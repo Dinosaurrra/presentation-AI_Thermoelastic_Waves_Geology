@@ -2,10 +2,28 @@
 % Propagation in Geological Media. Diploma defence deck, IITU 2026.
 
 \documentclass[aspectratio=169,10pt]{beamer}
-\usetheme[showlogo,nosectionpage]{UU}
+\usetheme{default}
 
 \usepackage{booktabs}
 \usepackage{array}
+
+% Minimal defence style: plain white slides, no branding or decorative backgrounds.
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{blocks}[default]
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{normal text}{fg=black,bg=white}
+\setbeamercolor{frametitle}{fg=black,bg=white}
+\setbeamercolor{title}{fg=black,bg=white}
+\setbeamercolor{structure}{fg=black}
+\setbeamercolor{block title}{fg=black,bg=white}
+\setbeamercolor{block body}{fg=black,bg=white}
+\setbeamercolor{block title example}{fg=black,bg=white}
+\setbeamercolor{block body example}{fg=black,bg=white}
+\setbeamercolor{block title alerted}{fg=black,bg=white}
+\setbeamercolor{block body alerted}{fg=black,bg=white}
+\setbeamerfont{frametitle}{series=\bfseries}
 
 % -- Metadata -----------------------------------
 \title[AI-Assisted Thermoelastic Prediction]{%
@@ -16,16 +34,10 @@
 \subtitle{A comparative Beamer presentation for diploma defence}
 
 \author[Group of 4]{%
-  Kasymkhanov Timur \and
-  Askarov Insar \and
-  Kaidrakhmetova Dinara \and
-  Nurshanov Dias%
+  Kasymkhanov Timur \and Askarov Insar \and Kaidrakhmetova Dinara \and Nurshanov Dias%
 }
-\addinstitute{1}{International Information Technology University, Almaty}
-\multiauthor
-\venue{Bachelor's diploma defence, 2026}
 \institute{International Information Technology University}
-\date{\today}
+\date{Bachelor's diploma defence, 2026}
 
 \begin{document}
 
@@ -36,11 +48,6 @@
     Research adviser: \textbf{Bakhyt N. Alipova} (PhD, Applied Mathematics)
   \end{center}
 \end{frame}
-
-% Reset to single-author for the rest of the deck.
-\subtitle{}
-\clearinstitutes
-\singleauthor
 
 \section{Motivation and Problem}
 
@@ -132,7 +139,6 @@
   \]
 \end{frame}
 
-\sectionframe{Section 1 -- Physical Basis}
 \section{Physical Basis}
 
 \begin{frame}{Geological Media and Effective Parameters}
@@ -277,7 +283,6 @@
   \end{itemize}
 \end{frame}
 
-\sectionframe{Section 2 -- Comparative Framework}
 \section{Comparative Framework}
 
 \begin{frame}{Comparative Prototype Framework}
@@ -364,7 +369,6 @@
   \end{alertblock}
 \end{frame}
 
-\sectionframe{Section 3 -- Experimental Results}
 \section{Experimental Results}
 
 \begin{frame}{Experiment Status}
@@ -471,7 +475,6 @@
   \end{enumerate}
 \end{frame}
 
-\sectionframe{Section 4 -- Conclusion}
 \section{Conclusion}
 
 \begin{frame}{Conclusions}
@@ -503,8 +506,9 @@
   \end{exampleblock}
 \end{frame}
 
-\thankframe{Thank you for your attention}{Questions?}
-
-\closingframe
+\begin{frame}{Thank You}
+  \centering
+  \Large Questions?
+\end{frame}
 
 \end{document}
