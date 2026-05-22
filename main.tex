@@ -4,26 +4,91 @@
 \documentclass[aspectratio=169,10pt]{beamer}
 \usetheme{default}
 
+\usefonttheme{professionalfonts}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{booktabs}
 \usepackage{array}
+\usepackage{graphicx}
 
-% Minimal defence style: plain white slides, no branding or decorative backgrounds.
+\definecolor{AcademicNavy}{HTML}{17324D}
+\definecolor{AcademicBlue}{HTML}{2E5E88}
+\definecolor{AcademicText}{HTML}{202124}
+\definecolor{AcademicMuted}{HTML}{5F6B76}
+\definecolor{AcademicRule}{HTML}{CBD5E1}
+\definecolor{AcademicPanel}{HTML}{F6F8FA}
+
+% Clean academic defence style: light background, dark text, restrained accents.
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{headline}{}
-\setbeamertemplate{footline}[frame number]
 \setbeamertemplate{blocks}[default]
+\setbeamersize{text margin left=8mm,text margin right=8mm}
+
 \setbeamercolor{background canvas}{bg=white}
-\setbeamercolor{normal text}{fg=black,bg=white}
-\setbeamercolor{frametitle}{fg=black,bg=white}
-\setbeamercolor{title}{fg=black,bg=white}
-\setbeamercolor{structure}{fg=black}
-\setbeamercolor{block title}{fg=black,bg=white}
-\setbeamercolor{block body}{fg=black,bg=white}
-\setbeamercolor{block title example}{fg=black,bg=white}
-\setbeamercolor{block body example}{fg=black,bg=white}
-\setbeamercolor{block title alerted}{fg=black,bg=white}
-\setbeamercolor{block body alerted}{fg=black,bg=white}
-\setbeamerfont{frametitle}{series=\bfseries}
+\setbeamercolor{normal text}{fg=AcademicText,bg=white}
+\setbeamercolor{frametitle}{fg=AcademicNavy,bg=white}
+\setbeamercolor{title}{fg=AcademicNavy,bg=white}
+\setbeamercolor{subtitle}{fg=AcademicMuted,bg=white}
+\setbeamercolor{author}{fg=AcademicText,bg=white}
+\setbeamercolor{institute}{fg=AcademicMuted,bg=white}
+\setbeamercolor{date}{fg=AcademicMuted,bg=white}
+\setbeamercolor{structure}{fg=AcademicBlue}
+\setbeamercolor{block title}{fg=AcademicNavy,bg=AcademicPanel}
+\setbeamercolor{block body}{fg=AcademicText,bg=AcademicPanel}
+\setbeamercolor{block title example}{fg=AcademicNavy,bg=AcademicPanel}
+\setbeamercolor{block body example}{fg=AcademicText,bg=AcademicPanel}
+\setbeamercolor{block title alerted}{fg=AcademicNavy,bg=AcademicPanel}
+\setbeamercolor{block body alerted}{fg=AcademicText,bg=AcademicPanel}
+\setbeamercolor{footline}{fg=AcademicMuted,bg=white}
+
+\setbeamerfont{title}{series=\bfseries,size=\Large}
+\setbeamerfont{subtitle}{size=\normalsize}
+\setbeamerfont{frametitle}{series=\bfseries,size=\large}
+\setbeamerfont{normal text}{size=\normalsize}
+\setbeamerfont{block title}{series=\bfseries,size=\small}
+\setbeamerfont{block body}{size=\small}
+\setbeamerfont{footline}{size=\scriptsize}
+
+\setbeamertemplate{itemize item}{\raise0.2ex\hbox{\tiny$\blacktriangleright$}}
+\setbeamertemplate{itemize subitem}{\raise0.2ex\hbox{\tiny$\circ$}}
+\setbeamertemplate{enumerate item}{\textbf{\insertenumlabel.}}
+
+\setbeamertemplate{frametitle}{%
+  \vspace{2mm}
+  \insertframetitle\par
+  \vspace{1mm}
+  {\color{AcademicRule}\rule{\linewidth}{0.45pt}}
+  \vspace{-1mm}
+}
+
+\setbeamertemplate{footline}{%
+  \leavevmode
+  \hbox{%
+    \begin{beamercolorbox}[wd=.72\paperwidth,ht=2.5ex,dp=1ex,leftskip=8mm]{footline}%
+      \color{AcademicMuted}\insertshorttitle
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.28\paperwidth,ht=2.5ex,dp=1ex,right,rightskip=8mm]{footline}%
+      \color{AcademicMuted}\insertframenumber\,/\,\inserttotalframenumber
+    \end{beamercolorbox}%
+  }%
+}
+
+\setbeamertemplate{title page}{%
+  \vspace{10mm}
+  {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+  \vspace{3mm}
+  {\color{AcademicRule}\rule{0.68\linewidth}{0.6pt}\par}
+  \vspace{4mm}
+  {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}
+  \vfill
+  {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}
+  \vspace{2mm}
+  {\usebeamerfont{institute}\usebeamercolor[fg]{institute}\insertinstitute\par}
+  \vspace{2mm}
+  {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}
+}
 
 % -- Metadata -----------------------------------
 \title[AI-Guided Thermoelastic Prediction]{%
@@ -65,8 +130,8 @@
   \vskip 6pt
   \begin{exampleblock}{Working position of this thesis}
     The project is a \emph{research prototype} for
-    \emph{AI-guided directional prediction}, not a complete
-    field-validated geological simulator.
+    \emph{AI-guided directional prediction}, not a calibrated
+    field-scale geological simulator.
   \end{exampleblock}
 \end{frame}
 
@@ -158,6 +223,39 @@
   These are \emph{effective scalar parameters} used in the simplified
   locally homogeneous isotropic approximation. They support comparison,
   not field calibration.
+\end{frame}
+
+\begin{frame}{Full Geological Media Parameter Table}
+  \tiny
+  \renewcommand{\arraystretch}{1.08}
+  \setlength{\tabcolsep}{1.6pt}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{@{}llrrrrrrrrrrrrrl@{}}
+    \toprule
+    \textbf{Material} & \textbf{Group} & $\rho$ & $E$ & $\nu$ & $\mu$ & $K$ &
+    $\lambda$ & $\alpha$ & $k$ & $C_p$ & $C$ & $\gamma$ & $V_P$ & $V_S$ &
+    \textbf{Porosity} \\
+    & & kg/m$^3$ & GPa & -- & GPa & GPa & GPa & $10^{-6}$/K &
+    W/mK & J/kgK & MJ/m$^3$K & MPa/K & m/s & m/s & \% \\
+    \midrule
+    Granite & igneous intrusive & 2650 & 76.28 & 0.245 & 30.63 & 49.84 & 29.42 & 7.9 & 2.50 & 850 & 2.25 & 1.18 & 5850 & 3400 & total 45.5 \\
+    Granodiorite & igneous intrusive & 2795 & 85.91 & 0.255 & 34.24 & 58.35 & 35.52 & -- & 2.40 & -- & -- & -- & 6100 & 3500 & -- \\
+    Basalt & igneous volcanic & 3000 & 103.96 & 0.266 & 41.07 & 73.95 & 46.57 & -- & 1.95 & 1300 & 3.90 & -- & 6550 & 3700 & total 19.0 \\
+    Diabase & igneous hypabyssal & 2975 & 98.22 & 0.274 & 38.56 & 72.36 & 46.66 & -- & 2.50 & 850 & 2.53 & -- & 6450 & 3600 & -- \\
+    Gabbro & igneous intrusive mafic & 3075 & 114.27 & 0.287 & 44.40 & 89.33 & 59.72 & -- & 2.30 & 1000 & 3.08 & -- & 6950 & 3800 & total 43.5 \\
+    Sandstone & sedimentary siliciclastic & 2725 & 55.75 & 0.259 & 22.13 & 38.61 & 23.86 & 11.6 & 2.25 & 1000 & 2.73 & 1.34 & 5000 & 2850 & total 31.5; eff. 26.5 \\
+    Limestone & sedimentary carbonate & 2675 & 61.48 & 0.277 & 24.08 & 45.90 & 29.85 & 8.0 & 2.55 & 1050 & 2.81 & 1.10 & 5400 & 3000 & total 31.5; eff. 18.0 \\
+    Marble & metamorphic carbonate & 2725 & 82.41 & 0.270 & 32.43 & 59.82 & 38.20 & 9.8 & 2.80 & 850 & 2.32 & 1.76 & 6150 & 3450 & -- \\
+    Schist & metamorphic foliated & 2800 & 68.20 & 0.267 & 26.91 & 48.82 & 30.88 & -- & 2.75 & 1150 & 3.22 & -- & 5500 & 3100 & total 26.5; eff. 27.5 \\
+    Quartzite & metamorphic quartz-rich & 2650 & 83.50 & 0.250 & 33.40 & 55.70 & 33.44 & -- & 5.10 & 1000 & 2.65 & -- & 6150 & 3550 & -- \\
+    \bottomrule
+  \end{tabular}%
+  }
+  \vskip 5pt
+  \scriptsize
+  Values are effective midpoint parameters used for model-ready comparison.
+  Elastic constants are derived from $\rho$, $V_P$, and $V_S$ under isotropic
+  assumptions; missing thermal expansion values are shown as dashes.
 \end{frame}
 
 \begin{frame}{Rock Properties Controlling Propagation}
@@ -505,35 +603,37 @@
 
 \begin{frame}{Travel-Time Predictions}
   \begin{columns}[T]
-    \begin{column}{0.55\textwidth}
+    \begin{column}{0.62\textwidth}
       \includegraphics[width=\textwidth]{img/travel_time_by_model_material}
     \end{column}
-    \begin{column}{0.42\textwidth}
+    \begin{column}{0.34\textwidth}
       \footnotesize
-      Mean travel time per route:
-      \begin{itemize}
-        \item PINN $\approx 0.11$\,ms
-        \item Transformer $\approx 0.14$\,ms
-        \item FNO $\approx 1.29$\,ms
-        \item MeshGraphNet $\approx 2.47$\,ms
-      \end{itemize}
-      The material effect is visible, but the model-family effect is
-      larger than the difference between basalt and sandstone.
+      \begin{block}{Reading the plot}
+        \begin{itemize}
+          \item PINN $\approx 0.11$\,ms
+          \item Transformer $\approx 0.14$\,ms
+          \item FNO $\approx 1.29$\,ms
+          \item MeshGraphNet $\approx 2.47$\,ms
+        \end{itemize}
+      \end{block}
+      Model-family differences are larger than the basalt--sandstone
+      material difference in the current prototype.
     \end{column}
   \end{columns}
 \end{frame}
 
 \begin{frame}{Accuracy Against Analytical Reference}
   \begin{columns}[T]
-    \begin{column}{0.55\textwidth}
+    \begin{column}{0.60\textwidth}
       \includegraphics[width=\textwidth]{img/travel_time_relative_error}
     \end{column}
-    \begin{column}{0.42\textwidth}
+    \begin{column}{0.36\textwidth}
       \footnotesize
-      Reference:
+      \begin{block}{Analytical reference}
       \[
         t_{\mathrm{gt}} = \frac{r}{V_p}
       \]
+      \end{block}
       \begin{tabular}{@{}lcc@{}}
         \toprule
         \textbf{Model} & \textbf{Median rel.\ error} & \textbf{Within 10\,\%} \\
@@ -553,18 +653,19 @@
 
 \begin{frame}{Inference Latency and Time Behavior}
   \begin{columns}[T]
-    \begin{column}{0.55\textwidth}
+    \begin{column}{0.62\textwidth}
       \includegraphics[width=\textwidth]{img/inference_latency_by_model}
     \end{column}
-    \begin{column}{0.42\textwidth}
+    \begin{column}{0.34\textwidth}
       \footnotesize
-      All four routes return in under $10$\,ms on the development machine.
-      \begin{itemize}
-        \item Transformer $\approx 1.3$\,ms
-        \item MeshGraphNet $\approx 1.5$\,ms
-        \item FNO $\approx 2.4$\,ms
-        \item PINN $\approx 2.6$\,ms
-      \end{itemize}
+      \begin{block}{Median latency}
+        \begin{itemize}
+          \item Transformer $\approx 1.3$\,ms
+          \item MeshGraphNet $\approx 1.5$\,ms
+          \item FNO $\approx 2.4$\,ms
+          \item PINN $\approx 2.6$\,ms
+        \end{itemize}
+      \end{block}
       \vskip 4pt
       PINN is also the only route that changes smoothly with requested
       observation time; the other routes currently behave as fixed-horizon
@@ -576,7 +677,7 @@
 \begin{frame}{Threats to Validity}
   \begin{enumerate}
     \item \textbf{Limited training data.}
-          The COMSOL-derived pilot configuration is not a full field-validated
+          The COMSOL-derived pilot configuration is not a full calibrated
           geological database.
     \item \textbf{Simplified 2D assumptions.}
           The study uses effective material parameters in a plane-strain setup.
