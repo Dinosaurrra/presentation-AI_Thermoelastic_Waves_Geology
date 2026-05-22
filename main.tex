@@ -1,4 +1,4 @@
-% main.tex -- AI-Assisted Directional Prediction of Thermoelastic Wave
+% main.tex -- AI-Guided Prediction of Thermoelastic Wave
 % Propagation in Geological Media. Diploma defence deck, IITU 2026.
 
 \documentclass[aspectratio=169,10pt]{beamer}
@@ -26,8 +26,8 @@
 \setbeamerfont{frametitle}{series=\bfseries}
 
 % -- Metadata -----------------------------------
-\title[AI-Assisted Thermoelastic Prediction]{%
-  AI-Assisted Directional Prediction of Thermoelastic Wave Propagation%
+\title[AI-Guided Thermoelastic Prediction]{%
+  AI-Guided Prediction of Thermoelastic Wave Propagation%
   \texorpdfstring{\\}{ }%
   in Geological Media%
 }
@@ -65,7 +65,7 @@
   \vskip 6pt
   \begin{exampleblock}{Working position of this thesis}
     The project is a \emph{research prototype} for
-    \emph{AI-assisted directional prediction}, not a complete
+    \emph{AI-guided directional prediction}, not a complete
     field-validated geological simulator.
   \end{exampleblock}
 \end{frame}
@@ -88,7 +88,7 @@
 
 \begin{frame}{Aim and Tasks}
   \begin{block}{Aim}
-    To develop and justify an AI-assisted framework for directional
+    To develop and justify an AI-guided framework for directional
     prediction of thermoelastic wave propagation in geological media.
   \end{block}
   \vskip 4pt
@@ -111,7 +111,7 @@
     \end{column}
     \begin{column}{0.48\textwidth}
       \begin{block}{Subject}
-        AI-assisted directional prediction of thermal and displacement
+        AI-guided directional prediction of thermal and displacement
         response along a selected source--probe path.
       \end{block}
     \end{column}
@@ -160,21 +160,92 @@
   not field calibration.
 \end{frame}
 
-\begin{frame}{Minimal Physical Basis}
+\begin{frame}{Rock Properties Controlling Propagation}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Mechanical controls}
+        \begin{itemize}
+          \item Density controls inertia.
+          \item Elastic stiffness controls resistance to deformation.
+          \item Porosity, cracks, and saturation change effective stiffness.
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Thermal controls}
+        \begin{itemize}
+          \item Conductivity controls heat transfer.
+          \item Heat capacity controls thermal storage.
+          \item Thermal expansion converts temperature change into strain.
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+  \vskip 6pt
+  Directional behavior can appear because bedding, foliation, aligned
+  pores, fractures, and stress state make real rocks structurally ordered.
+\end{frame}
+
+\begin{frame}{Elastic Waves in Geological Media}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{P-waves}
+        Compressional waves. Particle motion is mainly parallel to the
+        propagation direction and involves volume change.
+      \end{block}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{S-waves}
+        Shear waves. Particle motion is mainly transverse to the direction
+        of propagation and depends on shear rigidity.
+      \end{block}
+    \end{column}
+  \end{columns}
+  \vskip 6pt
+  \[
+    V_P = \sqrt{\frac{K+\frac{4}{3}G}{\rho}},
+    \qquad
+    V_S = \sqrt{\frac{G}{\rho}}
+  \]
+  A stiffer rock usually transmits elastic disturbances faster, while
+  porosity and compliant cracks often reduce effective wave velocity.
+\end{frame}
+
+\begin{frame}{Heat Conduction and Thermal Expansion}
+  \begin{block}{Thermal part of the process}
+    \[
+      q = -k\nabla T,
+      \qquad
+      \rho C_p\frac{\partial T}{\partial t}
+      =
+      \nabla\cdot(k\nabla T)+Q
+    \]
+  \end{block}
+  \vskip 4pt
+  \begin{block}{Mechanical effect of heating}
+    \[
+      \theta = T-T_0,
+      \qquad
+      \varepsilon_{\mathrm{th}}=\alpha\Delta T
+    \]
+  \end{block}
+  \vskip 4pt
+  Heat diffuses through the solid framework, while thermal expansion
+  creates strain. If expansion is constrained, thermal stress appears.
+\end{frame}
+
+\begin{frame}{Key Physical Parameters}
   \begin{block}{Wave speed and thermal spreading}
     \[
-      V_P = \sqrt{\frac{K+\frac{4}{3}G}{\rho}},
-      \qquad
-      V_S = \sqrt{\frac{G}{\rho}},
-      \qquad
       \alpha_T = \frac{k}{\rho C_p}
     \]
   \end{block}
   \vskip 6pt
   \begin{itemize}
-    \item Elastic wave velocity depends on stiffness-to-density ratio.
-    \item Thermal diffusivity depends on conductivity and heat storage.
-    \item Different rocks therefore show different thermo-mechanical response.
+    \item $\rho$ controls inertia in the equation of motion.
+    \item $K$ and $G$ control compressional and shear stiffness.
+    \item $k$ and $C_p$ control how quickly temperature disturbances spread.
+    \item $\alpha$ controls how strongly temperature change produces strain.
   \end{itemize}
 \end{frame}
 
@@ -198,6 +269,47 @@
   \vskip 6pt
   These relations provide the theoretical backbone of the thesis and
   motivate the physics-aware interpretation of the surrogate models.
+\end{frame}
+
+\begin{frame}{Mathematical Scope and Assumptions}
+  \begin{itemize}
+    \item The geological medium is represented as a 2D continuum:
+          \[
+            \Omega\subset\mathbb{R}^{2},\qquad (x,t)\in\Omega\times[0,T_f].
+          \]
+    \item The displacement field is in-plane:
+          \[
+            u(x,t)=
+            \begin{bmatrix}
+              u(x,t)\\
+              v(x,t)
+            \end{bmatrix}.
+          \]
+    \item Small deformation and linear isotropic thermoelasticity are used
+          as first-order approximations.
+    \item Pores, fractures, fluids, plasticity, damage, and full anisotropic
+          constitutive modelling are not resolved explicitly.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Primary Fields in the 2D Model}
+  \footnotesize
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    \textbf{Field} & \textbf{Meaning} & \textbf{Role in the thesis} \\
+    \midrule
+    $T(x,t)$ & Temperature & Thermal state of the rock \\
+    $\theta(x,t)=T-T_0$ & Temperature perturbation & Drives thermal strain/stress \\
+    $(u,v)$ & In-plane displacement & Mechanical response at the probe \\
+    $\varepsilon_{ij}$ & Strain tensor & Local deformation from displacement gradients \\
+    $\sigma_{ij}$ & Stress tensor & Internal force response \\
+    $d,\hat d,\phi$ & Direction quantities & Source--probe directional interpretation \\
+    \bottomrule
+  \end{tabular}
+  \vskip 8pt
+  \normalsize
+  These fields connect the physical formulation from Chapters 1--2 with
+  the prediction methodology of Chapter 3.
 \end{frame}
 
 \begin{frame}{Directional Prediction}
@@ -480,7 +592,7 @@
 \begin{frame}{Conclusions}
   \begin{enumerate}
     \item The thesis develops a physically grounded
-          \emph{comparative framework} for AI-assisted directional prediction.
+          \emph{comparative framework} for AI-guided directional prediction.
     \item PINN is the strongest \emph{physics-informed baseline} in the
           current comparison and shows the best agreement with the analytical
           travel-time reference.
