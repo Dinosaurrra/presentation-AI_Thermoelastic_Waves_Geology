@@ -37,7 +37,7 @@
 \newcommand{\Transition}{\vspace{0.2em}\textbf{Transition to next slide:}\par}
 
 \title{\color{AcademicNavy}Speaker Notes\\
-Artificial Intelligence-Assisted Directional Prediction of Thermoelastic Wave Propagation in Geological Media}
+AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media}
 \author{Diploma defence speech notes}
 \date{Bachelor's diploma defence, 2026}
 
@@ -47,12 +47,12 @@ Artificial Intelligence-Assisted Directional Prediction of Thermoelastic Wave Pr
 \tableofcontents
 \newpage
 
-\begin{slidenote}{Artificial Intelligence-Assisted Directional Prediction of Thermoelastic Wave Propagation in Geological Media}
+\begin{slidenote}{AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media}
 \Purpose
 Open the defence, name the topic, and immediately set the correct research scope.
 
 \WhatToSay
-Good morning. The topic of our diploma work is \textit{Artificial Intelligence-Assisted Directional Prediction of Thermoelastic Wave Propagation in Geological Media}. The work studies how machine learning can support directional prediction for thermoelastic wave behavior in simplified geological media. I would like to emphasize the scope from the beginning: this is a research prototype and a comparative framework. It is not presented as a site-calibrated simulator or as a replacement for numerical methods. The focus is on physical interpretation, model comparison, and estimating directional characteristics under simplified assumptions.
+Good morning. The topic of our diploma work is \textit{AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media}. The work studies how machine learning can support directional prediction for thermoelastic wave behavior in simplified geological media. I would like to emphasize the scope from the beginning: this is a research prototype and a comparative framework. It is not presented as a site-calibrated simulator or as a replacement for numerical methods. The focus is on physical interpretation, model comparison, and estimating directional characteristics under simplified assumptions.
 
 \KeyPoints
 \begin{itemize}
@@ -376,7 +376,7 @@ Now I will describe the comparative prototype framework.
 Explain that all models are evaluated under one shared workflow.
 
 \WhatToSay
-The prototype uses one workflow for all model routes. The frontend, backend orchestrator, material catalog, and model services follow a shared input-output contract. This is important for fair comparison: the same source--probe geometry, the same material presets, and the same normalized response format are used for every route. The goal is not to show a production platform, but to create a consistent research environment for comparing AI-assisted directional prediction methods.
+The prototype uses one workflow for all model routes. The frontend, backend orchestrator, material catalog, and model services follow a shared input-output contract. This is important for fair comparison: the same source--probe geometry, the same material presets, and the same normalized response format are used for every route. The goal is not to show a production platform, but to create a consistent research environment for comparing AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media methods.
 
 \KeyPoints
 \begin{itemize}
@@ -574,7 +574,7 @@ With these limitations in mind, I can summarize the conclusions.
 State the main scientific outcomes of the work.
 
 \WhatToSay
-The thesis develops a physically grounded comparative framework for AI-assisted directional prediction of thermoelastic wave propagation. Within the tested assumptions, PINN is the strongest physics-informed baseline and shows the best agreement with the analytical travel-time reference. Transformer-style prediction is the fastest route and is useful for rapid query-based inference. MeshGraphNet remains a useful mesh-aware surrogate candidate, but needs further time-conditioning. FNO should be treated as a diagnostic branch until its output normalization is corrected. Overall, the work demonstrates a careful prototype for comparing neural surrogate approaches rather than a final geophysical simulator.
+The thesis develops a physically grounded comparative framework for AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media. Within the tested assumptions, PINN is the strongest physics-informed baseline and shows the best agreement with the analytical travel-time reference. Transformer-style prediction is the fastest route and is useful for rapid query-based inference. MeshGraphNet remains a useful mesh-aware surrogate candidate, but needs further time-conditioning. FNO should be treated as a diagnostic branch until its output normalization is corrected. Overall, the work demonstrates a careful prototype for comparing neural surrogate approaches rather than a final geophysical simulator.
 
 \KeyPoints
 \begin{itemize}
@@ -653,13 +653,13 @@ The main limitations are the simplified two-dimensional setting, effective isotr
 
 \textbf{7. What is the main contribution of the diploma work?}
 
-The main contribution is a physically grounded comparative framework for AI-assisted directional prediction. It combines thermoelastic theory, geological material parameters, a controlled dataset, and several neural surrogate routes under one consistent comparison workflow.
+The main contribution is a physically grounded comparative framework for AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media. It combines thermoelastic theory, geological material parameters, a controlled dataset, and several neural surrogate routes under one consistent comparison workflow.
 
 \newpage
 \section*{\color{AcademicNavy}Short version of the speech}
 \addcontentsline{toc}{section}{Short version of the speech}
 
-Good morning. The topic of our diploma work is \textit{Artificial Intelligence-Assisted Directional Prediction of Thermoelastic Wave Propagation in Geological Media}. The work presents a research prototype for AI-assisted directional prediction. It is not a site-calibrated simulator. The goal is to estimate selected directional characteristics of thermoelastic wave propagation under simplified assumptions and to compare several neural surrogate approaches.
+Good morning. The topic of our diploma work is \textit{AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media}. The work presents a research prototype for AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media. It is not a site-calibrated simulator. The goal is to estimate selected directional characteristics of thermoelastic wave propagation under simplified assumptions and to compare several neural surrogate approaches.
 
 The physical motivation is that temperature changes in rocks can create thermal expansion, stress, displacement, and wave-like mechanical response. This is relevant for geothermal systems, underground engineering, and geophysical interpretation. A full coupled numerical simulation can be expensive when many materials and source--probe directions must be compared. Therefore, the thesis formulates a narrower prediction task.
 
@@ -671,6 +671,6 @@ The comparison includes the Physics-Informed Neural Network, Fourier Neural Oper
 
 The calculations use forty scenarios per material, four materials, and four model routes, giving six hundred forty model responses. In the travel-time comparison, model-family differences are larger than the material difference in the current prototype. Against the simple analytical reference $t=r/V_P$, PINN shows the best agreement and remains within the ten percent band in the balanced sweep. Transformer-style prediction is the fastest route, while MeshGraphNet and FNO need additional development for time behavior and calibration.
 
-The main limitations are the limited synthetic dataset, the simplified two-dimensional assumptions, the current FNO normalization issue, and the fact that the analytical reference is only a sanity check. The conclusion is that the work provides a physically grounded comparative framework for AI-assisted directional prediction within simplified assumptions. Future work should recalibrate FNO, improve time-conditioned MeshGraphNet behavior, extend material data, and compare against additional analytical or numerical baselines.
+The main limitations are the limited synthetic dataset, the simplified two-dimensional assumptions, the current FNO normalization issue, and the fact that the analytical reference is only a sanity check. The conclusion is that the work provides a physically grounded comparative framework for AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media within simplified assumptions. Future work should recalibrate FNO, improve time-conditioned MeshGraphNet behavior, extend material data, and compare against additional analytical or numerical baselines.
 
 \end{document}
