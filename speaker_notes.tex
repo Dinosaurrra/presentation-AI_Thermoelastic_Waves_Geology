@@ -37,7 +37,7 @@
 \newcommand{\Transition}{\vspace{0.2em}\textbf{Transition to next slide:}\par}
 
 \title{\color{AcademicNavy}Speaker Notes\\
-AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media}
+Artificial Intelligence-Assisted Directional Prediction of Thermoelastic Wave Propagation in Geological Media}
 \author{Diploma defence speech notes}
 \date{Bachelor's diploma defence, 2026}
 
@@ -47,12 +47,12 @@ AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media}
 \tableofcontents
 \newpage
 
-\begin{slidenote}{AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media}
+\begin{slidenote}{Artificial Intelligence-Assisted Directional Prediction of Thermoelastic Wave Propagation in Geological Media}
 \Purpose
 Open the defence, name the topic, and immediately set the correct research scope.
 
 \WhatToSay
-Good morning. The topic of our diploma work is \textit{AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media}. The work studies how machine learning can support directional prediction for thermoelastic wave behavior in simplified geological media. I would like to emphasize the scope from the beginning: this is a research prototype and a comparative framework. It is not presented as a site-calibrated simulator. The focus is on physical interpretation, model comparison, and estimating directional characteristics under simplified assumptions.
+Good morning. The topic of our diploma work is \textit{Artificial Intelligence-Assisted Directional Prediction of Thermoelastic Wave Propagation in Geological Media}. The work studies how machine learning can support directional prediction for thermoelastic wave behavior in simplified geological media. I would like to emphasize the scope from the beginning: this is a research prototype and a comparative framework. It is not presented as a site-calibrated simulator or as a replacement for numerical methods. The focus is on physical interpretation, model comparison, and estimating directional characteristics under simplified assumptions.
 
 \KeyPoints
 \begin{itemize}
@@ -70,13 +70,13 @@ I will start by explaining why this topic is relevant.
 Explain why thermoelastic wave prediction in rocks is worth studying.
 
 \WhatToSay
-Thermally affected rocks appear in several applied contexts: geothermal energy, underground construction, thermal stimulation, and geophysical interpretation. When temperature changes inside a rock, it can influence stress, deformation, and wave behavior. A direct coupled numerical simulation is useful, but it can be expensive when many materials, source positions, or observation directions must be compared. This motivates an AI-guided approach, where neural models estimate selected directional responses and help compare scenarios faster. The important point is that the AI model supports the analysis; it does not replace the physical problem formulation.
+Thermally affected rocks appear in several applied contexts: geothermal energy, underground construction, thermal stimulation, and geophysical interpretation. When temperature changes inside a rock, it can influence stress, deformation, and wave behavior. A direct coupled numerical calculation is useful, but it can be expensive when many materials, source positions, or observation directions must be compared. This motivates an artificial intelligence-assisted approach, where neural models estimate selected directional responses and help compare scenarios faster. The thesis is positioned as a research prototype: it compares surrogate approaches under simplified assumptions rather than replacing numerical solvers.
 
 \KeyPoints
 \begin{itemize}
   \item Temperature changes can create mechanical effects in geological media.
   \item Repeated coupled simulations are expensive for comparative studies.
-  \item The work uses AI-guided prediction as a supporting research tool.
+  \item The work uses AI-assisted prediction as a supporting research tool.
 \end{itemize}
 
 \Transition
@@ -88,12 +88,12 @@ This relevance leads to the main research problem.
 State the central question and narrow it to a defensible bachelor thesis scope.
 
 \WhatToSay
-The central question is how to estimate directional characteristics of thermoelastic wave propagation without rerunning a full coupled numerical simulation for every new scenario. Real geological media are complex: they may be porous, fractured, anisotropic, and saturated with fluids. Modelling all these effects is outside the scope of this thesis. Therefore, the work uses a simplified two-dimensional effective-medium formulation. Within that controlled setting, the prototype compares several neural surrogate approaches for directional prediction.
+The research problem is to estimate directional characteristics of thermoelastic wave propagation in geological media using an AI-assisted comparative framework under simplified physical assumptions. This is important because coupled thermal and mechanical calculations can become costly when many materials and directions are compared. The work estimates selected source--probe responses and travel-time characteristics in a controlled model-based calculation setting. It does not claim a complete field-scale simulator or a field-validated prediction system.
 
 \KeyPoints
 \begin{itemize}
   \item The problem is framed as directional prediction, not full field simulation.
-  \item Real rocks are more complex than the simplified model.
+  \item The work is important for comparative studies with many query directions.
   \item The simplified setup makes controlled model comparison possible.
 \end{itemize}
 
@@ -106,13 +106,13 @@ Next, I will formulate the aim and the tasks of the work.
 Show what the diploma work tries to achieve and how the study is organized.
 
 \WhatToSay
-The aim is to develop and justify an AI-guided framework for directional prediction of thermoelastic wave propagation in geological media. To reach this aim, the work first establishes the physical and geological basis of the problem. Then it formulates a simplified two-dimensional prediction task. After that, it uses COMSOL-derived synthetic data for controlled comparison. Finally, it compares PINN, FNO, MeshGraphNet, and Transformer-style surrogate routes and interprets their results and limitations.
+The aim is to develop and justify an artificial intelligence-assisted framework for directional prediction of thermoelastic wave propagation in geological media. The calculations were performed for representative geological materials, including granite, basalt, sandstone, and limestone. To reach the aim, the work establishes the physical basis, formulates a simplified two-dimensional prediction task, prepares COMSOL-derived synthetic data, compares four surrogate routes, and interprets the results and limitations.
 
 \KeyPoints
 \begin{itemize}
   \item The aim combines physical reasoning with model comparison.
-  \item The task is built around a simplified 2D formulation.
-  \item The models are compared under one shared prediction contract.
+  \item The task is built around a simplified two-dimensional formulation.
+  \item The representative materials are granite, basalt, sandstone, and limestone.
 \end{itemize}
 
 \Transition
@@ -124,7 +124,7 @@ Before the theory, I will define the object and subject of the study.
 Clarify what is being studied and what specific aspect the thesis focuses on.
 
 \WhatToSay
-The object of the study is thermoelastic wave propagation in geological media represented by effective rock parameters. The subject is narrower: AI-guided directional prediction of thermal and displacement response along a selected source--probe path. This distinction is important. We do not model a full natural formation with all geological details. We study a simplified comparative framework where the material is represented by effective parameters and the prediction is made for a defined direction.
+The object of the study is thermoelastic wave propagation in geological media represented by effective rock parameters. The subject is narrower: artificial intelligence-assisted directional prediction of thermal and displacement response along a selected source--probe path. This distinction is important. We do not model a full natural formation with all geological details. We study a simplified comparative framework where the material is represented by effective parameters and the prediction is made for a defined direction.
 
 \KeyPoints
 \begin{itemize}
@@ -142,7 +142,7 @@ Now I will explain the basic physical logic of thermoelastic coupling.
 Introduce the physical chain from heating to wave-like mechanical response.
 
 \WhatToSay
-This slide shows the basic logic of thermoelastic coupling. A local thermal source changes the temperature field. Temperature change produces thermal expansion, and if the expansion is constrained by the surrounding material, stress appears. Stress gradients then create mechanical displacement, and this response propagates through the medium. The formula at the bottom is not meant to be read as a full equation. It summarizes the chain: temperature leads to thermal strain, thermal strain contributes to stress, and stress drives displacement.
+This slide shows the basic logic of thermoelastic coupling. A local thermal source changes the temperature field. Temperature change produces thermal strain, and if the expansion is constrained by the surrounding material, stress appears. Stress gradients then create mechanical displacement, and this response propagates through the medium. The chain at the bottom is a physical summary rather than a full equation: $T$ is temperature in kelvin, $\varepsilon_{\mathrm{th}}$ is dimensionless thermal strain, $\sigma$ is stress in pascals, and $u$ is displacement in metres.
 
 \KeyPoints
 \begin{itemize}
@@ -160,7 +160,7 @@ The next group of slides explains the physical and geological parameters used in
 Show that geological materials enter the prototype through effective scalar parameters.
 
 \WhatToSay
-Here we show a compact example of the geological material parameters used in the study. Density, P-wave velocity, thermal conductivity, and heat capacity differ between rock types such as granite, basalt, sandstone, and limestone. In the prototype, these are effective scalar parameters. They allow us to compare material behavior in a controlled way. However, they should not be interpreted as a complete field calibration for a real geological site.
+Here we show a compact example of the geological material parameters used in the study. Density, compressional wave velocity, thermal conductivity, and heat capacity differ between rock types such as granite, basalt, sandstone, and limestone. In the prototype, these are effective scalar parameters. They allow us to compare material behavior in a controlled way. The limestone texture is included only as an illustrative geological material image; it is not used as input data.
 
 \KeyPoints
 \begin{itemize}
@@ -170,21 +170,39 @@ Here we show a compact example of the geological material parameters used in the
 \end{itemize}
 
 \Transition
-The next slide expands this idea into the full material table.
+The next slide separates the mechanical part of the material catalogue.
 \end{slidenote}
 
-\begin{slidenote}{Full Geological Media Parameter Table}
+\begin{slidenote}{Mechanical Rock Parameters}
 \Purpose
-Document the broader material catalogue used for the comparative framework.
+Document the mechanical part of the material catalogue used for comparison.
 
 \WhatToSay
-This table gives the extended catalogue of effective geological media parameters. It includes igneous, sedimentary, and metamorphic rocks, together with mechanical and thermal quantities such as density, elastic moduli, Lame parameters, thermal expansion, conductivity, heat capacity, and wave velocities. The key idea is not to discuss every number in detail. The table shows that the model inputs are physically meaningful and material-dependent. Missing values are shown explicitly, which is important for transparency.
+This table separates the mechanical parameters from the larger material catalogue. It lists density, Young's modulus, Poisson's ratio, shear modulus, bulk modulus, and representative compressional and shear wave velocities. I will not read every value. The purpose is to show that the model inputs are physically meaningful and material-dependent, while still being effective midpoint values used under isotropic assumptions.
 
 \KeyPoints
 \begin{itemize}
-  \item The table links rock groups with mechanical and thermal parameters.
-  \item Elastic constants are derived under isotropic assumptions.
-  \item Missing thermal data are marked rather than hidden.
+  \item Mechanical parameters control inertia, stiffness, and elastic wave speeds.
+  \item The values are effective and comparative, not site-calibrated.
+  \item Vertical table boundaries separate values and units for readability.
+\end{itemize}
+
+\Transition
+The next slide gives the thermal and porosity part of the catalogue.
+\end{slidenote}
+
+\begin{slidenote}{Thermal and Porosity Parameters}
+\Purpose
+Document the thermal and porosity parameters without overloading one table.
+
+\WhatToSay
+This table gives thermal expansion, thermal conductivity, heat capacity, volumetric heat capacity, thermoelastic coupling coefficient, and porosity information. These quantities control how a temperature disturbance spreads and how temperature change contributes to thermal strain and stress. Missing values are shown as dashes rather than filled by unsupported assumptions. This keeps the material representation transparent.
+
+\KeyPoints
+\begin{itemize}
+  \item Thermal parameters control heat spreading and thermal strain.
+  \item Porosity is included as an effective descriptive property.
+  \item Missing values are explicit and are not silently invented.
 \end{itemize}
 
 \Transition
@@ -214,7 +232,7 @@ To connect this with wave propagation, I will briefly discuss P-waves and S-wave
 Introduce compressional and shear waves using simple physical interpretation.
 
 \WhatToSay
-Elastic wave propagation is commonly described using P-waves and S-waves. P-waves are compressional waves, where particle motion is mainly parallel to the propagation direction. S-waves are shear waves, where particle motion is transverse and depends on shear rigidity. The formulas show that wave velocity depends on stiffness and density. Physically, a stiffer rock usually transmits disturbances faster, while porosity and compliant cracks often reduce effective velocity. These relations also justify using wave speed as a reference for travel-time sanity checks.
+Elastic wave propagation is commonly described using compressional waves and shear waves. Compressional waves have particle motion mainly parallel to the propagation direction, while shear waves have transverse motion and depend on shear rigidity. The formulas define $V_P$ and $V_S$ in metres per second. They depend on bulk modulus $K$, shear modulus $G$, and density $\rho$. In physical terms, larger stiffness tends to increase wave velocity, while larger density increases inertia.
 
 \KeyPoints
 \begin{itemize}
@@ -232,7 +250,7 @@ Next, I will add the thermal part of the coupled problem.
 Explain how heat transfer enters the thermoelastic formulation.
 
 \WhatToSay
-The thermal part is described by heat conduction. Fourier's law says that heat flux is directed opposite to the temperature gradient and depends on thermal conductivity. The heat equation describes how temperature evolves in time under conduction and a heat source. The mechanical connection appears through thermal expansion. We do not need to read the equations term by term. Their physical meaning is that heat diffuses through the rock, and a temperature increase can produce thermal strain. If the surrounding medium restricts this strain, thermal stress appears.
+The thermal part is described by Fourier heat flux and the heat equation. In the notation, $q$ is heat flux in watts per square metre, $k$ is thermal conductivity, $T$ is temperature in kelvin, $\rho$ is density, $C_p$ is heat capacity, and $Q$ is a volumetric heat source. The second relation defines temperature perturbation and thermal strain: $\theta$ and $\Delta T$ are temperature changes in kelvin, $\alpha$ is thermal expansion, and $\varepsilon_{\mathrm{th}}$ is dimensionless thermal strain. The physical meaning is simple: heat diffuses through the rock, and temperature increase can create strain.
 
 \KeyPoints
 \begin{itemize}
@@ -250,7 +268,7 @@ Now I will summarize the key physical parameters in one place.
 Make the parameter roles easy to remember for the committee.
 
 \WhatToSay
-This slide summarizes the main parameters. Thermal diffusivity combines conductivity, density, and heat capacity. It describes how quickly a temperature disturbance spreads through the medium. Density also controls inertia in the mechanical response. Bulk and shear moduli control compressional and shear stiffness. Thermal expansion controls how strongly a temperature change produces strain. In the prediction framework, these parameters become input features, so the neural models receive physically interpretable information rather than only abstract numerical labels.
+This slide summarizes thermal diffusivity. The relation $\alpha_T=k/(\rho C_p)$ combines thermal conductivity, density, and heat capacity. The result has units of square metres per second and describes how quickly a temperature disturbance spreads through the medium. This parameter is useful because it turns several material properties into one interpretable quantity related to thermal spreading.
 
 \KeyPoints
 \begin{itemize}
@@ -268,7 +286,7 @@ The next slide combines these ideas in the thermoelastic equations.
 Present the theoretical backbone without overloading the speech with derivation.
 
 \WhatToSay
-This slide gives the key thermoelastic relations used as theoretical background. The temperature perturbation is measured relative to the initial temperature. The stress relation contains the usual elastic part, controlled by Lame parameters, and a thermal stress term, controlled by the coupling coefficient. The equation of motion then links stress gradients to acceleration and displacement. In simple terms, the equations say that temperature changes can modify stress, and stress drives motion. These relations motivate why a physics-informed baseline is useful in the comparison.
+This slide gives the thermoelastic extension of Hooke's law. The first relation defines temperature perturbation relative to the reference temperature. The stress relation contains the elastic part, controlled by the Lame parameters, and the thermal part, controlled by the coupling coefficient $\gamma=3K\alpha$. Stress is measured in pascals, strain is dimensionless, and displacement is measured in metres. The equation of motion then links stress gradients to acceleration and displacement. In simple terms, temperature changes can modify stress, and stress drives motion.
 
 \KeyPoints
 \begin{itemize}
@@ -281,72 +299,36 @@ This slide gives the key thermoelastic relations used as theoretical background.
 I will now define the mathematical scope used in the thesis.
 \end{slidenote}
 
-\begin{slidenote}{Mathematical Scope and Assumptions}
+\begin{slidenote}{Mathematical Scope and Primary Fields}
 \Purpose
-Make the simplifications explicit and defensible.
+Make the simplifications and primary fields explicit and defensible.
 
 \WhatToSay
-The model is formulated as a two-dimensional continuum problem. The displacement field is in-plane, so the model tracks horizontal and vertical displacement components. Small deformation and linear isotropic thermoelasticity are used as first-order approximations. This is a deliberate simplification. The model does not explicitly resolve pores, fractures, fluids, plasticity, damage, or full anisotropic constitutive behavior. These assumptions make the problem tractable for a bachelor-level comparative study and allow the model outputs to be interpreted consistently.
+The model is formulated as a two-dimensional continuum problem. The domain $\Omega$ is the model region, position is measured in metres, time is measured in seconds, and the displacement components are measured in metres. Small deformation and linear isotropic thermoelasticity are used as first-order approximations. The table also lists the primary fields: temperature, temperature perturbation, displacement, strain, stress, and direction variables. The model does not explicitly resolve pores, fractures, fluids, plasticity, damage, or full anisotropic constitutive behavior.
 
 \KeyPoints
 \begin{itemize}
-  \item The thesis uses a 2D continuum formulation.
+  \item The thesis uses a two-dimensional continuum formulation.
   \item Small deformation and linear isotropic thermoelasticity are assumed.
   \item Complex geological effects are acknowledged as limitations.
 \end{itemize}
 
 \Transition
-With the assumptions defined, I will list the primary fields used in the model.
+With the assumptions defined, I will explain the directional prediction task.
 \end{slidenote}
 
-\begin{slidenote}{Primary Fields in the 2D Model}
-\Purpose
-Connect the theoretical variables with the prediction outputs.
-
-\WhatToSay
-This table lists the main fields of the simplified model. Temperature describes the thermal state of the rock, and temperature perturbation drives thermal strain and stress. The displacement components describe the mechanical response at the probe point. Strain and stress are internal physical quantities derived from the displacement field and material law. Finally, the direction variables describe the source--probe geometry: distance, unit direction, and azimuth. These fields connect the theory from the first chapters with the prediction methodology.
-
-\KeyPoints
-\begin{itemize}
-  \item Temperature and displacement are the main observable response fields.
-  \item Strain and stress provide the physical link inside the model.
-  \item Direction variables define what is meant by directional prediction.
-\end{itemize}
-
-\Transition
-Now I will explain the directional prediction task more directly.
-\end{slidenote}
-
-\begin{slidenote}{Directional Prediction}
+\begin{slidenote}{Directional Prediction Task}
 \Purpose
 Define the source--probe query and what the prototype estimates.
 
 \WhatToSay
-Directional prediction is built around a source point and a probe point. The vector from the source to the probe defines the direction of interest. From this vector, we compute the distance, unit direction, and azimuth angle. The prototype then estimates the thermal and displacement response associated with that query. The important point is that we are not predicting every possible field value in a complete geological volume. We are estimating directional characteristics for a specified material, geometry, source, probe, and observation time.
+Directional prediction is built around a source point and a probe point. The vector from the source to the probe defines the direction of interest. Here $x_s$ and $x_p$ are positions in metres, $d$ is the direction vector, $L$ is distance, $\hat d$ is a dimensionless unit direction, and $\phi$ is the azimuth angle in radians. The mapping $\mathcal{F}:X\rightarrow\widehat{Y}$ means that the model maps input features to estimated outputs. We are not predicting every possible field value in a complete geological volume; we estimate directional characteristics for a specified query.
 
 \KeyPoints
 \begin{itemize}
   \item A source and a probe define the directional query.
   \item Distance and azimuth are explicit geometric quantities.
   \item The predicted response is interpreted along that direction.
-\end{itemize}
-
-\Transition
-Next, I will show how this physical idea becomes a machine learning prediction task.
-\end{slidenote}
-
-\begin{slidenote}{From Physics to a Prediction Task}
-\Purpose
-Translate the physical problem into an input-output mapping for surrogate models.
-
-\WhatToSay
-The prediction task is written as a mapping from input features to estimated outputs. The input includes material parameters, source location, probe location, propagation direction, and observation time. The output includes estimated temperature, displacement, directional response, and travel time. This formulation is intentionally narrower than solving the complete coupled PDE system at all field points. It is designed for structured comparison of predictive estimates under the same input-output contract.
-
-\KeyPoints
-\begin{itemize}
-  \item Inputs combine material, geometry, direction, and time.
-  \item Outputs include temperature, displacement, and travel-time estimates.
-  \item The task is predictive and comparative, not a full physical solver.
 \end{itemize}
 
 \Transition
@@ -358,12 +340,12 @@ To train and compare the models, the work uses a controlled synthetic dataset.
 Explain where the controlled training and comparison data come from.
 
 \WhatToSay
-The dataset is derived from a controlled COMSOL thermoelastic experiment. The domain is a two-dimensional plane-strain rock sample with size one meter by one meter. A heated internal source generates a time-dependent thermal and mechanical response. For each node and time step, the exported outputs include temperature, displacement, velocity, stress, strain, and material features. The purpose of this dataset is to provide a common reference for comparing the surrogate models under the same conditions.
+The dataset is derived from a controlled COMSOL-based thermoelastic calculation. The setup is a two-dimensional plane-strain rock domain with a heated internal source, used to generate time-dependent synthetic data. I will not focus on the initial conditions in the speech. The initial and boundary assumptions are used only to define a consistent calculation setting and are not the main focus of the presentation. The purpose of the dataset is to provide a common reference for comparing surrogate models under the same conditions.
 
 \KeyPoints
 \begin{itemize}
-  \item The dataset comes from a controlled COMSOL-based setup.
-  \item The model uses a 2D plane-strain domain.
+  \item The dataset comes from a controlled COMSOL-based calculation.
+  \item The model uses a two-dimensional plane-strain domain.
   \item The data provide a shared basis for comparison.
 \end{itemize}
 
@@ -376,7 +358,7 @@ After data generation, the exports must be represented in a model-ready form.
 Show how raw simulation exports are prepared for different model families.
 
 \WhatToSay
-The COMSOL CSV exports are aligned into a single node set. Dynamic features are assembled into a spatio-temporal tensor, while static material and geometry features are stored separately. Before training, the feature channels are normalized using the mean and standard deviation. This step is important because the variables have different physical units and scales. The same processed dataset can then support several model types: coordinate-based models, grid-based models, and graph-based models.
+The COMSOL comma-separated value exports are aligned into a single node set. Dynamic features are assembled into a spatio-temporal tensor $\mathbf{S}$ with dimensions for time steps, spatial points, and feature channels. Static material and geometry features are stored separately. Before training, the feature channels are normalized using the mean and standard deviation. In the normalization formula, $\widetilde{x}$ is the normalized feature, $x$ is the original feature in its native unit, and $\varepsilon$ is a small stabilizer.
 
 \KeyPoints
 \begin{itemize}
@@ -394,7 +376,7 @@ Now I will describe the comparative prototype framework.
 Explain that all models are evaluated under one shared workflow.
 
 \WhatToSay
-The prototype uses one workflow for all model routes. The frontend, backend orchestrator, material catalog, and model services follow a shared input-output contract. This is important for fair comparison: the same source--probe geometry, the same material presets, and the same normalized response format are used for every route. The goal is not to show a production platform, but to create a consistent research environment for comparing AI-guided directional prediction methods.
+The prototype uses one workflow for all model routes. The frontend, backend orchestrator, material catalog, and model services follow a shared input-output contract. This is important for fair comparison: the same source--probe geometry, the same material presets, and the same normalized response format are used for every route. The goal is not to show a production platform, but to create a consistent research environment for comparing AI-assisted directional prediction methods.
 
 \KeyPoints
 \begin{itemize}
@@ -407,30 +389,30 @@ The prototype uses one workflow for all model routes. The frontend, backend orch
 Next, I will introduce the four model families compared in the work.
 \end{slidenote}
 
-\begin{slidenote}{Compared Model Families}
+\begin{slidenote}{Shared Model Comparison Contract}
 \Purpose
-Give a high-level comparison of the model roles without going into implementation details.
+Explain the shared input-output contract before discussing individual models.
 
 \WhatToSay
-The work compares four model families. PINN is used as the physics-informed baseline because its objective includes physical residual terms. FNO is a supervised operator model for structured grid representations and global field patterns. MeshGraphNet represents the mesh as a graph and uses message passing to model local interactions. The Transformer-style route treats geometry and state variables as query features and is useful for fast flexible inference. These are compared as surrogate routes, not as equivalent physical solvers.
+All routes are treated as surrogate modelling approaches for the same directional prediction task. The input side includes material parameters, source--probe geometry, observation time, and processed field features. The output side includes estimated temperature, displacement components, travel time, and diagnostic quantities. The comparison uses the same material presets, geometry contract, response format, and analytical travel-time sanity check. This keeps the comparison fair and avoids presenting the models as complete numerical solvers.
 
 \KeyPoints
 \begin{itemize}
-  \item PINN provides the physics-informed baseline.
-  \item FNO, MeshGraphNet, and Transformer are surrogate routes for comparison.
-  \item The comparison focuses on role and behavior, not deep architecture detail.
+  \item The comparison is based on one shared prediction contract.
+  \item Inputs and outputs are kept consistent across all routes.
+  \item The models are surrogate approaches, not equivalent physical solvers.
 \end{itemize}
 
 \Transition
-I will now explain the PINN route in more detail because it is the physics-informed baseline.
+I will now discuss each model route separately, starting with the physics-informed baseline.
 \end{slidenote}
 
-\begin{slidenote}{PINN as the Physics-Informed Baseline}
+\begin{slidenote}{Physics-Informed Neural Network (PINN)}
 \Purpose
 Explain why PINN is treated differently from the purely supervised surrogate routes.
 
 \WhatToSay
-The PINN route uses a point-wise neural network that takes coordinates, time, and material parameters as input and predicts temperature and displacement components. Its training objective combines supervised loss with residual terms related to velocity, elasticity, and thermal behavior. This should not be interpreted as an exact PDE solution. The careful interpretation is that PINN is a physics-informed baseline: it includes physical structure in the loss and therefore provides a useful reference for the other surrogate approaches.
+The Physics-Informed Neural Network is the physics-informed baseline. It takes coordinates, time, and material parameters as input and returns estimated temperature and in-plane displacement. The model relation shows the input variables and predicted outputs. The loss combines supervised terms with velocity, elastic, and thermal residual terms. The important interpretation is cautious: including residuals makes this route physics-informed, but it is still a baseline model inside the simplified prototype, not an exact equation solver.
 
 \KeyPoints
 \begin{itemize}
@@ -440,33 +422,69 @@ The PINN route uses a point-wise neural network that takes coordinates, time, an
 \end{itemize}
 
 \Transition
-The next slide summarizes the other surrogate routes.
+The next slide gives the Fourier Neural Operator route.
 \end{slidenote}
 
-\begin{slidenote}{Other Surrogate Routes}
+\begin{slidenote}{Fourier Neural Operator (FNO)}
 \Purpose
-Describe FNO, MeshGraphNet, and Transformer-style models at the right level for defence.
+Describe the neural operator route and its limitation.
 
 \WhatToSay
-The other routes are treated as neural surrogate approaches. FNO is designed for field-to-field operator learning on structured two-dimensional representations. MeshGraphNet is useful when a mesh can be represented as a graph, so that local node interactions are modeled through message passing. The Transformer-style route uses coordinate queries and feature tokens, which makes it flexible and fast for inference. In this thesis, these models are compared as alternative predictive routes. They are not described as physically equivalent numerical solvers.
+The Fourier Neural Operator route is a neural operator surrogate for structured two-dimensional fields. Its input is grid-based material and response information together with the shared source--probe and time query context. Its output is a field-style response that can be used to derive directional quantities. It is included because Fourier operator methods can capture broad field patterns. In the current prototype, however, its output scale needs recalibration, so its results are interpreted as diagnostic.
 
 \KeyPoints
 \begin{itemize}
-  \item FNO targets structured field patterns.
-  \item MeshGraphNet targets mesh-aware local interactions.
-  \item Transformer-style prediction provides fast query-based inference.
+  \item FNO is the structured-grid neural operator surrogate.
+  \item It is useful for broad field patterns.
+  \item The current route has a calibration limitation.
 \end{itemize}
 
 \Transition
-Now I will move from methodology to the experimental setup and results.
+The next model route represents the mesh as a graph.
 \end{slidenote}
 
-\begin{slidenote}{Experiment Status}
+\begin{slidenote}{MeshGraphNet}
+\Purpose
+Explain the graph-based surrogate route.
+
+\WhatToSay
+MeshGraphNet is the graph-based surrogate model. Its input includes mesh nodes, graph connectivity, material features, and the query context. Its output is a node-level or probe-level response estimate after graph message passing. It is included because graph structure can represent local mesh interactions more naturally than a fixed regular grid. The current limitation is temporal: in this prototype the route behaves mainly as a fixed-horizon predictor and needs stronger time-conditioning.
+
+\KeyPoints
+\begin{itemize}
+  \item MeshGraphNet uses graph connectivity to represent local interactions.
+  \item It is useful for mesh-aware surrogate prediction.
+  \item Its current time behavior is limited.
+\end{itemize}
+
+\Transition
+The fourth route is the Transformer-style surrogate.
+\end{slidenote}
+
+\begin{slidenote}{Transformer-Style Surrogate Model}
+\Purpose
+Explain the attention-based surrogate route.
+
+\WhatToSay
+The Transformer-style model is an attention-based baseline surrogate for fast query prediction. Its input is a set of tokens describing geometry, material parameters, state variables, and requested observation time. Its output is a fast estimate of temperature, displacement, travel time, and diagnostics. It is included because it is flexible and low-latency. Its limitation is that it has fewer explicit physics priors, so results should be interpreted cautiously.
+
+\KeyPoints
+\begin{itemize}
+  \item The model is useful for fast flexible inference.
+  \item It uses query-like tokens for geometry and material information.
+  \item Its physics constraints are weaker than in the PINN route.
+\end{itemize}
+
+\Transition
+Now I will move from methodology to the calculation setup and results.
+\end{slidenote}
+
+\begin{slidenote}{Calculation Status}
 \Purpose
 Summarize the evaluation setup and make caveats transparent before showing plots.
 
 \WhatToSay
-The evaluation uses forty scenarios per material and four materials: granite, sandstone, limestone, and basalt. With four model routes, this gives six hundred forty model responses under the same contract. The important technical note is that every plotted response is an active model output, not a mock fallback. The operating envelope is still limited to the two-dimensional plane-strain setup. Also, FNO is included in the comparison, but its output scale is currently miscalibrated, so it should be interpreted as a diagnostic branch rather than a reliable final route.
+The calculation setup uses forty scenarios per material and four materials: granite, sandstone, limestone, and basalt. With four model routes, this gives six hundred forty model responses under the same contract. Every plotted response is an active model output, not a mock fallback. The operating envelope is still limited to the two-dimensional plane-strain setup. The Fourier Neural Operator is included, but its output scale is currently miscalibrated, so it should be interpreted as a diagnostic branch rather than a reliable final route.
 
 \KeyPoints
 \begin{itemize}
@@ -502,7 +520,7 @@ To judge accuracy, the next slide compares the estimates with an analytical refe
 Present the key quantitative result and its cautious interpretation.
 
 \WhatToSay
-Here the predicted travel times are compared with a simple analytical reference, $t_{\mathrm{gt}}=r/V_P$. This reference is not a full thermoelastic validation; it is a useful sanity check based on distance and P-wave velocity. In this comparison, PINN has the lowest median relative error, around two percent, and remains within the ten percent band across the balanced sweep. Transformer is faster but less accurate for this metric. FNO and MeshGraphNet show larger errors in the current configuration. The result suggests that the physics-informed baseline is the most consistent route for this specific travel-time comparison.
+Here the predicted travel times are compared with a simple analytical reference, $t_{\mathrm{gt}}=r/V_P$. In this formula, $t_{\mathrm{gt}}$ is reference travel time in seconds, $r$ is source--probe distance in metres, and $V_P$ is compressional wave velocity in metres per second. This reference is not a full thermoelastic validation; it is a useful sanity check. In this comparison, PINN has the lowest median relative error and remains within the ten percent band across the balanced sweep.
 
 \KeyPoints
 \begin{itemize}
@@ -538,12 +556,12 @@ Before concluding, I will state the main threats to validity.
 Show scientific caution and define the limits of the results.
 
 \WhatToSay
-There are several threats to validity. First, the training data are limited and come from a pilot COMSOL-derived configuration, not from a complete calibrated geological database. Second, the model uses two-dimensional plane-strain assumptions and effective material parameters. Third, the current FNO route has a normalization issue and is not yet physically reliable. Fourth, the analytical reference based on $r/V_P$ is only a sanity check, not a full validation of thermoelastic behavior. These limitations are important because the results should be interpreted within the simplified assumptions of the study.
+There are several threats to validity. First, the training data are limited and come from a pilot COMSOL-derived configuration, not from a complete calibrated geological database. Second, the model uses two-dimensional plane-strain assumptions and effective material parameters. Third, the current Fourier Neural Operator route has a normalization issue and is not yet physically reliable. Fourth, the analytical reference based on $r/V_P$ is only a sanity check, not a full validation of thermoelastic behavior. These limitations are important because the results should be interpreted within the simplified assumptions of the study.
 
 \KeyPoints
 \begin{itemize}
   \item The dataset is limited and synthetic.
-  \item The physical formulation is simplified to 2D effective media.
+  \item The physical formulation is simplified to two-dimensional effective media.
   \item The analytical reference is useful but limited.
 \end{itemize}
 
@@ -556,11 +574,11 @@ With these limitations in mind, I can summarize the conclusions.
 State the main scientific outcomes of the work.
 
 \WhatToSay
-The thesis develops a physically grounded comparative framework for AI-guided directional prediction of thermoelastic wave propagation. Within the tested assumptions, PINN is the strongest physics-informed baseline and shows the best agreement with the analytical travel-time reference. Transformer is the fastest route and is useful for rapid query-based inference. MeshGraphNet remains a useful mesh-aware surrogate candidate, but needs further time-conditioning. FNO should be treated as a diagnostic branch until its output normalization is corrected. Overall, the work demonstrates a careful prototype for comparing neural surrogate approaches rather than a final geophysical simulator.
+The thesis develops a physically grounded comparative framework for AI-assisted directional prediction of thermoelastic wave propagation. Within the tested assumptions, PINN is the strongest physics-informed baseline and shows the best agreement with the analytical travel-time reference. Transformer-style prediction is the fastest route and is useful for rapid query-based inference. MeshGraphNet remains a useful mesh-aware surrogate candidate, but needs further time-conditioning. FNO should be treated as a diagnostic branch until its output normalization is corrected. Overall, the work demonstrates a careful prototype for comparing neural surrogate approaches rather than a final geophysical simulator.
 
 \KeyPoints
 \begin{itemize}
-  \item The main contribution is a comparative AI-guided framework.
+  \item The main contribution is a comparative AI-assisted framework.
   \item PINN performs best against the travel-time reference.
   \item Other models remain useful candidates with specific limitations.
 \end{itemize}
@@ -574,7 +592,7 @@ Finally, I will outline the most important next steps.
 Show how the prototype can be developed after the diploma.
 
 \WhatToSay
-The first direction is to retrain and recalibrate the two-dimensional FNO route, because its current output scale is not reliable. The second direction is to add stronger time-conditioned rollout behavior to MeshGraphNet. The third direction is to extend the material catalogue with more complete thermoelastic parameters and validation data. It would also be useful to compare the prototype against additional analytical and numerical baselines. The final message is that the prototype estimates directional characteristics of thermoelastic wave propagation within simplified assumptions, and it provides a basis for further research.
+The first direction is to retrain and recalibrate the two-dimensional FNO route, because its current output scale is not reliable. The second direction is to add stronger time-conditioned rollout behavior to MeshGraphNet. The third direction is to extend the material catalogue with more complete thermoelastic parameters and validation data. It would also be useful to compare the prototype against additional analytical and numerical baselines. The final message is that the prototype estimates directional characteristics of thermoelastic wave propagation within simplified assumptions and provides a basis for further research.
 
 \KeyPoints
 \begin{itemize}
@@ -631,17 +649,17 @@ It is a simple travel-time sanity check based on distance and P-wave velocity. I
 
 \textbf{6. What are the main limitations of the work?}
 
-The main limitations are the simplified 2D setting, effective isotropic material parameters, limited synthetic data, fixed-horizon behavior in some surrogate routes, and the absence of direct calibration against real geological measurements.
+The main limitations are the simplified two-dimensional setting, effective isotropic material parameters, limited synthetic data, fixed-horizon behavior in some surrogate routes, and the absence of direct calibration against real geological measurements.
 
 \textbf{7. What is the main contribution of the diploma work?}
 
-The main contribution is a physically grounded comparative framework for AI-guided directional prediction. It combines thermoelastic theory, geological material parameters, a controlled dataset, and several neural surrogate routes under one consistent comparison workflow.
+The main contribution is a physically grounded comparative framework for AI-assisted directional prediction. It combines thermoelastic theory, geological material parameters, a controlled dataset, and several neural surrogate routes under one consistent comparison workflow.
 
 \newpage
 \section*{\color{AcademicNavy}Short version of the speech}
 \addcontentsline{toc}{section}{Short version of the speech}
 
-Good morning. The topic of our diploma work is \textit{AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media}. The work presents a research prototype for AI-guided directional prediction. It is not a site-calibrated simulator. The goal is to estimate selected directional characteristics of thermoelastic wave propagation under simplified assumptions and to compare several neural surrogate approaches.
+Good morning. The topic of our diploma work is \textit{Artificial Intelligence-Assisted Directional Prediction of Thermoelastic Wave Propagation in Geological Media}. The work presents a research prototype for AI-assisted directional prediction. It is not a site-calibrated simulator. The goal is to estimate selected directional characteristics of thermoelastic wave propagation under simplified assumptions and to compare several neural surrogate approaches.
 
 The physical motivation is that temperature changes in rocks can create thermal expansion, stress, displacement, and wave-like mechanical response. This is relevant for geothermal systems, underground engineering, and geophysical interpretation. A full coupled numerical simulation can be expensive when many materials and source--probe directions must be compared. Therefore, the thesis formulates a narrower prediction task.
 
@@ -649,10 +667,10 @@ The model uses effective geological material parameters such as density, elastic
 
 Directional prediction is defined by a source point and a probe point. Their difference gives the direction, distance, and azimuth. The prototype estimates temperature, displacement, travel time, and directional response for that query. The data are based on a controlled COMSOL-derived two-dimensional thermoelastic setup, exported and normalized for several model families.
 
-The comparison includes PINN, FNO, MeshGraphNet, and a Transformer-style route. PINN is used as the physics-informed baseline because its objective includes thermoelastic residual terms. FNO, MeshGraphNet, and Transformer-style models are treated as surrogate routes for comparison, not as physically equivalent numerical solvers.
+The comparison includes the Physics-Informed Neural Network, Fourier Neural Operator, MeshGraphNet, and a Transformer-style route. PINN is used as the physics-informed baseline because its objective includes thermoelastic residual terms. FNO, MeshGraphNet, and Transformer-style models are treated as surrogate routes for comparison, not as physically equivalent numerical solvers.
 
-The experiments use forty scenarios per material, four materials, and four model routes, giving six hundred forty model responses. In the travel-time comparison, model-family differences are larger than the material difference in the current prototype. Against the simple analytical reference $t=r/V_P$, PINN shows the best agreement and remains within the ten percent band in the balanced sweep. Transformer is the fastest route, while MeshGraphNet and FNO need additional development for time behavior and calibration.
+The calculations use forty scenarios per material, four materials, and four model routes, giving six hundred forty model responses. In the travel-time comparison, model-family differences are larger than the material difference in the current prototype. Against the simple analytical reference $t=r/V_P$, PINN shows the best agreement and remains within the ten percent band in the balanced sweep. Transformer-style prediction is the fastest route, while MeshGraphNet and FNO need additional development for time behavior and calibration.
 
-The main limitations are the limited synthetic dataset, the simplified 2D assumptions, the current FNO normalization issue, and the fact that the analytical reference is only a sanity check. The conclusion is that the work provides a physically grounded comparative framework for AI-guided directional prediction within simplified assumptions. Future work should recalibrate FNO, improve time-conditioned MeshGraphNet behavior, extend material data, and compare against additional analytical or numerical baselines.
+The main limitations are the limited synthetic dataset, the simplified two-dimensional assumptions, the current FNO normalization issue, and the fact that the analytical reference is only a sanity check. The conclusion is that the work provides a physically grounded comparative framework for AI-assisted directional prediction within simplified assumptions. Future work should recalibrate FNO, improve time-conditioned MeshGraphNet behavior, extend material data, and compare against additional analytical or numerical baselines.
 
 \end{document}

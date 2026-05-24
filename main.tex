@@ -1,4 +1,4 @@
-% main.tex -- AI-Guided Prediction of Thermoelastic Wave
+% main.tex -- Artificial Intelligence-Assisted Directional Prediction of Thermoelastic Wave
 % Propagation in Geological Media. Diploma defence deck, IITU 2026.
 
 \documentclass[aspectratio=169,10pt]{beamer}
@@ -91,8 +91,8 @@
 }
 
 % -- Metadata -----------------------------------
-\title[AI-Guided Thermoelastic Prediction]{%
-  AI-Guided Prediction of Thermoelastic Wave Propagation%
+\title[AI-Assisted Thermoelastic Prediction]{%
+  Artificial Intelligence-Assisted Directional Prediction of Thermoelastic Wave Propagation%
   \texorpdfstring{\\}{ }%
   in Geological Media%
 }
@@ -129,41 +129,48 @@
   \end{block}
   \vskip 6pt
   \begin{exampleblock}{Working position of this thesis}
-    The project is a \emph{research prototype} for
-    \emph{AI-guided directional prediction}, not a calibrated
-    field-scale geological simulator.
+    This thesis is positioned as a \emph{research prototype} for
+    \emph{artificial intelligence (AI)-assisted directional prediction} of thermoelastic wave
+    propagation. It compares neural surrogate approaches under simplified
+    assumptions rather than replacing numerical solvers.
   \end{exampleblock}
 \end{frame}
 
 \begin{frame}{Research Problem}
   \begin{exampleblock}{Problem statement}
-    How can we estimate the directional characteristics of thermoelastic
-    wave propagation in geological media without rerunning the full coupled
-    numerical simulation for every scenario?
+    The research problem is to estimate directional characteristics of
+    thermoelastic wave propagation in geological media using an
+    artificial intelligence (AI)-assisted comparative framework under simplified physical assumptions.
   \end{exampleblock}
   \vskip 6pt
   \begin{itemize}
-    \item Real rocks are heterogeneous, porous, fractured, and often anisotropic.
-    \item A complete field-scale thermoelastic description is beyond the scope
-          of this bachelor thesis.
-    \item The task is therefore framed as \emph{comparative directional prediction}
-          under simplified 2D effective-medium assumptions.
+    \item The problem is important because coupled thermal and mechanical
+          calculations can be costly when many directions or materials are compared.
+    \item This work estimates selected source--probe responses and travel-time
+          characteristics in a controlled model-based calculation setting.
+    \item It does not claim a complete field-scale thermoelastic simulator or
+          field-validated prediction system.
   \end{itemize}
 \end{frame}
 
 \begin{frame}{Aim and Tasks}
   \begin{block}{Aim}
-    To develop and justify an AI-guided framework for directional
+    To develop and justify an artificial intelligence (AI)-assisted framework for directional
     prediction of thermoelastic wave propagation in geological media.
   \end{block}
   \vskip 4pt
   \begin{enumerate}
     \item Establish the physical and geological basis of the problem.
-    \item Formulate a simplified thermoelastic prediction task in 2D.
+    \item Formulate a simplified thermoelastic prediction task in two dimensions (2D).
     \item Build a COMSOL-derived synthetic dataset for controlled comparison.
-    \item Compare PINN, FNO, MeshGraphNet, and Transformer-style surrogates.
+    \item Compare Physics-Informed Neural Network (PINN), Fourier Neural
+          Operator (FNO), MeshGraphNet, and Transformer-style surrogates.
     \item Interpret the results, limitations, and next development steps.
   \end{enumerate}
+  \vskip 4pt
+  \footnotesize
+  The calculations were performed for representative geological materials,
+  including granite, basalt, sandstone, and limestone.
 \end{frame}
 
 \begin{frame}{Object and Subject of the Study}
@@ -176,7 +183,7 @@
     \end{column}
     \begin{column}{0.48\textwidth}
       \begin{block}{Subject}
-        AI-guided directional prediction of thermal and displacement
+        artificial intelligence (AI)-assisted directional prediction of thermal and displacement
         response along a selected source--probe path.
       \end{block}
     \end{column}
@@ -184,78 +191,120 @@
   \vskip 6pt
   \begin{alertblock}{Scope}
     The work does not claim to solve the full thermoelastic problem in
-    real geological formations. It studies a simplified 2D
+    real geological formations. It studies a simplified two-dimensional (2D)
     \emph{comparative framework}.
   \end{alertblock}
 \end{frame}
 
 \begin{frame}{Thermoelastic Coupling Logic}
-  \begin{enumerate}
-    \item \textbf{Thermal excitation:} a local source changes the temperature field.
-    \item \textbf{Thermal expansion:} temperature change produces local strain.
-    \item \textbf{Stress formation:} constrained expansion creates thermal stress.
-    \item \textbf{Mechanical response:} stress gradients drive displacement.
-    \item \textbf{Propagation:} the response travels through the medium.
-  \end{enumerate}
-  \vskip 8pt
-  \[
-    T \longrightarrow \varepsilon_{\mathrm{th}}
-    \longrightarrow \sigma \longrightarrow u
-  \]
+  \begin{columns}[T]
+    \begin{column}{0.54\textwidth}
+      \begin{enumerate}
+        \item \textbf{Thermal excitation:} a local source changes the temperature field.
+        \item \textbf{Thermal expansion:} temperature change produces local strain.
+        \item \textbf{Stress formation:} constrained expansion creates thermal stress.
+        \item \textbf{Mechanical response:} stress gradients drive displacement.
+      \end{enumerate}
+      \[
+        T \longrightarrow \varepsilon_{\mathrm{th}}
+        \longrightarrow \sigma \longrightarrow u
+      \]
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \footnotesize
+      \begin{block}{Physical meaning}
+        Temperature change causes thermal strain; thermal strain contributes
+        to stress; stress affects displacement and wave propagation.
+      \end{block}
+      \scriptsize
+      $T$ -- temperature [K]; $\varepsilon_{\mathrm{th}}$ -- thermal strain
+      [dimensionless]; $\sigma$ -- stress [Pa]; $u$ -- displacement [m].
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \section{Physical Basis}
 
 \begin{frame}{Geological Media and Effective Parameters}
-  \footnotesize
-  \begin{tabular}{@{}lcccc@{}}
-    \toprule
-    \textbf{Rock} & $\rho$ [kg/m$^3$] & $V_P$ [m/s] & $k$ [W/mK] & $C_p$ [J/kgK] \\
-    \midrule
-    Granite    & 2650 & 5850 & 2.50 & 850 \\
-    Basalt     & 3000 & 6550 & 1.95 & 1300 \\
-    Sandstone  & 2725 & 5000 & 2.25 & 1000 \\
-    Limestone  & 2675 & 5400 & 2.55 & 1050 \\
-    \bottomrule
-  \end{tabular}
-  \vskip 8pt
-  \normalsize
-  These are \emph{effective scalar parameters} used in the simplified
-  locally homogeneous isotropic approximation. They support comparison,
-  not field calibration.
+  \begin{columns}[T]
+    \begin{column}{0.58\textwidth}
+      \footnotesize
+      \renewcommand{\arraystretch}{1.15}
+      \begin{tabular}{l|r|r|r|r}
+        \hline
+        \textbf{Rock} & $\rho$ & $V_P$ & $k$ & $C_p$ \\
+        & kg/m$^3$ & m/s & W/(m K) & J/(kg K) \\
+        \hline
+        Granite    & 2650 & 5850 & 2.50 & 850 \\
+        Basalt     & 3000 & 6550 & 1.95 & 1300 \\
+        Sandstone  & 2725 & 5000 & 2.25 & 1000 \\
+        Limestone  & 2675 & 5400 & 2.55 & 1050 \\
+        \hline
+      \end{tabular}
+      \vskip 6pt
+      \scriptsize
+      Effective scalar parameters support comparison under a locally
+      homogeneous isotropic approximation, not field calibration.
+    \end{column}
+    \begin{column}{0.36\textwidth}
+      \includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{img/sawn_limestone_texture}
+      \vskip 2pt
+      \scriptsize
+      Public-domain limestone texture, Wikimedia Commons / Titus Tscharntke.
+    \end{column}
+  \end{columns}
 \end{frame}
 
-\begin{frame}{Full Geological Media Parameter Table}
-  \tiny
-  \renewcommand{\arraystretch}{1.08}
-  \setlength{\tabcolsep}{1.6pt}
-  \resizebox{\textwidth}{!}{%
-  \begin{tabular}{@{}llrrrrrrrrrrrrrl@{}}
-    \toprule
-    \textbf{Material} & \textbf{Group} & $\rho$ & $E$ & $\nu$ & $\mu$ & $K$ &
-    $\lambda$ & $\alpha$ & $k$ & $C_p$ & $C$ & $\gamma$ & $V_P$ & $V_S$ &
-    \textbf{Porosity} \\
-    & & kg/m$^3$ & GPa & -- & GPa & GPa & GPa & $10^{-6}$/K &
-    W/mK & J/kgK & MJ/m$^3$K & MPa/K & m/s & m/s & \% \\
-    \midrule
-    Granite & igneous intrusive & 2650 & 76.28 & 0.245 & 30.63 & 49.84 & 29.42 & 7.9 & 2.50 & 850 & 2.25 & 1.18 & 5850 & 3400 & total 45.5 \\
-    Granodiorite & igneous intrusive & 2795 & 85.91 & 0.255 & 34.24 & 58.35 & 35.52 & -- & 2.40 & -- & -- & -- & 6100 & 3500 & -- \\
-    Basalt & igneous volcanic & 3000 & 103.96 & 0.266 & 41.07 & 73.95 & 46.57 & -- & 1.95 & 1300 & 3.90 & -- & 6550 & 3700 & total 19.0 \\
-    Diabase & igneous hypabyssal & 2975 & 98.22 & 0.274 & 38.56 & 72.36 & 46.66 & -- & 2.50 & 850 & 2.53 & -- & 6450 & 3600 & -- \\
-    Gabbro & igneous intrusive mafic & 3075 & 114.27 & 0.287 & 44.40 & 89.33 & 59.72 & -- & 2.30 & 1000 & 3.08 & -- & 6950 & 3800 & total 43.5 \\
-    Sandstone & sedimentary siliciclastic & 2725 & 55.75 & 0.259 & 22.13 & 38.61 & 23.86 & 11.6 & 2.25 & 1000 & 2.73 & 1.34 & 5000 & 2850 & total 31.5; eff. 26.5 \\
-    Limestone & sedimentary carbonate & 2675 & 61.48 & 0.277 & 24.08 & 45.90 & 29.85 & 8.0 & 2.55 & 1050 & 2.81 & 1.10 & 5400 & 3000 & total 31.5; eff. 18.0 \\
-    Marble & metamorphic carbonate & 2725 & 82.41 & 0.270 & 32.43 & 59.82 & 38.20 & 9.8 & 2.80 & 850 & 2.32 & 1.76 & 6150 & 3450 & -- \\
-    Schist & metamorphic foliated & 2800 & 68.20 & 0.267 & 26.91 & 48.82 & 30.88 & -- & 2.75 & 1150 & 3.22 & -- & 5500 & 3100 & total 26.5; eff. 27.5 \\
-    Quartzite & metamorphic quartz-rich & 2650 & 83.50 & 0.250 & 33.40 & 55.70 & 33.44 & -- & 5.10 & 1000 & 2.65 & -- & 6150 & 3550 & -- \\
-    \bottomrule
-  \end{tabular}%
-  }
-  \vskip 5pt
+\begin{frame}{Mechanical Rock Parameters}
   \scriptsize
-  Values are effective midpoint parameters used for model-ready comparison.
-  Elastic constants are derived from $\rho$, $V_P$, and $V_S$ under isotropic
-  assumptions; missing thermal expansion values are shown as dashes.
+  \renewcommand{\arraystretch}{1.12}
+  \setlength{\tabcolsep}{2.6pt}
+  \begin{tabular}{l|l|r|r|r|r|r|r}
+    \hline
+    \textbf{Material} & \textbf{Type} & $\rho$ & $E$ & $\nu$ & $\mu$ & $K$ & $V_P/V_S$ \\
+    & & kg/m$^3$ & GPa & -- & GPa & GPa & m/s \\
+    \hline
+    Granite & intrusive & 2650 & 76.28 & 0.245 & 30.63 & 49.84 & 5850/3400 \\
+    Granodiorite & intrusive & 2795 & 85.91 & 0.255 & 34.24 & 58.35 & 6100/3500 \\
+    Basalt & volcanic & 3000 & 103.96 & 0.266 & 41.07 & 73.95 & 6550/3700 \\
+    Diabase & hypabyssal & 2975 & 98.22 & 0.274 & 38.56 & 72.36 & 6450/3600 \\
+    Gabbro & mafic & 3075 & 114.27 & 0.287 & 44.40 & 89.33 & 6950/3800 \\
+    Sandstone & sedimentary & 2725 & 55.75 & 0.259 & 22.13 & 38.61 & 5000/2850 \\
+    Limestone & carbonate & 2675 & 61.48 & 0.277 & 24.08 & 45.90 & 5400/3000 \\
+    Marble & metamorphic & 2725 & 82.41 & 0.270 & 32.43 & 59.82 & 6150/3450 \\
+    Schist & foliated & 2800 & 68.20 & 0.267 & 26.91 & 48.82 & 5500/3100 \\
+    Quartzite & quartz-rich & 2650 & 83.50 & 0.250 & 33.40 & 55.70 & 6150/3550 \\
+    \hline
+  \end{tabular}
+  \vskip 6pt
+  Elastic constants are effective midpoint values derived under isotropic
+  assumptions for model-ready comparison.
+\end{frame}
+
+\begin{frame}{Thermal and Porosity Parameters}
+  \scriptsize
+  \renewcommand{\arraystretch}{1.12}
+  \setlength{\tabcolsep}{3.2pt}
+  \begin{tabular}{l|r|r|r|r|r|>{\raggedright\arraybackslash}p{0.22\textwidth}}
+    \hline
+    \textbf{Material} & $\alpha$ & $k$ & $C_p$ & $C$ & $\gamma$ & \textbf{Porosity} \\
+    & $10^{-6}$/K & W/(m K) & J/(kg K) & MJ/(m$^3$ K) & MPa/K & \% \\
+    \hline
+    Granite & 7.9 & 2.50 & 850 & 2.25 & 1.18 & total 45.5 \\
+    Granodiorite & -- & 2.40 & -- & -- & -- & -- \\
+    Basalt & -- & 1.95 & 1300 & 3.90 & -- & total 19.0 \\
+    Diabase & -- & 2.50 & 850 & 2.53 & -- & -- \\
+    Gabbro & -- & 2.30 & 1000 & 3.08 & -- & total 43.5 \\
+    Sandstone & 11.6 & 2.25 & 1000 & 2.73 & 1.34 & total 31.5; eff. 26.5 \\
+    Limestone & 8.0 & 2.55 & 1050 & 2.81 & 1.10 & total 31.5; eff. 18.0 \\
+    Marble & 9.8 & 2.80 & 850 & 2.32 & 1.76 & -- \\
+    Schist & -- & 2.75 & 1150 & 3.22 & -- & total 26.5; eff. 27.5 \\
+    Quartzite & -- & 5.10 & 1000 & 2.65 & -- & -- \\
+    \hline
+  \end{tabular}
+  \vskip 6pt
+  Missing thermal expansion or coupling values are shown explicitly as dashes
+  rather than inferred.
 \end{frame}
 
 \begin{frame}{Rock Properties Controlling Propagation}
@@ -287,13 +336,13 @@
 \begin{frame}{Elastic Waves in Geological Media}
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
-      \begin{block}{P-waves}
+      \begin{block}{Compressional (P) waves}
         Compressional waves. Particle motion is mainly parallel to the
         propagation direction and involves volume change.
       \end{block}
     \end{column}
     \begin{column}{0.48\textwidth}
-      \begin{block}{S-waves}
+      \begin{block}{Shear (S) waves}
         Shear waves. Particle motion is mainly transverse to the direction
         of propagation and depends on shear rigidity.
       \end{block}
@@ -305,12 +354,15 @@
     \qquad
     V_S = \sqrt{\frac{G}{\rho}}
   \]
-  A stiffer rock usually transmits elastic disturbances faster, while
-  porosity and compliant cracks often reduce effective wave velocity.
+  \scriptsize
+  $V_P,V_S$ -- compressional and shear wave velocities [m/s];
+  $K$ -- bulk modulus [Pa]; $G$ -- shear modulus [Pa];
+  $\rho$ -- density [kg/m$^3$]. These relations show that stiffness
+  increases wave velocity, while density increases inertia.
 \end{frame}
 
 \begin{frame}{Heat Conduction and Thermal Expansion}
-  \begin{block}{Thermal part of the process}
+  \begin{block}{Fourier heat flux and heat equation}
     \[
       q = -k\nabla T,
       \qquad
@@ -318,153 +370,163 @@
       =
       \nabla\cdot(k\nabla T)+Q
     \]
+    \scriptsize
+    $q$ -- heat flux [W/m$^2$]; $k$ -- thermal conductivity [W/(m K)];
+    $T$ -- temperature [K]; $\rho$ -- density [kg/m$^3$];
+    $C_p$ -- specific heat capacity [J/(kg K)]; $t$ -- time [s];
+    $Q$ -- volumetric heat source [W/m$^3$].
   \end{block}
   \vskip 4pt
-  \begin{block}{Mechanical effect of heating}
+  \begin{block}{Temperature perturbation and thermal strain}
     \[
       \theta = T-T_0,
       \qquad
       \varepsilon_{\mathrm{th}}=\alpha\Delta T
     \]
+    \scriptsize
+    $\theta,\Delta T$ -- temperature change [K]; $T_0$ -- reference
+    temperature [K]; $\varepsilon_{\mathrm{th}}$ -- thermal strain
+    [dimensionless]; $\alpha$ -- linear thermal expansion [1/K].
   \end{block}
-  \vskip 4pt
-  Heat diffuses through the solid framework, while thermal expansion
-  creates strain. If expansion is constrained, thermal stress appears.
 \end{frame}
 
 \begin{frame}{Key Physical Parameters}
-  \begin{block}{Wave speed and thermal spreading}
+  \begin{block}{Thermal diffusivity relation}
     \[
       \alpha_T = \frac{k}{\rho C_p}
     \]
   \end{block}
   \vskip 6pt
   \begin{itemize}
-    \item $\rho$ controls inertia in the equation of motion.
-    \item $K$ and $G$ control compressional and shear stiffness.
-    \item $k$ and $C_p$ control how quickly temperature disturbances spread.
-    \item $\alpha$ controls how strongly temperature change produces strain.
+    \item $\alpha_T$ is thermal diffusivity [m$^2$/s].
+    \item $k$ is thermal conductivity [W/(m K)].
+    \item $\rho$ is density [kg/m$^3$], and $C_p$ is heat capacity [J/(kg K)].
+    \item Larger $\alpha_T$ means faster spreading of a temperature disturbance.
   \end{itemize}
 \end{frame}
 
 \begin{frame}{Thermoelastic Coupling}
-  \begin{block}{Key relations}
-    \[
-      \theta = T - T_0
-    \]
-    \[
-      \sigma_{ij} = \lambda\,\delta_{ij}\,\varepsilon_{kk}
-      + 2\mu\,\varepsilon_{ij}
-      - \gamma\,\delta_{ij}\,\theta,
-      \qquad
-      \gamma = 3K\alpha
-    \]
-    \[
-      \rho\,\frac{\partial^2u_i}{\partial t^2}
-      = \frac{\partial \sigma_{ij}}{\partial x_j} + f_i
-    \]
-  \end{block}
-  \vskip 6pt
-  These relations provide the theoretical backbone of the thesis and
-  motivate the physics-aware interpretation of the surrogate models.
-\end{frame}
-
-\begin{frame}{Mathematical Scope and Assumptions}
-  \begin{itemize}
-    \item The geological medium is represented as a 2D continuum:
-          \[
-            \Omega\subset\mathbb{R}^{2},\qquad (x,t)\in\Omega\times[0,T_f].
-          \]
-    \item The displacement field is in-plane:
-          \[
-            u(x,t)=
-            \begin{bmatrix}
-              u(x,t)\\
-              v(x,t)
-            \end{bmatrix}.
-          \]
-    \item Small deformation and linear isotropic thermoelasticity are used
-          as first-order approximations.
-    \item Pores, fractures, fluids, plasticity, damage, and full anisotropic
-          constitutive modelling are not resolved explicitly.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Primary Fields in the 2D Model}
-  \footnotesize
-  \begin{tabular}{@{}lll@{}}
-    \toprule
-    \textbf{Field} & \textbf{Meaning} & \textbf{Role in the thesis} \\
-    \midrule
-    $T(x,t)$ & Temperature & Thermal state of the rock \\
-    $\theta(x,t)=T-T_0$ & Temperature perturbation & Drives thermal strain/stress \\
-    $(u,v)$ & In-plane displacement & Mechanical response at the probe \\
-    $\varepsilon_{ij}$ & Strain tensor & Local deformation from displacement gradients \\
-    $\sigma_{ij}$ & Stress tensor & Internal force response \\
-    $d,\hat d,\phi$ & Direction quantities & Source--probe directional interpretation \\
-    \bottomrule
-  \end{tabular}
-  \vskip 8pt
-  \normalsize
-  These fields connect the physical formulation from Chapters 1--2 with
-  the prediction methodology of Chapter 3.
-\end{frame}
-
-\begin{frame}{Directional Prediction}
   \begin{columns}[T]
     \begin{column}{0.58\textwidth}
-      \includegraphics[width=\textwidth]{img/web_visualization}
+      \begin{block}{Thermoelastic extension of Hooke's law}
+        \[
+          \theta = T - T_0
+        \]
+        \[
+          \sigma_{ij} = \lambda\,\delta_{ij}\,\varepsilon_{kk}
+          + 2\mu\,\varepsilon_{ij}
+          - \gamma\,\delta_{ij}\,\theta,
+          \qquad
+          \gamma = 3K\alpha
+        \]
+      \end{block}
+      \begin{block}{Equation of motion}
+        \[
+          \rho\,\frac{\partial^2u_i}{\partial t^2}
+          = \frac{\partial \sigma_{ij}}{\partial x_j} + f_i
+        \]
+      \end{block}
     \end{column}
     \begin{column}{0.38\textwidth}
+      \scriptsize
+      $\theta$ -- temperature perturbation [K]; $T,T_0$ -- current and
+      reference temperatures [K]; $\sigma_{ij}$ -- stress tensor [Pa];
+      $\varepsilon_{ij}$ -- strain tensor [dimensionless];
+      $\varepsilon_{kk}$ -- volumetric strain [dimensionless];
+      $\lambda,\mu,K$ -- Lame and bulk moduli [Pa];
+      $\delta_{ij}$ -- Kronecker delta [dimensionless];
+      $\alpha$ -- thermal expansion [1/K]; $\gamma$ -- thermoelastic
+      coupling coefficient [Pa/K]; $u_i$ -- displacement [m];
+      $x_j$ -- coordinate [m]; $f_i$ -- body force density [N/m$^3$].
+      \vskip 4pt
+      The relation states that stress depends on elastic deformation and
+      temperature-induced expansion; this is why thermal and elastic fields
+      are coupled in the model.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Mathematical Scope and Primary Fields}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Simplified model scope}
+        \footnotesize
+        \begin{itemize}
+          \item 2D continuum: $\Omega\subset\mathbb{R}^{2}$,
+                $(x,t)\in\Omega\times[0,T_f]$.
+          \item In-plane displacement: $u(x,t)=[u,v]^T$.
+          \item Small deformation and linear isotropic thermoelasticity.
+          \item Pores, fractures, fluids, plasticity, damage, and full
+                anisotropy are not resolved explicitly.
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.48\textwidth}
       \footnotesize
+      \begin{tabular}{@{}lll@{}}
+        \toprule
+        \textbf{Field} & \textbf{Meaning} & \textbf{Role} \\
+        \midrule
+        $T(x,t)$ & Temperature & Thermal state \\
+        $\theta(x,t)$ & Perturbation & Thermal loading \\
+        $(u,v)$ & Displacement & Probe response \\
+        $\varepsilon_{ij}$ & Strain & Deformation \\
+        $\sigma_{ij}$ & Stress & Internal force \\
+        $d,\hat d,\phi$ & Direction & Source--probe query \\
+        \bottomrule
+      \end{tabular}
+      \vskip 6pt
+      These fields connect the physical formulation with the prediction
+      methodology used in the comparative prototype.
+    \end{column}
+  \end{columns}
+  \vskip 4pt
+  \scriptsize
+  These assumptions keep the task suitable for comparative AI-assisted
+  directional prediction and make the results interpretable within the scope
+  of a bachelor thesis. Here $\Omega$ is the model domain [m$^2$], $x$ is
+  position [m], $t$ is time [s], $T_f$ is final time [s], and $u,v$ are
+  displacement components [m].
+\end{frame}
+
+\begin{frame}{Directional Prediction Task}
+  \begin{columns}[T]
+    \begin{column}{0.56\textwidth}
+      \includegraphics[width=\textwidth]{img/web_visualization}
+    \end{column}
+    \begin{column}{0.40\textwidth}
+      \scriptsize
       A source point and a probe point define the directional query.
       \[
         d = x_p - x_s,\qquad
-        L = \|d\|
+        L = \|d\|,\qquad
+        \hat d = \frac{d}{\|d\|}
       \]
       \[
-        \hat d = \frac{d}{\|d\|},\qquad
-        \phi = \operatorname{atan2}(d_y,d_x)
+        \phi = \operatorname{atan2}(d_y,d_x),
+        \qquad
+        \mathcal{F}:X\rightarrow\widehat{Y}
       \]
-      The prototype predicts thermal and displacement response together
-      with geometric directional quantities such as distance and azimuth.
+      \scriptsize
+      $x_s,x_p$ -- source and probe positions [m]; $d$ -- direction vector
+      [m]; $L$ -- distance [m]; $\hat d$ -- unit direction [dimensionless];
+      $\phi$ -- azimuth [rad]; $\mathcal{F}$ maps input features $X$ to
+      predicted outputs $\widehat{Y}$.
+      \begin{block}{Prediction contract}
+        \scriptsize
+        Input: material parameters, geometry, direction, and time.
+        Output: estimated temperature, displacement, directional response,
+        and travel time.
+      \end{block}
     \end{column}
   \end{columns}
 \end{frame}
 
 \section{Prediction Framework}
 
-\begin{frame}{From Physics to a Prediction Task}
-  \begin{block}{Prediction view}
-    \[
-      \mathcal{F}: X \rightarrow \widehat{Y}
-    \]
-  \end{block}
-  \vskip 4pt
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Input}
-        \footnotesize
-        Material parameters, source location, probe location, propagation
-        direction, and observation time.
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Output}
-        \footnotesize
-        Estimated temperature, displacement, directional response,
-        and travel time.
-      \end{block}
-    \end{column}
-  \end{columns}
-  \vskip 6pt
-  The thesis does not claim to solve the complete coupled PDE system
-  for every field point. It compares structured predictive estimates.
-\end{frame}
-
 \begin{frame}{COMSOL-Based Synthetic Dataset}
-  \begin{block}{Controlled thermoelastic experiment}
-    2D plane-strain rock domain $1\,\mathrm{m}\times1\,\mathrm{m}$ with a
+  \begin{block}{Controlled thermoelastic calculation}
+    Two-dimensional (2D) plane-strain rock domain $1\,\mathrm{m}\times1\,\mathrm{m}$ with a
     heated internal source used to generate time-dependent synthetic data.
   \end{block}
   \vskip 4pt
@@ -479,7 +541,7 @@
 
 \begin{frame}{Data Representation and Preprocessing}
   \begin{itemize}
-    \item COMSOL CSV exports are aligned into a single node set.
+    \item COMSOL comma-separated value (CSV) exports are aligned into a single node set.
     \item Dynamic features are assembled into a spatio-temporal tensor:
           \[
             \mathbf{S}\in\mathbb{R}^{N_t \times N_p \times F_d}
@@ -491,6 +553,13 @@
           \]
     \item The same processed dataset supports coordinate, grid, and graph models.
   \end{itemize}
+  \scriptsize
+  $\mathbf{S}$ is the assembled data tensor; $N_t$ is the number of time
+  steps, $N_p$ the number of spatial points, and $F_d$ the number of dynamic
+  feature channels. $\widetilde{x}$ is a normalized feature [dimensionless],
+  $x$ is the original feature in its native unit, $\mu$ and $\sigma$ are its
+  dataset mean and standard deviation, and $\varepsilon$ is a small
+  dimensionless stabilizer.
 \end{frame}
 
 \section{Comparative Framework}
@@ -509,80 +578,161 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Compared Model Families}
-  \footnotesize
-  \begin{tabular}{@{}lcccc@{}}
-    \toprule
-    \textbf{Model} & \textbf{Physics use} & \textbf{Geometry} & \textbf{Strength} & \textbf{Current status} \\
-    \midrule
-    PINN & Explicit residuals & Coordinates & Physics-informed baseline & Stable \\
-    FNO & Supervised operator & Structured grid & Global field patterns & Needs calibration \\
-    MeshGraphNet & Supervised rollout & Mesh graph & Mesh-aware prediction & Fixed horizon \\
-    Transformer & Supervised operator & Query points & Fast flexible inference & Limited physics priors \\
-    \bottomrule
-  \end{tabular}
-\end{frame}
-
-\begin{frame}{PINN as the Physics-Informed Baseline}
-  \begin{block}{Core idea}
-    Point-wise MLP
-    \[
-      f_{\theta}(x,y,t,E,\nu,\rho,\alpha,k,C_p)\rightarrow(T,u,v)
-    \]
-    trained with supervised loss plus thermoelastic residual terms.
+\begin{frame}{Shared Model Comparison Contract}
+  \begin{block}{Common interpretation}
+    All routes are treated as surrogate modelling approaches for the same
+    AI-assisted directional prediction task, not as complete numerical solvers.
   \end{block}
-  \vskip 4pt
-  \[
-    \mathcal{L}
-    =
-    \lambda_{\mathrm{sup}}\mathcal{L}_{\mathrm{sup}}
-    +
-    \lambda_{\mathrm{vel}}\mathcal{L}_{\mathrm{vel}}
-    +
-    \lambda_{\mathrm{el}}\mathcal{L}_{\mathrm{elastic}}
-    +
-    \lambda_{\mathrm{th}}\mathcal{L}_{\mathrm{thermal}}
-  \]
-  \vskip 4pt
-  PINN is the only route in the comparison whose objective explicitly
-  includes the governing thermoelastic relations.
-\end{frame}
-
-\begin{frame}{Other Surrogate Routes}
   \begin{columns}[T]
     \begin{column}{0.32\textwidth}
-      \begin{block}{FNO}
+      \begin{block}{Input}
         \footnotesize
-        Field-to-field neural operator using spectral convolutions on
-        structured 2D representations.
+        Material parameters, source--probe geometry, observation time, and
+        processed field features.
       \end{block}
     \end{column}
     \begin{column}{0.32\textwidth}
-      \begin{block}{MeshGraphNet}
+      \begin{block}{Output}
         \footnotesize
-        Mesh nodes become graph nodes; message passing models local
-        interactions on irregular geometry.
+        Estimated temperature, displacement components, travel time, and
+        diagnostic response quantities.
       \end{block}
     \end{column}
     \begin{column}{0.32\textwidth}
-      \begin{block}{Transformer}
+      \begin{block}{Comparison basis}
         \footnotesize
-        Coordinate-query neural operator with tokens carrying geometry,
-        state variables, and material features.
+        Same material presets, geometry contract, response format, and
+        analytical travel-time sanity check.
       \end{block}
     \end{column}
   \end{columns}
-  \vskip 6pt
-  \begin{alertblock}{Important framing}
-    These models are treated as \emph{surrogate routes for comparison},
-    not as physically equivalent solvers.
-  \end{alertblock}
 \end{frame}
 
-\section{Experimental Results}
+\begin{frame}{Physics-Informed Neural Network (PINN)}
+  \begin{columns}[T]
+    \begin{column}{0.42\textwidth}
+      \footnotesize
+      \begin{block}{Role}
+        Physics-informed baseline in the comparison.
+      \end{block}
+      \begin{block}{Input / output}
+        Input: coordinates, time, and material parameters.
+        Output: estimated temperature and in-plane displacement.
+      \end{block}
+      \begin{block}{Why and limitation}
+        Used because thermoelastic residuals can be included in training.
+        It is still a baseline model, not an exact equation solver.
+      \end{block}
+    \end{column}
+    \begin{column}{0.54\textwidth}
+      \begin{block}{Model relation}
+        \[
+          f_{\theta}(x,y,t,E,\nu,\rho,\alpha,k,C_p)\rightarrow(T,u,v)
+        \]
+        \[
+          \mathcal{L}
+          =
+          \lambda_{\mathrm{sup}}\mathcal{L}_{\mathrm{sup}}
+          +
+          \lambda_{\mathrm{vel}}\mathcal{L}_{\mathrm{vel}}
+          +
+          \lambda_{\mathrm{el}}\mathcal{L}_{\mathrm{elastic}}
+          +
+          \lambda_{\mathrm{th}}\mathcal{L}_{\mathrm{thermal}}
+        \]
+      \end{block}
+      \scriptsize
+      $x,y$ -- coordinates [m]; $t$ -- time [s]; $E$ -- Young's modulus [Pa];
+      $\nu$ -- Poisson's ratio [dimensionless]; $\rho$ -- density [kg/m$^3$];
+      $\alpha$ -- thermal expansion [1/K]; $k$ -- conductivity [W/(m K)];
+      $C_p$ -- heat capacity [J/(kg K)]; $T,u,v$ -- predicted temperature [K]
+      and displacements [m]. $\mathcal{L}$ and $\mathcal{L}_{\cdot}$ are
+      normalized loss terms; $\lambda_{\cdot}$ are dimensionless loss weights.
+    \end{column}
+  \end{columns}
+\end{frame}
 
-\begin{frame}{Experiment Status}
-  \begin{block}{Evaluation setup}
+\begin{frame}{Fourier Neural Operator (FNO)}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Role}
+        Neural operator surrogate for structured two-dimensional fields.
+      \end{block}
+      \begin{block}{Input}
+        \footnotesize
+        Grid-based material and response features, together with the shared
+        source--probe and time query context.
+      \end{block}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Output}
+        \footnotesize
+        Estimated field-style response used to derive directional quantities.
+      \end{block}
+      \begin{block}{Why and limitation}
+        \footnotesize
+        Included because Fourier operators can capture broad field patterns.
+        In the current prototype, its output scale needs recalibration.
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{MeshGraphNet}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Role}
+        Graph-based surrogate model for mesh-aware prediction.
+      \end{block}
+      \begin{block}{Input}
+        \footnotesize
+        Mesh nodes, graph connectivity, material features, and query context.
+      \end{block}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Output}
+        \footnotesize
+        Node-level or probe-level response estimates after graph message passing.
+      \end{block}
+      \begin{block}{Why and limitation}
+        \footnotesize
+        Included because graph structure can represent local mesh interactions.
+        The current route behaves mainly as a fixed-horizon predictor.
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Transformer-Style Surrogate Model}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Role}
+        Attention-based baseline surrogate for fast query prediction.
+      \end{block}
+      \begin{block}{Input}
+        \footnotesize
+        Tokens describing geometry, material parameters, state variables,
+        and requested observation time.
+      \end{block}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Output}
+        \footnotesize
+        Fast estimates of temperature, displacement, travel time, and diagnostics.
+      \end{block}
+      \begin{block}{Why and limitation}
+        \footnotesize
+        Included as a flexible low-latency route. Its physics priors are limited,
+        so results require cautious interpretation.
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section{Calculation Results}
+
+\begin{frame}{Calculation Status}
+  \begin{block}{Calculation setup}
     \begin{enumerate}
       \item \textbf{40 scenarios per material}, four materials:
             granite, sandstone, limestone, and basalt.
@@ -624,24 +774,28 @@
 
 \begin{frame}{Accuracy Against Analytical Reference}
   \begin{columns}[T]
-    \begin{column}{0.60\textwidth}
+    \begin{column}{0.56\textwidth}
       \includegraphics[width=\textwidth]{img/travel_time_relative_error}
     \end{column}
-    \begin{column}{0.36\textwidth}
+    \begin{column}{0.40\textwidth}
       \footnotesize
       \begin{block}{Analytical reference}
       \[
         t_{\mathrm{gt}} = \frac{r}{V_p}
       \]
+      \scriptsize
+      $t_{\mathrm{gt}}$ -- reference travel time [s]; $r$ -- source--probe
+      distance [m]; $V_p$ -- compressional wave velocity [m/s].
       \end{block}
+      \scriptsize
       \begin{tabular}{@{}lcc@{}}
         \toprule
-        \textbf{Model} & \textbf{Median rel.\ error} & \textbf{Within 10\,\%} \\
+        \textbf{Model} & \textbf{Median error} & \textbf{$\leq$10\,\%} \\
         \midrule
         PINN         & $2.0\%$    & $100\%$ \\
         Transformer  & $29.2\%$   & $0\%$   \\
         FNO          & $1403.6\%$ & $0\%$   \\
-        MGN          & $> 100\%$  & $0\%$   \\
+        MeshGraphNet & $> 100\%$  & $0\%$   \\
         \bottomrule
       \end{tabular}
       \vskip 4pt
@@ -693,7 +847,7 @@
 \begin{frame}{Conclusions}
   \begin{enumerate}
     \item The thesis develops a physically grounded
-          \emph{comparative framework} for AI-guided directional prediction.
+          \emph{comparative framework} for AI-assisted directional prediction.
     \item PINN is the strongest \emph{physics-informed baseline} in the
           current comparison and shows the best agreement with the analytical
           travel-time reference.
