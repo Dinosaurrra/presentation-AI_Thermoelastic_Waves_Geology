@@ -17,6 +17,7 @@
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{4pt}
+\emergencystretch=2em
 \setlist[itemize]{leftmargin=*,topsep=2pt,itemsep=2pt}
 \setlist[enumerate]{leftmargin=*,topsep=2pt,itemsep=2pt}
 
@@ -407,78 +408,510 @@ All routes are treated as surrogate modelling approaches for the same directiona
 I will now discuss each model route separately, starting with the physics-informed baseline.
 \end{slidenote}
 
+
 \begin{slidenote}{Physics-Informed Neural Network (PINN)}
 \Purpose
-Explain why PINN is treated differently from the purely supervised surrogate routes.
+Introduce the PINN route as the explicitly physics-informed baseline.
 
 \WhatToSay
-The Physics-Informed Neural Network is the physics-informed baseline. It takes coordinates, time, and material parameters as input and returns estimated temperature and in-plane displacement. The model relation shows the input variables and predicted outputs. The loss combines supervised terms with velocity, elastic, and thermal residual terms. The important interpretation is cautious: including residuals makes this route physics-informed, but it is still a baseline model inside the simplified prototype, not an exact equation solver.
+The first model route is the Physics-Informed Neural Network. In the comparison it is the model that is closest to the thermoelastic formulation, because its training objective can include residuals connected with the governing equations. The input consists of coordinates, time, and material parameters such as Young's modulus, Poisson's ratio, density, thermal expansion, conductivity, and heat capacity. The output is the estimated temperature and in-plane displacement. The important point is balanced: PINN is physics-informed, but it is still a neural surrogate inside a simplified two-dimensional prototype, not an exact numerical solver.
 
 \KeyPoints
 \begin{itemize}
-  \item PINN maps coordinates, time, and material parameters to response fields.
-  \item The loss includes supervised and physics-related residual terms.
-  \item PINN is a physics-informed baseline, not a complete solver.
+  \item PINN is the explicitly physics-informed route in the comparison.
+  \item It maps coordinates, time, and material parameters to temperature and displacement.
+  \item It is a baseline surrogate, not a complete equation solver.
 \end{itemize}
 
 \Transition
-The next slide gives the Fourier Neural Operator route.
+The next slides unpack how this PINN route is built and interpreted.
+\end{slidenote}
+
+\begin{slidenote}{PINN: Physics-Informed Baseline}
+\Purpose
+Clarify why PINN is treated differently from the other surrogate models.
+
+\WhatToSay
+This slide states the main distinction between PINN and the other routes. PINN is called physics-informed because thermoelastic residual terms are part of the training loss. It is trained not only to match data, but also to reduce violations of selected physical relations. This does not make it a full COMSOL replacement. It means that, among the compared neural routes, PINN has the strongest direct link to the equations introduced in the thesis.
+
+\KeyPoints
+\begin{itemize}
+  \item PINN combines supervised learning with physical residual terms.
+  \item It is the reference physics-informed baseline for the comparison.
+  \item The interpretation remains limited by the simplified 2D setup.
+\end{itemize}
+
+\Transition
+Now I will show the input--output mapping used by the PINN.
+\end{slidenote}
+
+\begin{slidenote}{PINN Input--Output Mapping}
+\Purpose
+Explain what the network receives and what it predicts.
+
+\WhatToSay
+The mapping is pointwise. For a given coordinate, observation time, and material parameters, the network predicts temperature and the two in-plane displacement components. Stress and strain are not primary outputs on this slide. They can be recovered from spatial derivatives of displacement and temperature-dependent constitutive relations. This is useful because the model can work with measurable field quantities while the physics residuals use derivatives internally.
+
+\KeyPoints
+\begin{itemize}
+  \item Inputs: position, time, and effective material parameters.
+  \item Outputs: temperature and in-plane displacement components.
+  \item Stress and strain are derived diagnostics, not direct API outputs.
+\end{itemize}
+
+\Transition
+The next slide shows the neural network structure behind this mapping.
+\end{slidenote}
+
+\begin{slidenote}{PINN Network Structure}
+\Purpose
+Describe the network architecture at a high level without overloading the defence.
+
+\WhatToSay
+The PINN is represented as a multilayer perceptron. The input vector is passed through hidden layers with smooth activation functions. Smooth activations are important because the residual terms require spatial and temporal derivatives of the network output. Automatic differentiation is used to compute those derivatives. The details of every layer are less important than the reason for this structure: it supports differentiable field prediction.
+
+\KeyPoints
+\begin{itemize}
+  \item The PINN is a differentiable multilayer perceptron.
+  \item Smooth activations help compute PDE-related derivatives.
+  \item Automatic differentiation provides derivatives for residuals.
+\end{itemize}
+
+\Transition
+With the network defined, I will explain the composite loss.
+\end{slidenote}
+
+\begin{slidenote}{PINN Composite Loss}
+\Purpose
+Show how data fitting and physical consistency are combined.
+
+\WhatToSay
+The composite loss contains data terms and physics terms. The supervised part compares predicted fields with reference data. The velocity consistency term supports dynamic interpretation. The elastic and thermal residuals encourage the network to respect the thermoelastic formulation. This is the main reason PINN is not grouped with purely supervised baselines. At the same time, the weights of the loss terms and the available data influence the final behaviour, so the output must still be validated.
+
+\KeyPoints
+\begin{itemize}
+  \item The loss combines supervised, velocity, elastic, and thermal terms.
+  \item Physics terms encourage consistency with thermoelastic relations.
+  \item Loss balancing and data coverage remain important limitations.
+\end{itemize}
+
+\Transition
+The next slide states the residuals more explicitly.
+\end{slidenote}
+
+\begin{slidenote}{PINN Thermoelastic Residuals}
+\Purpose
+Connect the PINN loss to the governing thermoelastic relations.
+
+\WhatToSay
+This slide is the strongest connection between the implementation and the mathematical chapter. The residuals represent momentum balance, the thermoelastic stress relation, and the coupled heat equation. The coupling coefficient connects temperature change with volumetric strain and stress. In the defence I would not derive the equations again; I would simply emphasize that these terms are evaluated through automatic differentiation and added to the training objective.
+
+\KeyPoints
+\begin{itemize}
+  \item The residuals use momentum balance and coupled heat behaviour.
+  \item The coupling term links temperature, strain, and stress.
+  \item This explicit residual use distinguishes PINN from the other routes.
+\end{itemize}
+
+\Transition
+The last PINN detail slide explains its data use and final role.
+\end{slidenote}
+
+\begin{slidenote}{PINN Data Use and Resulting Role}
+\Purpose
+Summarize how PINN uses the dataset and why it is the main physical baseline.
+
+\WhatToSay
+PINN uses the same COMSOL-derived two-dimensional data as the other models: coordinates, time, material parameters, and reference temperature and displacement. In addition, it evaluates residuals at collocation points. Therefore, it serves as the physically grounded reference route in the comparison. Its results are still interpreted within the training-data range and within the simplified two-dimensional assumptions.
+
+\KeyPoints
+\begin{itemize}
+  \item PINN shares the COMSOL-derived dataset with the other routes.
+  \item It also uses collocation points for residual evaluation.
+  \item It is the strongest physics-informed baseline, not a full simulator.
+\end{itemize}
+
+\Transition
+Next I will move to the Fourier Neural Operator route.
 \end{slidenote}
 
 \begin{slidenote}{Fourier Neural Operator (FNO)}
 \Purpose
-Describe the neural operator route and its limitation.
+Introduce FNO as the structured-grid neural operator route.
 
 \WhatToSay
-The Fourier Neural Operator route is a neural operator surrogate for structured two-dimensional fields. Its input is grid-based material and response information together with the shared source--probe and time query context. Its output is a field-style response that can be used to derive directional quantities. It is included because Fourier operator methods can capture broad field patterns. In the current prototype, however, its output scale needs recalibration, so its results are interpreted as diagnostic.
+The Fourier Neural Operator is included as a neural-operator surrogate for structured two-dimensional fields. Its purpose is to learn a mapping between input fields and output response fields. This is different from PINN: the current FNO route uses physically meaningful fields, but it does not enforce the thermoelastic PDE residuals in the same explicit way. The current prototype also has an output-scale limitation, so FNO should be treated carefully as a diagnostic branch.
 
 \KeyPoints
 \begin{itemize}
-  \item FNO is the structured-grid neural operator surrogate.
-  \item It is useful for broad field patterns.
-  \item The current route has a calibration limitation.
+  \item FNO is a field-to-field neural operator route.
+  \item It works with physical fields but is not explicitly physics-informed like PINN.
+  \item The current implementation requires recalibration.
 \end{itemize}
 
 \Transition
-The next model route represents the mesh as a graph.
+The next slides explain how the FNO route represents fields.
+\end{slidenote}
+
+\begin{slidenote}{FNO: Field-to-Field Prediction Idea}
+\Purpose
+Explain the operator-learning view behind FNO.
+
+\WhatToSay
+The key idea is that the output of a thermoelastic simulation is a spatial field, not just a scalar number. FNO learns an operator from an input field space to an output field space. This makes it attractive for grid-based temperature and displacement prediction. In this thesis it is used as a neural operator baseline, meaning it learns from data and field structure rather than from explicit thermoelastic residual enforcement.
+
+\KeyPoints
+\begin{itemize}
+  \item The model learns a mapping between function spaces.
+  \item Inputs and outputs preserve spatial grid structure.
+  \item It is a neural operator baseline for comparison.
+\end{itemize}
+
+\Transition
+Now I will show the tensor format used in the 2D setup.
+\end{slidenote}
+
+\begin{slidenote}{FNO Tensor Format for the 2D Setup}
+\Purpose
+Document the practical two-dimensional tensor representation.
+
+\WhatToSay
+The FNO receives tensors with batch, channel, and two spatial dimensions. This matches the practical two-dimensional setup of the thesis. The output tensor has the same spatial grid and a selected number of output channels. In the simplified thermoelastic setup, those channels can represent temperature and in-plane displacement components. This is another place where the difference between theory and implementation is visible: the theory is general, but this implementation is two-dimensional.
+
+\KeyPoints
+\begin{itemize}
+  \item Input and output tensors are two-dimensional grids.
+  \item Channels represent physical quantities such as temperature and displacement.
+  \item The practical setup remains 2D.
+\end{itemize}
+
+\Transition
+The next slide gives the main architecture of the FNO route.
+\end{slidenote}
+
+\begin{slidenote}{FNO Architecture Used in the Prototype}
+\Purpose
+Summarize the FNO processing chain.
+
+\WhatToSay
+The FNO architecture has four main stages: lifting, Fourier blocks, projection, and output. The lifting layer maps input channels to a latent representation. Fourier blocks process the latent field using spectral and local branches. The projection layer maps the latent representation back to output channels. The implementation parameters on the slide define the retained Fourier modes, number of Fourier layers, and channel capacity.
+
+\KeyPoints
+\begin{itemize}
+  \item FNO processes fields through lifting, Fourier blocks, and projection.
+  \item Fourier modes control spectral capacity and cost.
+  \item The architecture is suitable for regular 2D grids.
+\end{itemize}
+
+\Transition
+The next slide explains the spectral block itself.
+\end{slidenote}
+
+\begin{slidenote}{FNO Spectral Block}
+\Purpose
+Explain how the spectral and local branches work together.
+
+\WhatToSay
+A Fourier block combines a spectral branch with a local convolution branch. The spectral branch transforms the latent field into Fourier space, applies learned complex-valued weights to selected coefficients, and transforms the result back. This helps capture broader field patterns. The local branch keeps neighbouring spatial information. Together, they allow the model to learn both global and local structure in the field.
+
+\KeyPoints
+\begin{itemize}
+  \item The spectral branch works in Fourier space.
+  \item The local convolution branch handles neighbouring patterns.
+  \item The block is data-driven, not a PDE residual calculation.
+\end{itemize}
+
+\Transition
+Now I will explain mode truncation and coordinate encoding.
+\end{slidenote}
+
+\begin{slidenote}{Mode Truncation and Coordinate Encoding}
+\Purpose
+Clarify two practical FNO design choices.
+
+\WhatToSay
+Mode truncation means that only selected low-frequency Fourier coefficients are transformed with learned weights. This reduces computational cost and controls model capacity. Coordinate encoding adds normalized spatial coordinates as extra channels, so the model can distinguish source, boundary, and interior regions. These are engineering choices that help the neural operator learn spatially organized behaviour.
+
+\KeyPoints
+\begin{itemize}
+  \item Retained modes control spectral resolution and cost.
+  \item Coordinate channels give the model spatial awareness.
+  \item These choices support learning but do not enforce physics directly.
+\end{itemize}
+
+\Transition
+The last FNO slide states the training objective and caveat.
+\end{slidenote}
+
+\begin{slidenote}{Training, Evaluation, and Current FNO Caveat}
+\Purpose
+Make the FNO interpretation honest before the result slides.
+
+\WhatToSay
+The FNO objective is supervised: it combines mean squared error with a relative error term. Channel normalization is computed on the training set and then reused for validation and inference. In the current prototype, the FNO branch still has an output-scale calibration issue. Therefore, it is useful for showing the neural-operator route, but its physical predictions should not be overclaimed until recalibration is completed.
+
+\KeyPoints
+\begin{itemize}
+  \item The current FNO loss is supervised MSE plus relative error.
+  \item It uses normalization of physical channels.
+  \item Its output scale needs recalibration before strong physical claims.
+\end{itemize}
+
+\Transition
+Next I will describe the MeshGraphNet route.
 \end{slidenote}
 
 \begin{slidenote}{MeshGraphNet}
 \Purpose
-Explain the graph-based surrogate route.
+Introduce MeshGraphNet as the mesh-aware surrogate route.
 
 \WhatToSay
-MeshGraphNet is the graph-based surrogate model. Its input includes mesh nodes, graph connectivity, material features, and the query context. Its output is a node-level or probe-level response estimate after graph message passing. It is included because graph structure can represent local mesh interactions more naturally than a fixed regular grid. The current limitation is temporal: in this prototype the route behaves mainly as a fixed-horizon predictor and needs stronger time-conditioning.
+MeshGraphNet is the graph-based route. It is included because COMSOL data are naturally mesh-based: nodes and elements form local neighbourhoods. The model can use mesh nodes, connectivity, material features, and query context to estimate node-level or probe-level responses. In this prototype it is best described as a mesh-aware surrogate candidate. Its current limitation is temporal: it behaves mainly as a fixed-horizon predictor.
 
 \KeyPoints
 \begin{itemize}
-  \item MeshGraphNet uses graph connectivity to represent local interactions.
-  \item It is useful for mesh-aware surrogate prediction.
-  \item Its current time behavior is limited.
+  \item MeshGraphNet represents the computational domain as a graph.
+  \item It can preserve mesh connectivity more naturally than a grid model.
+  \item The current route needs stronger time-conditioning.
 \end{itemize}
 
 \Transition
-The fourth route is the Transformer-style surrogate.
+The next slides unpack the graph representation.
+\end{slidenote}
+
+\begin{slidenote}{MeshGraphNet: Why a Graph Model}
+\Purpose
+Explain why a graph model is relevant for COMSOL-derived data.
+
+\WhatToSay
+Finite-element data do not always lie on a regular image grid. A graph representation preserves node connectivity, nonuniform distances, and local neighbourhood structure. This matters because heat transfer, stress redistribution, and elastic response depend on local geometry. MeshGraphNet is therefore a natural candidate for mesh-aware surrogate modelling, although it still learns from data rather than explicitly solving the PDE system.
+
+\KeyPoints
+\begin{itemize}
+  \item COMSOL mesh data are naturally represented as nodes and edges.
+  \item Graphs preserve local neighbourhood geometry.
+  \item The route is supervised and mesh-aware, not a full physics solver.
+\end{itemize}
+
+\Transition
+Now I will show the edge features.
+\end{slidenote}
+
+\begin{slidenote}{Mesh and Edge Features}
+\Purpose
+Show how geometry enters the graph model.
+
+\WhatToSay
+The edge features describe the relative vector and distance between neighbouring mesh nodes. This gives the model information about both direction and separation length. These geometric features are important because the influence between two neighbouring nodes depends not only on their state values, but also on their spatial relation. In simple terms, the graph edges carry local geometry into the neural model.
+
+\KeyPoints
+\begin{itemize}
+  \item Edge features include relative position and distance.
+  \item Geometry helps represent local physical neighbourhoods.
+  \item The graph model avoids forcing all data onto a regular grid.
+\end{itemize}
+
+\Transition
+The next slide shows node features and the prediction target.
+\end{slidenote}
+
+\begin{slidenote}{Node Features and Prediction Target}
+\Purpose
+Clarify what each graph node contains and what the model predicts.
+
+\WhatToSay
+Each node feature vector can include coordinates, material parameters, scenario conditions, and current dynamic fields. The model then predicts a future field matrix over all nodes. This makes MeshGraphNet suitable for state-transition style prediction. The important distinction is that the physical quantities are present as features and targets, while the governing equations are not enforced as explicit residuals in the same way as PINN.
+
+\KeyPoints
+\begin{itemize}
+  \item Nodes contain geometry, material information, and current state variables.
+  \item The target is the future field over graph nodes.
+  \item Physics enters through features and data, not explicit residual enforcement.
+\end{itemize}
+
+\Transition
+Now I will explain absolute and delta prediction modes.
+\end{slidenote}
+
+\begin{slidenote}{Delta Prediction Mode}
+\Purpose
+Explain why predicting state changes can be useful.
+
+\WhatToSay
+MeshGraphNet can predict either the absolute next state or the change from the current state. Delta prediction is often useful because changes between neighbouring time steps are smoother and smaller than full field values. However, there is a rollout caveat: in autoregressive prediction, each predicted state becomes the next input, so small one-step errors can accumulate over longer horizons.
+
+\KeyPoints
+\begin{itemize}
+  \item Absolute mode predicts the next state directly.
+  \item Delta mode predicts the change from the current state.
+  \item Autoregressive rollout can accumulate errors.
+\end{itemize}
+
+\Transition
+The next slide gives the architecture of the graph network.
+\end{slidenote}
+
+\begin{slidenote}{Encoder--Processor--Decoder Structure}
+\Purpose
+Describe the MeshGraphNet architecture without excessive implementation detail.
+
+\WhatToSay
+The architecture has three parts. The encoder maps raw node and edge features into latent vectors. The processor applies repeated message passing over the graph connectivity. The decoder converts the final latent node states into predicted fields. This encoder--processor--decoder design is common in graph neural simulators because it separates feature embedding, interaction modelling, and output prediction.
+
+\KeyPoints
+\begin{itemize}
+  \item Encoder: embeds raw node and edge features.
+  \item Processor: performs message passing over the graph.
+  \item Decoder: maps latent states to predicted fields.
+\end{itemize}
+
+\Transition
+The last MeshGraphNet slide explains message passing and limits.
+\end{slidenote}
+
+\begin{slidenote}{Message Passing, Training, and Limits}
+\Purpose
+Connect graph message passing with training and interpretation.
+
+\WhatToSay
+Message passing updates edge and node representations by exchanging information along graph edges. This can be interpreted as a learned local interaction mechanism. The training objective is supervised and compares predicted node fields with reference fields, possibly with channel weights. Therefore, MeshGraphNet is a supervised COMSOL surrogate: it preserves mesh topology and supports material conditioning, but the physical equations are learned implicitly and must be checked through validation plots and metrics.
+
+\KeyPoints
+\begin{itemize}
+  \item Message passing learns local interactions on the mesh graph.
+  \item Training is supervised against reference fields.
+  \item Physical reliability depends on validation, not residual enforcement.
+\end{itemize}
+
+\Transition
+The fourth model route is the Transformer-style surrogate.
 \end{slidenote}
 
 \begin{slidenote}{Transformer-Style Surrogate Model}
 \Purpose
-Explain the attention-based surrogate route.
+Introduce the attention-based surrogate route.
 
 \WhatToSay
-The Transformer-style model is an attention-based baseline surrogate for fast query prediction. Its input is a set of tokens describing geometry, material parameters, state variables, and requested observation time. Its output is a fast estimate of temperature, displacement, travel time, and diagnostics. It is included because it is flexible and low-latency. Its limitation is that it has fewer explicit physics priors, so results should be interpreted cautiously.
+The Transformer-style model is an attention-based baseline surrogate for fast query prediction. Its input is a set of tokens describing geometry, material parameters, state variables, and requested observation time. Its output is a fast estimate of temperature, displacement, travel time, and diagnostics. It is included because it is flexible and low-latency. Its limitation is that it has fewer explicit physics priors than the PINN route, so results should be interpreted cautiously.
 
 \KeyPoints
 \begin{itemize}
-  \item The model is useful for fast flexible inference.
-  \item It uses query-like tokens for geometry and material information.
+  \item The Transformer route is a supervised attention-based surrogate.
+  \item It uses tokens for geometry, material data, and state variables.
   \item Its physics constraints are weaker than in the PINN route.
 \end{itemize}
 
 \Transition
-Now I will move from methodology to the calculation setup and results.
+The next slides explain how tokenisation and attention are used.
 \end{slidenote}
 
+\begin{slidenote}{Transformer: Attention-Based Surrogate}
+\Purpose
+Explain why attention is useful for query-style prediction.
+
+\WhatToSay
+This route treats sampled points as tokens. Attention allows each query point to relate to other points in the domain, including distant points. This makes the model flexible for query-style prediction at requested locations. In this thesis it is not presented as a physics-informed solver. It is a supervised operator-style baseline whose physical meaning comes from its inputs, outputs, and training data.
+
+\KeyPoints
+\begin{itemize}
+  \item Points are represented as tokens.
+  \item Attention can connect distant regions of the domain.
+  \item The route is data-driven and should be validated carefully.
+\end{itemize}
+
+\Transition
+Now I will describe the tokens used by the model.
+\end{slidenote}
+
+\begin{slidenote}{Transformer Tokenisation}
+\Purpose
+Define the input and query tokens in the Transformer route.
+
+\WhatToSay
+Input tokens describe known sample points. They include coordinates, initial temperature and displacement, velocity-like components, and material parameters. Query tokens describe where the model should predict the response. This token structure makes the model flexible: the same network can combine physical state information with requested prediction locations.
+
+\KeyPoints
+\begin{itemize}
+  \item Input tokens contain state, geometry, and material information.
+  \item Query tokens mark requested prediction locations.
+  \item Tokenisation converts the physical field problem into an attention problem.
+\end{itemize}
+
+\Transition
+The next slide gives the attention operation.
+\end{slidenote}
+
+\begin{slidenote}{Scaled Dot-Product Attention}
+\Purpose
+Explain the attention formula at an intuitive level.
+
+\WhatToSay
+Scaled dot-product attention compares queries and keys to compute weights, then uses those weights to combine value vectors. Intuitively, this lets a requested point decide which input points are most relevant for its prediction. The score matrix connects every query with every input token. This is useful for long-range dependencies, but it is still a learned statistical mechanism rather than an explicit physical equation.
+
+\KeyPoints
+\begin{itemize}
+  \item Queries, keys, and values define weighted information exchange.
+  \item Attention supports long-range interactions.
+  \item It does not by itself enforce thermoelastic conservation laws.
+\end{itemize}
+
+\Transition
+Now I will show the encoder and decoder structure.
+\end{slidenote}
+
+\begin{slidenote}{Transformer Encoder and Decoder}
+\Purpose
+Summarize the architecture used for query prediction.
+
+\WhatToSay
+The encoder processes input tokens using self-attention and feed-forward layers. The decoder uses query tokens and cross-attention to attend to the encoded input representation. This means the model first builds a representation of the known thermoelastic state and then predicts the requested response at query points. This is why it can be described as a supervised sequence or operator-style baseline.
+
+\KeyPoints
+\begin{itemize}
+  \item Encoder: processes known input tokens.
+  \item Decoder: uses query tokens and cross-attention.
+  \item The architecture supports flexible query-point prediction.
+\end{itemize}
+
+\Transition
+The next slide shows the output head.
+\end{slidenote}
+
+\begin{slidenote}{Transformer Output Head}
+\Purpose
+Clarify the predicted fields and possible derived diagnostics.
+
+\WhatToSay
+The output head predicts temperature and two in-plane displacement components at query points. Stress and strain are not direct outputs here. They can be derived later from displacement gradients if sufficient spatial information is available, or they could be added as future output channels. This keeps the current route aligned with the shared output contract without overstating its physical enforcement.
+
+\KeyPoints
+\begin{itemize}
+  \item Outputs are temperature and in-plane displacement at query points.
+  \item Stress and strain are derived or future diagnostics.
+  \item The model is fast but less physically constrained than PINN.
+\end{itemize}
+
+\Transition
+The final Transformer slide describes the training objective.
+\end{slidenote}
+
+\begin{slidenote}{Transformer Training Objective}
+\Purpose
+State how the Transformer route is trained and how to interpret it.
+
+\WhatToSay
+The slide shows a hybrid supervised objective with reconstruction, velocity, and thermal regularisation terms. The practical interpretation remains cautious: the Transformer route is mainly a supervised surrogate. Token subsampling helps control attention cost and encourages operation on different spatial samplings. Its predictions should be checked against COMSOL-derived references and should not be described as solving the full thermoelastic PDE system.
+
+\KeyPoints
+\begin{itemize}
+  \item Training is mainly supervised with additional regularisation terms.
+  \item Token subsampling controls computational cost.
+  \item The route is not physics-informed in the strict PINN sense.
+\end{itemize}
+
+\Transition
+Now I will move from model descriptions to the calculation setup and results.
+\end{slidenote}
 \begin{slidenote}{Calculation Status}
 \Purpose
 Summarize the evaluation setup and make caveats transparent before showing plots.
