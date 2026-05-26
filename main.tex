@@ -9,9 +9,32 @@
 % already loaded the class, so that line is ignored when the base file is read.
 \renewcommand{\documentclass}[2][]{}
 
-\AfterEndEnvironment{frame}{%
-  \ifdefstring{\insertframetitle}{Fourier Neural Operator (FNO)}{\input{fno_slides}}{}%
-  \ifdefstring{\insertframetitle}{MeshGraphNet}{\input{meshgraphnet_slides}}{}%
+\newif\ifInsertFNOSlides
+\newif\ifInsertMeshGraphNetSlides
+\makeatletter
+\let\ModelSlidesOriginalFrameTitle\frametitle
+\renewcommand{\frametitle}[1]{%
+  \ModelSlidesOriginalFrameTitle{#1}%
+  \def\ModelSlidesCurrentTitle{#1}%
+  \def\ModelSlidesFNOTitle{Fourier Neural Operator (FNO)}%
+  \def\ModelSlidesMGNTitle{MeshGraphNet}%
+  \ifx\ModelSlidesCurrentTitle\ModelSlidesFNOTitle
+    \global\InsertFNOSlidestrue
+  \fi
+  \ifx\ModelSlidesCurrentTitle\ModelSlidesMGNTitle
+    \global\InsertMeshGraphNetSlidestrue
+  \fi
 }
+\apptocmd{\endframe}{%
+  \ifInsertFNOSlides
+    \global\InsertFNOSlidesfalse
+    \input{fno_slides}%
+  \fi
+  \ifInsertMeshGraphNetSlides
+    \global\InsertMeshGraphNetSlidesfalse
+    \input{meshgraphnet_slides}%
+  \fi
+}{}{}
+\makeatother
 
 \input{main_base.tex}
