@@ -1,0 +1,179 @@
+% fno_slides.tex -- additional Fourier Neural Operator slides
+% Source context: MIKU-7437/AI_Termoelastic_Waves_Geology, chapter 5 FNO files.
+
+\begin{frame}{FNO: Field-to-Field Prediction Idea}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Why FNO fits this task}
+        \footnotesize
+        Thermoelastic simulation output is not a single scalar. It is a set
+        of spatial fields defined on a two-dimensional grid.
+      \end{block}
+      \begin{itemize}
+        \footnotesize
+        \item The model learns an operator between function spaces.
+        \item Inputs and outputs keep spatial structure.
+        \item The target can include temperature and displacement fields.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Operator view}
+        \[
+          \mathcal{G}_{\theta}:\mathcal{A}\rightarrow\mathcal{U},
+          \qquad
+          \hat{s}=\mathcal{G}_{\theta}(a)
+        \]
+      \end{block}
+      \scriptsize
+      $a$ -- input field; $\hat{s}$ -- predicted thermoelastic field;
+      $\mathcal{A}$ and $\mathcal{U}$ -- input and output field spaces;
+      $\theta$ -- trainable neural-operator parameters.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{FNO Tensor Format for the 2D Setup}
+  \begin{columns}[T]
+    \begin{column}{0.50\textwidth}
+      \begin{block}{Input tensor}
+        \[
+          A\in\mathbb{R}^{B\times C_{in}\times N_x\times N_y}
+        \]
+      \end{block}
+      \begin{block}{Output tensor}
+        \[
+          \hat{S}\in\mathbb{R}^{B\times C_{out}\times N_x\times N_y}
+        \]
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item $B$ is batch size.
+        \item $N_x,N_y$ are grid sizes.
+        \item $C_{in}$ is the number of input channels.
+        \item $C_{out}$ is controlled by \texttt{out\_channels}.
+      \end{itemize}
+      \vskip 4pt
+      For the three-channel thermoelastic setup:
+      \[
+        C_{out}=3,\qquad \hat{s}=[\hat{T},\hat{u},\hat{v}].
+      \]
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{FNO Architecture Used in the Prototype}
+  \begin{block}{Main processing chain}
+    \[
+      \text{input}\rightarrow\text{lifting}\rightarrow
+      \text{Fourier blocks}\rightarrow\text{projection}\rightarrow\text{output}
+    \]
+  \end{block}
+  \vskip 4pt
+  \begin{columns}[T]
+    \begin{column}{0.47\textwidth}
+      \footnotesize
+      \begin{block}{Implementation parameters}
+        \begin{itemize}
+          \item \texttt{modes}: retained Fourier modes
+          \item \texttt{num\_fourier\_layers}: number of blocks
+          \item \texttt{mid\_channels}: latent capacity
+          \item \texttt{projection\_channels}: output projection size
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.49\textwidth}
+      \begin{block}{Operator composition}
+        \[
+          \mathcal{G}_{\theta}=Q\circ\mathcal{B}_{L-1}\circ\cdots
+          \circ\mathcal{B}_0\circ P
+        \]
+      \end{block}
+      \scriptsize
+      $P$ -- lifting layer; $\mathcal{B}_l$ -- Fourier block;
+      $Q$ -- projection layer; $L$ -- number of Fourier blocks.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{FNO Spectral Block}
+  \begin{columns}[T]
+    \begin{column}{0.50\textwidth}
+      \begin{block}{Block update}
+        \[
+          v_{l+1}=\sigma\left(\mathcal{S}_l(v_l)+\mathcal{C}_l(v_l)\right)
+        \]
+      \end{block}
+      \footnotesize
+      The spectral branch captures global frequency-domain interactions;
+      the local convolution branch captures neighboring spatial patterns.
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Spectral convolution}
+        \[
+          \hat{v}_l=\mathcal{F}(v_l),\qquad
+          z_l=\mathcal{F}^{-1}\left(R_l\cdot\hat{v}_l\right)
+        \]
+      \end{block}
+      \scriptsize
+      $\mathcal{F}$ and $\mathcal{F}^{-1}$ are Fourier and inverse Fourier
+      transforms; $R_l$ is the trainable complex-valued spectral weight tensor.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Mode Truncation and Coordinate Encoding}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Retained modes}
+        \[
+          \texttt{modes}=[K_1,K_2],\qquad d=2
+        \]
+      \end{block}
+      \footnotesize
+      Only selected low-frequency Fourier coefficients are transformed by
+      learned weights. This controls capacity and computational cost.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Optional grid channels}
+        \[
+          \tilde{a}(x,y)=[a(x,y),x,y]
+        \]
+      \end{block}
+      \footnotesize
+      With \texttt{add\_grid}, the model receives explicit normalized spatial
+      coordinates. This helps distinguish source, boundary, and interior regions.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Training, Evaluation, and Current FNO Caveat}
+  \begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+      \begin{block}{Supervised objective}
+        \[
+          \mathcal{L}=\lambda_{MSE}\mathcal{L}_{MSE}
+          +\lambda_{rel}\mathcal{L}_{rel}
+        \]
+      \end{block}
+      \scriptsize
+      Channel normalization is computed on the training set and reused for
+      validation, testing, and inference.
+      \[
+        \tilde{s}_{i,c}=\frac{s_{i,c}-\mu_c}{\sigma_c}
+      \]
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \begin{alertblock}{Interpretation in this thesis}
+        \footnotesize
+        FNO is valuable as a field-based neural-operator route, but the current
+        prototype still needs output-scale recalibration before it can be read
+        as a physically reliable predictor.
+      \end{alertblock}
+      \footnotesize
+      Evaluation should use field-level plots, channel-wise errors, relative
+      $L^2$ error, and travel-time sanity checks.
+    \end{column}
+  \end{columns}
+\end{frame}
