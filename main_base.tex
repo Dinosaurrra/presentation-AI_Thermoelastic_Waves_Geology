@@ -562,73 +562,62 @@
   \end{columns}
 \end{frame}
 
-
-\begin{frame}{COMSOL Temperature Field}
-  \begin{columns}[T]
-    \begin{column}{0.60\textwidth}
-      \centering
-      \includegraphics[
-        width=\textwidth,
-        height=0.72\textheight,
-        keepaspectratio
-      ]{img/comsol_temperature_2d.png}
+\begin{frame}{COMSOL Simulation Results}
+\begin{columns}[T,onlytextwidth]
+    
+    \begin{column}{0.32\textwidth}
+        \centering
+        \includegraphics[
+            width=\textwidth,
+            height=0.42\textheight,
+            keepaspectratio
+        ]{img/comsol_temperature_2d.png}
+        
+        \vspace{2pt}
+        \scriptsize \textbf{Temperature Field}
+        
+        \vspace{2pt}
+        \tiny
+        Local heating creates a high-temperature region near the source, while
+        the surrounding rock remains close to the initial temperature.
     \end{column}
-
-    \begin{column}{0.36\textwidth}
-      \footnotesize
-      \begin{block}{Thermal excitation}
-        The heated source creates a localized high-temperature region inside
-        the geological medium.
-      \end{block}
-
-      \begin{block}{Temperature distribution}
-        The maximum temperature is concentrated near the source, while the
-        surrounding domain remains close to the initial temperature.
-      \end{block}
-
-      \begin{block}{Dataset variable}
-        Temperature is one of the main dynamic fields used for training and
-        validating the neural models.
-      \end{block}
+    
+    \begin{column}{0.32\textwidth}
+        \centering
+        \includegraphics[
+            width=\textwidth,
+            height=0.42\textheight,
+            keepaspectratio
+        ]{img/comsol_displacement_2d.png}
+        
+        \vspace{2pt}
+        \scriptsize \textbf{Total Displacement}
+        
+        \vspace{2pt}
+        \tiny
+        Thermal expansion causes deformation of the medium, with the largest
+        displacement concentrated around the heated source.
     \end{column}
-  \end{columns}
+    
+    \begin{column}{0.32\textwidth}
+        \centering
+        \includegraphics[
+            width=\textwidth,
+            height=0.42\textheight,
+            keepaspectratio
+        ]{img/comsol_stress_2d.png}
+        
+        \vspace{2pt}
+        \scriptsize \textbf{von Mises Stress}
+        
+        \vspace{2pt}
+        \tiny
+        The induced thermoelastic response generates stress concentration near
+        the source, confirming the coupled thermal and mechanical behavior.
+    \end{column}
+    
+\end{columns}
 \end{frame}
-
-
-\begin{frame}{COMSOL Thermoelastic Response}
-  \begin{columns}[T]
-    \begin{column}{0.49\textwidth}
-      \centering
-      \includegraphics[
-        width=\textwidth,
-        height=0.62\textheight,
-        keepaspectratio
-      ]{img/comsol_displacement_2d.png}
-
-      \vskip 2pt
-      \scriptsize Total displacement field
-    \end{column}
-
-    \begin{column}{0.49\textwidth}
-      \centering
-      \includegraphics[
-        width=\textwidth,
-        height=0.62\textheight,
-        keepaspectratio
-      ]{img/comsol_stress_2d.png}
-
-      \vskip 2pt
-      \scriptsize von Mises stress field
-    \end{column}
-  \end{columns}
-
-  \vskip 4pt
-  \footnotesize
-  Local heating causes thermal expansion of the medium. As a result,
-  displacement and stress are concentrated around the heated source, confirming
-  the coupled thermoelastic behavior of the simulated process.
-\end{frame}
-
 
 \begin{frame}{Data Representation and Preprocessing}
   \begin{itemize}
