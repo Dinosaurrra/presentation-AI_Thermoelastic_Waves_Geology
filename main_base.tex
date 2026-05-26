@@ -13,7 +13,7 @@
 \usepackage{array}
 \usepackage{graphicx}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,calc}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
 
 \definecolor{AcademicNavy}{HTML}{17324D}
 \definecolor{AcademicBlue}{HTML}{2E5E88}
@@ -1108,183 +1108,174 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Transformer-Style Surrogate Model}
+\begin{frame}{Transformer: Inputs and Outputs}
   \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Role}
-        Attention-based baseline surrogate for fast query prediction.
-      \end{block}
-      \begin{block}{Input}
-        \footnotesize
-        Tokens describing geometry, material parameters, state variables,
-        and requested observation time.
-      \end{block}
+    \begin{column}{0.60\textwidth}
+      \centering
+      \resizebox{\linewidth}{!}{%
+      \begin{tikzpicture}[
+        font=\small,
+        node distance=3mm and 12mm,
+        itok/.style={rectangle, rounded corners=2pt,
+          draw=blue!55!black, fill=blue!8,
+          minimum width=60mm, minimum height=8mm, inner sep=3pt, align=left},
+        qtok/.style={rectangle, rounded corners=2pt,
+          draw=teal!55!black, fill=teal!10,
+          minimum width=34mm, minimum height=8mm, inner sep=3pt, align=left}
+      ]
+        \node[itok] (i1) {$a_1=(x_1,\,T_1^{(0)},\,u_1^{(0)},\,\dot u_1^{(0)},\,a_1^{\text{mat}})$};
+        \node[itok, below=of i1] (i2) {$a_2=(x_2,\,\ldots)$};
+        \node[below=2mm of i2] (idots) {$\vdots$};
+        \node[itok, below=2mm of idots] (iN) {$a_{N_{\mathrm{in}}}=(x_{N_{\mathrm{in}}},\,\ldots)$};
+        \node[draw=black!50, dashed, fit=(i1)(iN), inner sep=4mm,
+          label=above:{Input set (mesh nodes, state at $t=0$)}] {};
+        \node[qtok, right=16mm of i1.east] (q1) {$q_1=(x_q^{(1)})$};
+        \node[qtok, below=of q1] (q2) {$q_2=(x_q^{(2)})$};
+        \node[below=2mm of q2] (qdots) {$\vdots$};
+        \node[qtok, below=2mm of qdots] (qN) {$q_{N_q}=(x_q^{(N_q)})$};
+        \node[draw=black!50, dashed, fit=(q1)(qN), inner sep=4mm,
+          label=above:{Query set (arbitrary points)}] {};
+      \end{tikzpicture}}
     \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Output}
-        \footnotesize
-        Fast estimates of temperature, displacement, travel time, and diagnostics.
-      \end{block}
-      \begin{block}{Why and limitation}
-        \footnotesize
-        Included as a flexible low-latency route. Its physics priors are limited,
-        so results require cautious interpretation.
-      \end{block}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Transformer: Attention-Based Surrogate}
-  \begin{columns}[T]
-    \begin{column}{0.50\textwidth}
-      \begin{block}{Role in the framework}
-        \footnotesize
-        The Transformer-style route is an attention-based surrogate for fast
-        prediction under the shared input--output contract.
-      \end{block}
-      \begin{itemize}
-        \footnotesize
-        \item Treats sampled points as tokens.
-        \item Relates distant points through attention.
-        \item Supports query-style prediction at requested locations.
-      \end{itemize}
-    \end{column}
-    \begin{column}{0.46\textwidth}
-      \begin{alertblock}{Interpretation}
-        \footnotesize
-        This route is mainly data-driven. It can be fast and flexible, but its
-        physical priors are weaker than those of the PINN route.
-      \end{alertblock}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Transformer Tokenisation}
-  \begin{columns}[T]
-    \begin{column}{0.52\textwidth}
-      \begin{block}{Input token}
-        {\scriptsize
-        \[
-          a_i=[x_i,y_i,T_i^{(0)},u_i^{(0)},v_i^{(0)},
-          \dot u_i^{(0)},\dot v_i^{(0)},E_i,\nu_i,\rho_i,
-          \alpha_i,k_i,C_{p,i}]
-        \]
-        }
-      \end{block}
-    \end{column}
-    \begin{column}{0.44\textwidth}
-      \begin{block}{Query token}
-        \[
-          q_j=(x_q^{(j)},y_q^{(j)})
-        \]
-      \end{block}
+    \begin{column}{0.38\textwidth}
       \footnotesize
-      Input tokens describe known mesh samples. Query tokens describe where the
-      predicted fields are requested.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Scaled Dot-Product Attention}
-  \begin{block}{Attention operation}
-    \[
-      \operatorname{Attention}(Q,K,V)=
-      \operatorname{softmax}\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V
-    \]
-  \end{block}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \footnotesize
-      \begin{itemize}
-        \item $Q$ stores query representations.
-        \item $K$ stores key representations.
-        \item $V$ stores value representations.
-      \end{itemize}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \footnotesize
-      The score matrix connects every query with every input token. This gives
-      the model a direct route for long-range interactions in the domain.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Transformer Encoder and Decoder}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Encoder}
-        \footnotesize
-        Input tokens are projected to an embedding space and refined through
-        multi-head self-attention and feed-forward layers.
+      \begin{block}{Input token \(\in\mathbb{R}^{13}\)}
+        coordinates, initial state \((T,u,v,\dot u,\dot v)\), and material
+        parameters \((E,\nu,\rho,\alpha,k,C_p)\).
       \end{block}
-      \[
-        H^{(\ell+1)}=\operatorname{EncoderBlock}(H^{(\ell)})
-      \]
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Decoder}
-        \footnotesize
-        Query tokens attend to encoded input tokens through cross-attention.
+      \begin{block}{Query token \(\in\mathbb{R}^{2}\)}
+        the coordinates \(q_j=(x_q^{(j)},y_q^{(j)})\) where fields are
+        requested.
       \end{block}
-      \[
-        Z^{(\ell+1)}=\operatorname{DecoderBlock}(Z^{(\ell)},H)
-      \]
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Transformer Output Head}
-  \begin{columns}[T]
-    \begin{column}{0.52\textwidth}
-      \begin{block}{Predicted fields at query points}
-        \[
-          \hat{y}_j=(\hat T_j,\hat u_j,\hat v_j)
-        \]
-        \[
-          \hat{y}_j=W_{\mathrm{out}}Z_{j,:}^{(L_{\mathrm{dec}})}
-        \]
+      \begin{block}{Output \(\in\mathbb{R}^{3}\)}
+        \[ \hat y_j = (\hat T_j,\,\hat u_j,\,\hat v_j) \]
       \end{block}
-    \end{column}
-    \begin{column}{0.44\textwidth}
-      \footnotesize
-      The model predicts temperature and two in-plane displacement components.
-      Stress and strain can be derived later from displacement gradients or
-      added as future output channels.
-      \vskip 4pt
       \scriptsize
-      The baseline described in the source text uses an embedding dimension of
-      $d_m=128$ and multi-head attention with $h=4$ heads.
+      \(N_{\mathrm{in}}\) and \(N_q\) are independent, so the operator is
+      discretisation-invariant.
     \end{column}
   \end{columns}
 \end{frame}
 
-\begin{frame}{Transformer Training Objective}
-  \begin{block}{Hybrid supervised objective}
+\begin{frame}{Transformer: Architecture}
+  \centering
+  \resizebox{!}{0.72\textheight}{%
+  \begin{tikzpicture}[
+    font=\small,
+    node distance=3mm and 12mm,
+    inp/.style={rectangle, rounded corners=2pt,
+      draw=blue!55!black, fill=blue!8,
+      minimum width=48mm, minimum height=9mm, align=center},
+    enc/.style={rectangle, rounded corners=2pt,
+      draw=violet!55!black, fill=violet!10,
+      minimum width=48mm, minimum height=9mm, align=center},
+    qry/.style={rectangle, rounded corners=2pt,
+      draw=teal!55!black, fill=teal!10,
+      minimum width=42mm, minimum height=9mm, align=center},
+    dec/.style={rectangle, rounded corners=2pt,
+      draw=orange!70!black, fill=orange!10,
+      minimum width=42mm, minimum height=9mm, align=center},
+    outp/.style={rectangle, rounded corners=2pt,
+      draw=green!50!black, fill=green!12,
+      minimum width=42mm, minimum height=9mm, align=center},
+    arr/.style={-{Latex[length=2mm]}, thick, draw=black!65}
+  ]
+    \node[inp] (in)   {Input tokens \(\{a_i\}\in\mathbb{R}^{13}\)};
+    \node[inp, below=of in] (ip) {Input projection \(\mathbb{R}^{13}\!\to\!\mathbb{R}^{d_m}\)};
+    \node[enc, below=of ip] (e1) {Self-attention layer \#1};
+    \node[enc, below=of e1] (e2) {Self-attention layer \#2};
+    \node[below=2mm of e2] (edots) {\(\vdots\)};
+    \node[enc, below=2mm of edots] (eL) {Self-attention layer \(L_{\mathrm{enc}}\)};
+
+    \node[qry, right=24mm of in] (q)  {Query tokens \(\{q_j\}\in\mathbb{R}^{2}\)};
+    \node[qry, below=of q]   (qp) {Query projection \(\mathbb{R}^{2}\!\to\!\mathbb{R}^{d_m}\)};
+    \node[dec, below=of qp]  (d1) {Cross-attention layer \#1};
+    \node[dec, below=of d1]  (d2) {Cross-attention layer \#2};
+    \node[below=2mm of d2]   (ddots) {\(\vdots\)};
+    \node[dec, below=2mm of ddots] (dL) {Cross-attention layer \(L_{\mathrm{dec}}\)};
+
+    \node[outp, below=18mm of $(eL)!0.5!(dL)$] (head) {Linear head \(\mathbb{R}^{d_m}\!\to\!\mathbb{R}^{3}\)};
+    \node[outp, below=of head] (yhat) {\(\hat{y}_j = (\hat T_j,\,\hat u_j,\,\hat v_j)\)};
+
+    \draw[arr] (in) -- (ip);
+    \draw[arr] (ip) -- (e1);
+    \draw[arr] (e1) -- (e2);
+    \draw[arr] (e2) -- (edots);
+    \draw[arr] (edots) -- (eL);
+
+    \draw[arr] (q)  -- (qp);
+    \draw[arr] (qp) -- (d1);
+    \draw[arr] (d1) -- (d2);
+    \draw[arr] (d2) -- (ddots);
+    \draw[arr] (ddots) -- (dL);
+
+    \draw[arr] (eL.east) -- ++(8mm,0) |- (d1.west) node[pos=0.25, right] {\scriptsize \(K,\,V\)};
+    \draw[arr, dashed, draw=black!40] (eL.east) -- ++(8mm,0) |- (dL.west);
+
+    \draw[arr] (dL.south) -- ++(0,-4mm) -| (head.north);
+    \draw[arr] (head) -- (yhat);
+  \end{tikzpicture}}
+
+  \vskip 2pt
+  {\scriptsize Encoder self-attention; decoder cross-attention from queries;
+   linear head returns \((T,u,v)\).}
+\end{frame}
+
+\begin{frame}{Transformer: Training Loss}
+  \setlength{\abovedisplayskip}{2pt}
+  \setlength{\belowdisplayskip}{2pt}
+  \setlength{\abovedisplayshortskip}{1pt}
+  \setlength{\belowdisplayshortskip}{1pt}
+  \begin{block}{Composite objective}
     \[
-      \mathcal{L}=\lambda_{\mathrm{sup}}\mathcal{L}_{\mathrm{sup}}
+      \mathcal{L}(\theta)=
+      \lambda_{\mathrm{sup}}\mathcal{L}_{\mathrm{sup}}
       +\lambda_{\mathrm{vel}}\mathcal{L}_{\mathrm{vel}}
-      +\lambda_{\mathrm{th}}\mathcal{L}_{\mathrm{th}}
+      +\lambda_{\mathrm{th}}\mathcal{L}_{\mathrm{th}},
+      \qquad
+      (\lambda_{\mathrm{sup}},\lambda_{\mathrm{vel}},\lambda_{\mathrm{th}})
+      =(1.0,\,0.25,\,0.05)
     \]
   \end{block}
   \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \footnotesize
-      \begin{itemize}
-        \item supervised reconstruction of reference fields;
-        \item velocity consistency for displacement evolution;
-        \item thermal residual regularisation.
-      \end{itemize}
+    \begin{column}{0.33\textwidth}
+      \begin{block}{Supervised (data)}
+        \scriptsize
+        \[
+          \mathcal{L}_{\mathrm{sup}}=
+          \frac{1}{N_q C_{\mathrm{out}}}
+          \sum_{j,c}\big(\hat y_{j,c}-y_{j,c}\big)^2
+        \]
+        Reconstructs the COMSOL reference fields.
+      \end{block}
     \end{column}
-    \begin{column}{0.48\textwidth}
-      \footnotesize
-      Token subsampling controls attention cost and encourages operation on
-      different spatial samplings. Predictions still require careful validation
-      against COMSOL-derived references.
+    \begin{column}{0.33\textwidth}
+      \begin{block}{Velocity consistency}
+        \scriptsize
+        \[
+          \mathcal{L}_{\mathrm{vel}}=
+          \frac{1}{N_q}\sum_{j}
+          \big\|\partial_t\hat u_j-\dot u_j^{\mathrm{ref}}\big\|_2^2
+        \]
+        Aligns the displacement rate with the exported velocity.
+      \end{block}
+    \end{column}
+    \begin{column}{0.33\textwidth}
+      \begin{block}{Thermal residual}
+        \scriptsize
+        \[
+          \mathcal{L}_{\mathrm{th}}=
+          \frac{1}{N_q}\sum_{j}
+          \big(\partial_t\hat T_j-\mathfrak{a}_j\nabla^2\hat T_j\big)^2
+        \]
+        Enforces diffusion with \(\mathfrak{a}_j=k_j/(\rho_j C_{p,j})\).
+      \end{block}
     \end{column}
   \end{columns}
+  \vskip 4pt
+  \scriptsize
+  Optimised with AdamW; tokens subsampled at \(N_{\mathrm{in}}=N_q=1024\).
 \end{frame}
-
-
 \section{Calculation Results}
 
 \begin{frame}{Calculation Status}
