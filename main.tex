@@ -1,6 +1,6 @@
 % main.tex -- wrapper for the base Beamer deck.
 % The original deck body is stored in main_base.tex.
-% Additional FNO slides are inserted before the Calculation Results section.
+% Additional model-detail slides are inserted before the Calculation Results section.
 
 \documentclass[aspectratio=169,10pt]{beamer}
 
@@ -9,14 +9,15 @@
 \renewcommand{\documentclass}[2][]{}
 
 \AtBeginDocument{%
-  \let\FNOOriginalSection\section
+  \let\ModelSlidesOriginalSection\section
   \renewcommand{\section}[1]{%
-    \def\FNOCurrentSection{#1}%
-    \def\FNOCalculationResults{Calculation Results}%
-    \ifx\FNOCurrentSection\FNOCalculationResults
+    \def\ModelSlidesCurrentSection{#1}%
+    \def\ModelSlidesCalculationResults{Calculation Results}%
+    \ifx\ModelSlidesCurrentSection\ModelSlidesCalculationResults
       \input{fno_slides}%
+      \input{meshgraphnet_slides}%
     \fi
-    \FNOOriginalSection{#1}%
+    \ModelSlidesOriginalSection{#1}%
   }%
 }
 
