@@ -66,72 +66,36 @@ Good morning. The topic of our diploma work is \textit{AI-Guided Prediction of T
 I will start by explaining why this topic is relevant.
 \end{slidenote}
 
-\begin{slidenote}{Relevance of the Topic}
+\begin{slidenote}{Motivation and Research Problem}
 \Purpose
-Explain why thermoelastic wave prediction in rocks is worth studying.
+Open the introduction with the motivation, the research problem, and the correct prototype scope.
 
 \WhatToSay
-Thermally affected rocks appear in several applied contexts: geothermal energy, underground construction, thermal stimulation, and geophysical interpretation. When temperature changes inside a rock, it can influence stress, deformation, and wave behavior. A direct coupled numerical calculation is useful, but it can be expensive when many materials, source positions, or observation directions must be compared. This motivates an artificial intelligence-assisted approach, where neural models estimate selected directional responses and help compare scenarios faster. The thesis is positioned as a research prototype: it compares surrogate approaches under simplified assumptions rather than replacing numerical solvers.
+This slide combines the motivation and the problem statement. Thermoelastic wave propagation is relevant because temperature changes in rocks can influence stress, deformation, and wave behaviour. This matters in geothermal systems, underground engineering, and geophysical interpretation. The research problem is to estimate directional characteristics of thermoelastic wave propagation using an AI-assisted comparative framework under simplified physical assumptions. The image reminds us that real rocks are complex, but in this thesis they are represented through effective material parameters.
 
 \KeyPoints
 \begin{itemize}
-  \item Temperature changes can create mechanical effects in geological media.
-  \item Repeated coupled simulations are expensive for comparative studies.
-  \item The work uses AI-assisted prediction as a supporting research tool.
+  \item Temperature changes in rocks can produce mechanical effects.
+  \item The task is directional source--probe prediction, not full field-scale simulation.
+  \item The work is a research prototype, not an industrial geophysical simulator.
 \end{itemize}
 
 \Transition
-This relevance leads to the main research problem.
+After defining the problem, I will state the aim, tasks, object, and subject of the work.
 \end{slidenote}
 
-\begin{slidenote}{Research Problem}
+\begin{slidenote}{Aim, Tasks, and Scope}
 \Purpose
-State the central question and narrow it to a defensible bachelor thesis scope.
+State the aim and compress the thesis tasks into one defensible overview slide.
 
 \WhatToSay
-The research problem is to estimate directional characteristics of thermoelastic wave propagation in geological media using an AI-assisted comparative framework under simplified physical assumptions. This is important because coupled thermal and mechanical calculations can become costly when many materials and directions are compared. The work estimates selected source--probe responses and travel-time characteristics in a controlled model-based calculation setting. It does not claim a complete field-scale simulator or a field-validated prediction system.
+The aim is to develop and justify an AI-guided framework for directional prediction of thermoelastic wave propagation in geological media. The work first defines the physical and geological basis, then formulates a simplified two-dimensional thermoelastic prediction task. After that, it prepares COMSOL-derived synthetic data, compares four surrogate routes, and interprets the results and limitations. The object is thermoelastic wave propagation in geological media. The subject is AI-assisted directional prediction along a selected source--probe path. The temperature-field image illustrates the controlled 2D simulation basis used for comparison.
 
 \KeyPoints
 \begin{itemize}
-  \item The problem is framed as directional prediction, not full field simulation.
-  \item The work is important for comparative studies with many query directions.
-  \item The simplified setup makes controlled model comparison possible.
-\end{itemize}
-
-\Transition
-Next, I will formulate the aim and the tasks of the work.
-\end{slidenote}
-
-\begin{slidenote}{Aim and Tasks}
-\Purpose
-Show what the diploma work tries to achieve and how the study is organized.
-
-\WhatToSay
-The aim is to develop and justify an artificial intelligence-assisted framework for directional prediction of thermoelastic wave propagation in geological media. The calculations were performed for representative geological materials, including granite, basalt, sandstone, and limestone. To reach the aim, the work establishes the physical basis, formulates a simplified two-dimensional prediction task, prepares COMSOL-derived synthetic data, compares four surrogate routes, and interprets the results and limitations.
-
-\KeyPoints
-\begin{itemize}
-  \item The aim combines physical reasoning with model comparison.
-  \item The task is built around a simplified two-dimensional formulation.
-  \item The representative materials are granite, basalt, sandstone, and limestone.
-\end{itemize}
-
-\Transition
-Before the theory, I will define the object and subject of the study.
-\end{slidenote}
-
-\begin{slidenote}{Object and Subject of the Study}
-\Purpose
-Clarify what is being studied and what specific aspect the thesis focuses on.
-
-\WhatToSay
-The object of the study is thermoelastic wave propagation in geological media represented by effective rock parameters. The subject is narrower: artificial intelligence-assisted directional prediction of thermal and displacement response along a selected source--probe path. This distinction is important. We do not model a full natural formation with all geological details. We study a simplified comparative framework where the material is represented by effective parameters and the prediction is made for a defined direction.
-
-\KeyPoints
-\begin{itemize}
-  \item Object: thermoelastic wave behavior in geological media.
-  \item Subject: directional prediction along a source--probe path.
-  \item The work is intentionally limited to a simplified comparative framework.
+  \item Aim: AI-guided directional thermoelastic wave prediction.
+  \item Tasks: physical basis, 2D formulation, COMSOL data, model comparison, interpretation.
+  \item Object and subject are stated explicitly on the slide.
 \end{itemize}
 
 \Transition
@@ -352,6 +316,60 @@ The dataset is derived from a controlled COMSOL-based thermoelastic calculation.
 
 \Transition
 After data generation, the exports must be represented in a model-ready form.
+\end{slidenote}
+
+\begin{slidenote}{COMSOL 2D Model and Mesh}
+\Purpose
+Show the numerical domain and explain why the mesh matters for the dataset.
+
+\WhatToSay
+This slide shows the two-dimensional COMSOL model and the finite-element mesh. The experiment represents a simplified section of a geological medium with an internal heated source. The mesh is refined near the source because this is where the largest thermal, displacement, and stress gradients are expected. This mesh is important because it defines the spatial structure from which the reference fields are exported.
+
+\KeyPoints
+\begin{itemize}
+  \item The practical simulation is a simplified 2D domain.
+  \item Mesh refinement is concentrated near the thermal source.
+  \item The mesh provides the spatial basis for exported COMSOL fields.
+\end{itemize}
+
+\Transition
+The next slide shows the temperature field generated by this setup.
+\end{slidenote}
+
+\begin{slidenote}{COMSOL Temperature Field}
+\Purpose
+Visualize the thermal part of the synthetic thermoelastic dataset.
+
+\WhatToSay
+Here we see the temperature field from the COMSOL setup. The heated source creates a localized high-temperature region, while the surrounding area stays much closer to the initial temperature. This temperature field is one of the main dynamic variables used for model training and validation. It also provides the thermal driver for the mechanical response in the coupled problem.
+
+\KeyPoints
+\begin{itemize}
+  \item The heat source creates a localized temperature disturbance.
+  \item Temperature is one of the primary dynamic fields.
+  \item The thermal field drives the coupled mechanical response.
+\end{itemize}
+
+\Transition
+The next slide shows how this heating appears in displacement and stress.
+\end{slidenote}
+
+\begin{slidenote}{COMSOL Thermoelastic Response}
+\Purpose
+Connect the temperature field with displacement and stress outputs.
+
+\WhatToSay
+The two images show the mechanical response produced by local heating. Thermal expansion creates displacement, and the constrained response of the surrounding medium creates stress concentration near the heated source. This confirms the coupled thermoelastic behaviour in the synthetic simulation. These fields are not field measurements; they are controlled numerical reference data for comparing neural surrogate models.
+
+\KeyPoints
+\begin{itemize}
+  \item Heating produces displacement and stress concentration near the source.
+  \item These fields demonstrate the coupled thermoelastic mechanism.
+  \item The data are synthetic COMSOL references for model comparison.
+\end{itemize}
+
+\Transition
+After generating the fields, they must be exported and preprocessed for the models.
 \end{slidenote}
 
 \begin{slidenote}{Data Representation and Preprocessing}

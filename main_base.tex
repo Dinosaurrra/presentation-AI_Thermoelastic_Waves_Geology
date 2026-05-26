@@ -116,86 +116,59 @@
 
 \section{Motivation and Problem}
 
-\begin{frame}{Relevance of the Topic}
-  \begin{block}{Why this topic matters}
-    \begin{itemize}
-      \item Thermally affected rocks are relevant to geothermal systems,
-            underground engineering, and geophysical interpretation.
-      \item Temperature change may alter stress, deformation, and wave behavior
-            inside the geological medium.
-      \item Repeated coupled simulations are informative, but expensive for
-            comparative directional studies.
-    \end{itemize}
-  \end{block}
-  \vskip 6pt
-  \begin{exampleblock}{Working position of this thesis}
-    This thesis is positioned as a \emph{research prototype} for
-    \emph{AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media}
-    propagation. It compares neural surrogate approaches under simplified
-    assumptions rather than replacing numerical solvers.
-  \end{exampleblock}
-\end{frame}
-
-\begin{frame}{Research Problem}
-  \begin{exampleblock}{Problem statement}
-    The research problem is to estimate directional characteristics of
-    thermoelastic wave propagation in geological media using an
-    AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media
-    under simplified physical assumptions.
-  \end{exampleblock}
-  \vskip 6pt
-  \begin{itemize}
-    \item The problem is important because coupled thermal and mechanical
-          calculations can be costly when many directions or materials are compared.
-    \item This work estimates selected source--probe responses and travel-time
-          characteristics in a controlled model-based calculation setting.
-    \item It does not claim a complete field-scale thermoelastic simulator or
-          field-validated prediction system.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Aim and Tasks}
-  \begin{block}{Aim}
-    To develop and justify the
-    \emph{AI-Guided Prediction of Thermoelastic Wave Propagation in Geological Media}
-    framework.
-  \end{block}
-  \vskip 4pt
-  \begin{enumerate}
-    \item Establish the physical and geological basis of the problem.
-    \item Formulate a simplified thermoelastic prediction task in two dimensions (2D).
-    \item Build a COMSOL-derived synthetic dataset for controlled comparison.
-    \item Compare Physics-Informed Neural Network (PINN), Fourier Neural
-          Operator (FNO), MeshGraphNet, and Transformer-style surrogates.
-    \item Interpret the results, limitations, and next development steps.
-  \end{enumerate}
-  \vskip 4pt
-  \footnotesize
-  The calculations were performed for representative geological materials,
-  including granite, basalt, sandstone, and limestone.
-\end{frame}
-
-\begin{frame}{Object and Subject of the Study}
+\begin{frame}{Motivation and Research Problem}
   \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Object}
-        Thermoelastic wave propagation in geological media represented by
-        effective rock parameters.
+    \begin{column}{0.58\textwidth}
+      \begin{block}{Motivation}
+        Temperature changes in rocks can affect stress, deformation, and wave
+        propagation. This is relevant to geothermal systems, underground
+        engineering, and geophysical interpretation.
       \end{block}
+      \vskip 3pt
+      \begin{exampleblock}{Research problem}
+        Estimate directional thermoelastic response using AI-assisted surrogate
+        models under simplified effective-medium assumptions.
+      \end{exampleblock}
+      \vskip 2pt
+      {\footnotesize\textbf{Scope:} research prototype for source--probe
+      prediction, not field-validated industrial simulation.}
     \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Subject}
-        AI-guided prediction of thermal and displacement
-        response along a selected source--probe path.
-      \end{block}
+    \begin{column}{0.38\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=0.43\textheight,keepaspectratio]{img/sawn_limestone_texture}
     \end{column}
   \end{columns}
-  \vskip 6pt
-  \begin{alertblock}{Scope}
-    The work does not claim to solve the full thermoelastic problem in
-    real geological formations. It studies a simplified two-dimensional (2D)
-    \emph{comparative framework}.
-  \end{alertblock}
+\end{frame}
+
+\begin{frame}{Aim, Tasks, and Scope}
+  \begin{columns}[T]
+    \begin{column}{0.58\textwidth}
+      \begin{block}{Aim}
+        Develop and justify an AI-guided framework for directional prediction of
+        thermoelastic wave propagation in geological media.
+      \end{block}
+      \vskip 2pt
+      {\footnotesize
+      \begin{enumerate}
+        \item Define the physical and geological basis.
+        \item Formulate a simplified 2D thermoelastic prediction task.
+        \item Prepare COMSOL-derived synthetic data.
+        \item Compare PINN, FNO, MeshGraphNet, and Transformer-style routes.
+        \item Interpret results, limitations, and future improvements.
+      \end{enumerate}
+      }
+      \vskip 1pt
+      {\scriptsize
+      Object: thermoelastic wave propagation in geological media.\\
+      Subject: AI-assisted source--probe directional prediction.}
+    \end{column}
+    \begin{column}{0.38\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=0.47\textheight,keepaspectratio]{img/comsol_temperature_2d}
+      \vskip 2pt
+      {\scriptsize Controlled 2D thermoelastic field data support comparison.}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \begin{frame}{Thermoelastic Coupling Logic}
@@ -557,8 +530,6 @@
   \scriptsize
   The exported COMSOL fields are used as synthetic reference data for comparing
   neural surrogate models.
-\end{frame}
-  \end{itemize}
 \end{frame}
 
 
@@ -1397,11 +1368,13 @@
   \begin{columns}[T]
     \begin{column}{0.52\textwidth}
       \begin{block}{Input token}
+        {\scriptsize
         \[
           a_i=[x_i,y_i,T_i^{(0)},u_i^{(0)},v_i^{(0)},
           \dot u_i^{(0)},\dot v_i^{(0)},E_i,\nu_i,\rho_i,
           \alpha_i,k_i,C_{p,i}]
         \]
+        }
       \end{block}
     \end{column}
     \begin{column}{0.44\textwidth}
