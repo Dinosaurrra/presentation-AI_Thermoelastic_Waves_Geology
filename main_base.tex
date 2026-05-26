@@ -681,6 +681,184 @@
   \end{columns}
 \end{frame}
 
+\begin{frame}{FNO: Field-to-Field Prediction Idea}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Why FNO fits this task}
+        \footnotesize
+        Thermoelastic simulation output is not a single scalar. It is a set
+        of spatial fields defined on a two-dimensional grid.
+      \end{block}
+      \begin{itemize}
+        \footnotesize
+        \item The model learns an operator between function spaces.
+        \item Inputs and outputs keep spatial structure.
+        \item The target can include temperature and displacement fields.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Operator view}
+        \[
+          \mathcal{G}_{\theta}:\mathcal{A}\rightarrow\mathcal{U},
+          \qquad
+          \hat{s}=\mathcal{G}_{\theta}(a)
+        \]
+      \end{block}
+      \scriptsize
+      $a$ -- input field; $\hat{s}$ -- predicted thermoelastic field;
+      $\mathcal{A}$ and $\mathcal{U}$ -- input and output field spaces;
+      $\theta$ -- trainable neural-operator parameters.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{FNO Tensor Format for the 2D Setup}
+  \begin{columns}[T]
+    \begin{column}{0.50\textwidth}
+      \begin{block}{Input tensor}
+        \[
+          A\in\mathbb{R}^{B\times C_{in}\times N_x\times N_y}
+        \]
+      \end{block}
+      \begin{block}{Output tensor}
+        \[
+          \hat{S}\in\mathbb{R}^{B\times C_{out}\times N_x\times N_y}
+        \]
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item $B$ is batch size.
+        \item $N_x,N_y$ are grid sizes.
+        \item $C_{in}$ is the number of input channels.
+        \item $C_{out}$ is controlled by \texttt{out\_channels}.
+      \end{itemize}
+      \vskip 4pt
+      For the three-channel thermoelastic setup:
+      \[
+        C_{out}=3,\qquad \hat{s}=[\hat{T},\hat{u},\hat{v}].
+      \]
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{FNO Architecture Used in the Prototype}
+  \begin{block}{Main processing chain}
+    \[
+      \text{input}\rightarrow\text{lifting}\rightarrow
+      \text{Fourier blocks}\rightarrow\text{projection}\rightarrow\text{output}
+    \]
+  \end{block}
+  \vskip 4pt
+  \begin{columns}[T]
+    \begin{column}{0.47\textwidth}
+      \footnotesize
+      \begin{block}{Implementation parameters}
+        \begin{itemize}
+          \item \texttt{modes}: retained Fourier modes
+          \item \texttt{num\_fourier\_layers}: number of blocks
+          \item \texttt{mid\_channels}: latent capacity
+          \item \texttt{projection\_channels}: output projection size
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.49\textwidth}
+      \begin{block}{Operator composition}
+        \[
+          \mathcal{G}_{\theta}=Q\circ\mathcal{B}_{L-1}\circ\cdots
+          \circ\mathcal{B}_0\circ P
+        \]
+      \end{block}
+      \scriptsize
+      $P$ -- lifting layer; $\mathcal{B}_l$ -- Fourier block;
+      $Q$ -- projection layer; $L$ -- number of Fourier blocks.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{FNO Spectral Block}
+  \begin{columns}[T]
+    \begin{column}{0.50\textwidth}
+      \begin{block}{Block update}
+        \[
+          v_{l+1}=\sigma\left(\mathcal{S}_l(v_l)+\mathcal{C}_l(v_l)\right)
+        \]
+      \end{block}
+      \footnotesize
+      The spectral branch captures global frequency-domain interactions;
+      the local convolution branch captures neighboring spatial patterns.
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Spectral convolution}
+        \[
+          \hat{v}_l=\mathcal{F}(v_l),\qquad
+          z_l=\mathcal{F}^{-1}\left(R_l\cdot\hat{v}_l\right)
+        \]
+      \end{block}
+      \scriptsize
+      $\mathcal{F}$ and $\mathcal{F}^{-1}$ are Fourier and inverse Fourier
+      transforms; $R_l$ is the trainable complex-valued spectral weight tensor.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Mode Truncation and Coordinate Encoding}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Retained modes}
+        \[
+          \texttt{modes}=[K_1,K_2],\qquad d=2
+        \]
+      \end{block}
+      \footnotesize
+      Only selected low-frequency Fourier coefficients are transformed by
+      learned weights. This controls capacity and computational cost.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Optional grid channels}
+        \[
+          \tilde{a}(x,y)=[a(x,y),x,y]
+        \]
+      \end{block}
+      \footnotesize
+      With \texttt{add\_grid}, the model receives explicit normalized spatial
+      coordinates. This helps distinguish source, boundary, and interior regions.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Training, Evaluation, and Current FNO Caveat}
+  \begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+      \begin{block}{Supervised objective}
+        \[
+          \mathcal{L}=\lambda_{MSE}\mathcal{L}_{MSE}
+          +\lambda_{rel}\mathcal{L}_{rel}
+        \]
+      \end{block}
+      \scriptsize
+      Channel normalization is computed on the training set and reused for
+      validation, testing, and inference.
+      \[
+        \tilde{s}_{i,c}=\frac{s_{i,c}-\mu_c}{\sigma_c}
+      \]
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \begin{alertblock}{Interpretation in this thesis}
+        \footnotesize
+        FNO is valuable as a field-based neural-operator route, but the current
+        prototype still needs output-scale recalibration before it can be read
+        as a physically reliable predictor.
+      \end{alertblock}
+      \footnotesize
+      Evaluation should use field-level plots, channel-wise errors, relative
+      $L^2$ error, and travel-time sanity checks.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
 \begin{frame}{MeshGraphNet}
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
@@ -702,6 +880,184 @@
         Included because graph structure can represent local mesh interactions.
         The current route behaves mainly as a fixed-horizon predictor.
       \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{MeshGraphNet: Why a Graph Model}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Reason for using MeshGraphNet}
+        \footnotesize
+        COMSOL finite-element data are naturally mesh-based. Nodes can have
+        different neighbourhoods and nonuniform distances, unlike pixels on a
+        regular image grid.
+      \end{block}
+      \begin{itemize}
+        \footnotesize
+        \item Preserves unstructured mesh connectivity.
+        \item Avoids forced interpolation to a Cartesian grid.
+        \item Matches local thermal and mechanical interactions.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Graph representation}
+        \[
+          \mathcal{G}=(\mathcal{V},\mathcal{E})
+        \]
+      \end{block}
+      \scriptsize
+      $\mathcal{V}$ -- mesh nodes; $\mathcal{E}$ -- local graph edges.
+      Each node represents a spatial location in the simulated geological
+      medium; each edge represents local physical neighbourhood connectivity.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Mesh and Edge Features}
+  \begin{columns}[T]
+    \begin{column}{0.50\textwidth}
+      \begin{block}{Geometric edge encoding}
+        \[
+          r_{ij}=p_j-p_i,\qquad d_{ij}=\|r_{ij}\|_2
+        \]
+        \[
+          a_{ij}=\begin{bmatrix}r_{ij}\\ d_{ij}\end{bmatrix}
+        \]
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \footnotesize
+      The edge attributes describe both direction and distance between
+      neighbouring mesh nodes.
+      \vskip 4pt
+      This matters because heat transfer, stress redistribution, and elastic
+      wave response depend on local geometry, not only on node values.
+      \vskip 4pt
+      \scriptsize
+      $p_i,p_j$ -- node coordinates [m]; $r_{ij}$ -- relative vector [m];
+      $d_{ij}$ -- Euclidean edge length [m].
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Node Features and Prediction Target}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Node feature vector}
+        \[
+          x_i^t=\begin{bmatrix}p_i\\ m_i\\ s\\ q_i^t\end{bmatrix}
+        \]
+      \end{block}
+      \footnotesize
+      Coordinates, material parameters, scenario conditions, and current
+      dynamic fields are concatenated before model input.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{State transition}
+        \[
+          \hat{Y}^{t+\Delta t}=f_{\theta}(X^t,\mathcal{G})
+        \]
+      \end{block}
+      \scriptsize
+      $X^t\in\mathbb{R}^{N\times F_v}$ is the node feature matrix;
+      $\hat{Y}^{t+\Delta t}\in\mathbb{R}^{N\times C}$ is the predicted
+      future field matrix for all graph nodes.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Delta Prediction Mode}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Absolute mode}
+        \[
+          \hat{q}_i^{t+\Delta t}=f_{\theta}(x_i^t,\mathcal{G})
+        \]
+      \end{block}
+      \begin{block}{Delta mode}
+        \[
+          \Delta\hat{q}_i^t=f_{\theta}(x_i^t,\mathcal{G})
+        \]
+        \[
+          \hat{q}_i^{t+\Delta t}=q_i^t+\Delta\hat{q}_i^t
+        \]
+      \end{block}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \footnotesize
+      Delta prediction is useful because neighbouring time-step changes are
+      often smoother and smaller than full thermoelastic fields.
+      \vskip 5pt
+      \begin{alertblock}{Rollout caveat}
+        \footnotesize
+        In autoregressive prediction, each predicted state becomes the next
+        input. Small one-step errors can accumulate over long horizons.
+      \end{alertblock}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Encoder--Processor--Decoder Structure}
+  \begin{block}{Model composition}
+    \[
+      f_{\theta}=D_{\theta_D}\circ P_{\theta_P}\circ E_{\theta_E}
+    \]
+  \end{block}
+  \vskip 4pt
+  \begin{columns}[T]
+    \begin{column}{0.31\textwidth}
+      \begin{block}{Encoder}
+        \footnotesize
+        Maps raw node and edge features into latent vectors.
+      \end{block}
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \begin{block}{Processor}
+        \footnotesize
+        Applies repeated message passing over mesh connectivity.
+      \end{block}
+    \end{column}
+    \begin{column}{0.31\textwidth}
+      \begin{block}{Decoder}
+        \footnotesize
+        Converts final latent node states into predicted fields.
+      \end{block}
+    \end{column}
+  \end{columns}
+  \vskip 4pt
+  \scriptsize
+  The repository implementation uses multilayer perceptrons, smooth SiLU
+  activations, residual connections, and layer normalization inside the graph
+  processing path.
+\end{frame}
+
+\begin{frame}{Message Passing, Training, and Limits}
+  \begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+      \begin{block}{Message passing step}
+        \[
+          \tilde{e}_{ij}^{k+1}=\phi_e^k([h_i^k,h_j^k,e_{ij}^k])
+        \]
+        \[
+          m_j^{k+1}=\sum_{i:(i,j)\in\mathcal{E}}e_{ij}^{k+1}
+        \]
+        \[
+          h_j^{k+1}=\phi_v^k([h_j^k,m_j^{k+1}])
+        \]
+      \end{block}
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \begin{block}{Training objective}
+        \[
+          \mathcal{L}=\frac{1}{\sum_c w_c}\sum_{c=1}^{C}w_c
+          \frac{1}{N}\sum_{i=1}^{N}(\hat{y}_{i,c}-y_{i,c})^2
+        \]
+      \end{block}
+      \scriptsize
+      MeshGraphNet is a supervised COMSOL surrogate. It preserves mesh topology
+      and supports material conditioning, but physical equations are learned
+      implicitly and must be checked through validation plots and metrics.
     \end{column}
   \end{columns}
 \end{frame}
