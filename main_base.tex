@@ -655,6 +655,166 @@
   \end{columns}
 \end{frame}
 
+\begin{frame}{PINN: Physics-Informed Baseline}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Role in the comparison}
+        \footnotesize
+        The Physics-Informed Neural Network (PINN) is the route whose loss
+        explicitly contains thermoelastic equation residuals.
+      \end{block}
+      \begin{itemize}
+        \footnotesize
+        \item Candidate predictor for the shared task.
+        \item Physics-informed baseline for the data-driven routes.
+        \item Uses supervised data and governing-equation constraints.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{alertblock}{Interpretation}
+        \footnotesize
+        PINN is not an exact numerical solver. It is a neural surrogate whose
+        training objective encourages physically consistent predictions.
+      \end{alertblock}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{PINN Input--Output Mapping}
+  \begin{block}{Pointwise thermoelastic prediction}
+    \[
+      f_{\theta}(x,y,t,E,\nu,\rho,\alpha,k,C_p)\rightarrow(T,u,v)
+    \]
+  \end{block}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item $(x,y)$: in-plane coordinate.
+        \item $t$: observation time.
+        \item $E,\nu,\rho,\alpha,k,C_p$: material parameters.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item $T$: predicted temperature.
+        \item $u,v$: in-plane displacement components.
+        \item Stress and strain are recovered from derivatives.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{PINN Network Structure}
+  \begin{columns}[T]
+    \begin{column}{0.50\textwidth}
+      \begin{block}{Multilayer perceptron}
+        \[
+          h^{(\ell)}=\varphi\left(W^{(\ell)}h^{(\ell-1)}+b^{(\ell)}\right)
+        \]
+        \[
+          h^{(0)}=(x,y,t,E,\nu,\rho,\alpha,k,C_p)
+        \]
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \footnotesize
+      The implementation uses a smooth activation such as $\tanh$, because the
+      PDE residuals require derivatives of the network output with respect to
+      space and time.
+      \vskip 4pt
+      \scriptsize
+      $\theta$ collects all trainable weights and biases; automatic
+      differentiation provides the derivatives used in the loss.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{PINN Composite Loss}
+  \begin{block}{Training objective}
+    \[
+      \mathcal{L}=\lambda_{\mathrm{sup}}\mathcal{L}_{\mathrm{sup}}
+      +\lambda_{\mathrm{vel}}\mathcal{L}_{\mathrm{vel}}
+      +\lambda_{\mathrm{el}}\mathcal{L}_{\mathrm{elastic}}
+      +\lambda_{\mathrm{th}}\mathcal{L}_{\mathrm{thermal}}
+    \]
+  \end{block}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \footnotesize
+      \begin{block}{Data terms}
+        \begin{itemize}
+          \item supervised error for $(T,u,v)$;
+          \item velocity consistency with exported COMSOL velocities.
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \footnotesize
+      \begin{block}{Physics terms}
+        \begin{itemize}
+          \item elastic-wave residual;
+          \item coupled thermal residual.
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{PINN Thermoelastic Residuals}
+  \begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+      \begin{block}{Momentum balance}
+        \[
+          \rho\,\partial_t^2 u-\nabla\!\cdot\!\sigma=0
+        \]
+        \[
+          \sigma=\lambda(\nabla\!\cdot\!u)I+2\mu\varepsilon-
+          \gamma\theta I
+        \]
+      \end{block}
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \begin{block}{Coupled heat equation}
+        \[
+          \rho C_p\partial_tT-k\nabla^2T+
+          \gamma T_0\partial_t(\nabla\!\cdot\!u)=0
+        \]
+      \end{block}
+      \scriptsize
+      $\theta=T-T_{\mathrm{ref}}$ and $\gamma=3K\alpha$ connect temperature,
+      strain, and stress inside the residual terms.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{PINN Data Use and Resulting Role}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Training data}
+        \footnotesize
+        PINN uses the same COMSOL-derived 2D datasets: coordinates, time,
+        material parameters, and ground-truth temperature and displacement.
+      \end{block}
+      \footnotesize
+      Residuals are evaluated at collocation points using automatic
+      differentiation.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Why it matters}
+        \footnotesize
+        Because governing-equation residuals are part of training, PINN is the
+        physically grounded reference route in the comparison framework.
+      \end{block}
+      \footnotesize
+      Its outputs should still be interpreted within the simplified 2D
+      assumptions and available training-data coverage.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
 \begin{frame}{Fourier Neural Operator (FNO)}
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
@@ -1087,6 +1247,155 @@
     \end{column}
   \end{columns}
 \end{frame}
+
+\begin{frame}{Transformer: Attention-Based Surrogate}
+  \begin{columns}[T]
+    \begin{column}{0.50\textwidth}
+      \begin{block}{Role in the framework}
+        \footnotesize
+        The Transformer-style route is an attention-based surrogate for fast
+        prediction under the shared input--output contract.
+      \end{block}
+      \begin{itemize}
+        \footnotesize
+        \item Treats sampled points as tokens.
+        \item Relates distant points through attention.
+        \item Supports query-style prediction at requested locations.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{alertblock}{Interpretation}
+        \footnotesize
+        This route is mainly data-driven. It can be fast and flexible, but its
+        physical priors are weaker than those of the PINN route.
+      \end{alertblock}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Transformer Tokenisation}
+  \begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+      \begin{block}{Input token}
+        \[
+          a_i=[x_i,y_i,T_i^{(0)},u_i^{(0)},v_i^{(0)},
+          \dot u_i^{(0)},\dot v_i^{(0)},E_i,\nu_i,\rho_i,
+          \alpha_i,k_i,C_{p,i}]
+        \]
+      \end{block}
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \begin{block}{Query token}
+        \[
+          q_j=(x_q^{(j)},y_q^{(j)})
+        \]
+      \end{block}
+      \footnotesize
+      Input tokens describe known mesh samples. Query tokens describe where the
+      predicted fields are requested.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Scaled Dot-Product Attention}
+  \begin{block}{Attention operation}
+    \[
+      \operatorname{Attention}(Q,K,V)=
+      \operatorname{softmax}\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V
+    \]
+  \end{block}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item $Q$ stores query representations.
+        \item $K$ stores key representations.
+        \item $V$ stores value representations.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \footnotesize
+      The score matrix connects every query with every input token. This gives
+      the model a direct route for long-range interactions in the domain.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Transformer Encoder and Decoder}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Encoder}
+        \footnotesize
+        Input tokens are projected to an embedding space and refined through
+        multi-head self-attention and feed-forward layers.
+      \end{block}
+      \[
+        H^{(\ell+1)}=\operatorname{EncoderBlock}(H^{(\ell)})
+      \]
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Decoder}
+        \footnotesize
+        Query tokens attend to encoded input tokens through cross-attention.
+      \end{block}
+      \[
+        Z^{(\ell+1)}=\operatorname{DecoderBlock}(Z^{(\ell)},H)
+      \]
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Transformer Output Head}
+  \begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+      \begin{block}{Predicted fields at query points}
+        \[
+          \hat{y}_j=(\hat T_j,\hat u_j,\hat v_j)
+        \]
+        \[
+          \hat{y}_j=W_{\mathrm{out}}Z_{j,:}^{(L_{\mathrm{dec}})}
+        \]
+      \end{block}
+    \end{column}
+    \begin{column}{0.44\textwidth}
+      \footnotesize
+      The model predicts temperature and two in-plane displacement components.
+      Stress and strain can be derived later from displacement gradients or
+      added as future output channels.
+      \vskip 4pt
+      \scriptsize
+      The baseline described in the source text uses an embedding dimension of
+      $d_m=128$ and multi-head attention with $h=4$ heads.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Transformer Training Objective}
+  \begin{block}{Hybrid supervised objective}
+    \[
+      \mathcal{L}=\lambda_{\mathrm{sup}}\mathcal{L}_{\mathrm{sup}}
+      +\lambda_{\mathrm{vel}}\mathcal{L}_{\mathrm{vel}}
+      +\lambda_{\mathrm{th}}\mathcal{L}_{\mathrm{th}}
+    \]
+  \end{block}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \footnotesize
+      \begin{itemize}
+        \item supervised reconstruction of reference fields;
+        \item velocity consistency for displacement evolution;
+        \item thermal residual regularisation.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \footnotesize
+      Token subsampling controls attention cost and encourages operation on
+      different spatial samplings. Predictions still require careful validation
+      against COMSOL-derived references.
+    \end{column}
+  \end{columns}
+\end{frame}
+
 
 \section{Calculation Results}
 
