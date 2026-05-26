@@ -1,4 +1,40 @@
-% main.tex -- project entry point.
-% The editable Beamer deck lives in main_base.tex.
+% main.tex -- wrapper for the base Beamer deck.
+% The original deck body is stored in main_base.tex.
+% Additional model-detail slides are inserted after their matching overview frames.
+
+\documentclass[aspectratio=169,10pt]{beamer}
+\usepackage{etoolbox}
+
+% main_base.tex contains the original \documentclass line. The wrapper has
+% already loaded the class, so that line is ignored when the base file is read.
+\renewcommand{\documentclass}[2][]{}
+
+\newif\ifInsertFNOSlides
+\newif\ifInsertMeshGraphNetSlides
+\makeatletter
+\let\ModelSlidesOriginalFrameTitle\frametitle
+\renewcommand{\frametitle}[1]{%
+  \ModelSlidesOriginalFrameTitle{#1}%
+  \def\ModelSlidesCurrentTitle{#1}%
+  \def\ModelSlidesFNOTitle{Fourier Neural Operator (FNO)}%
+  \def\ModelSlidesMGNTitle{MeshGraphNet}%
+  \ifx\ModelSlidesCurrentTitle\ModelSlidesFNOTitle
+    \global\InsertFNOSlidestrue
+  \fi
+  \ifx\ModelSlidesCurrentTitle\ModelSlidesMGNTitle
+    \global\InsertMeshGraphNetSlidestrue
+  \fi
+}
+\apptocmd{\endframe}{%
+  \ifInsertFNOSlides
+    \global\InsertFNOSlidesfalse
+    \input{fno_slides}%
+  \fi
+  \ifInsertMeshGraphNetSlides
+    \global\InsertMeshGraphNetSlidesfalse
+    \input{meshgraphnet_slides}%
+  \fi
+}{}{}
+\makeatother
 
 \input{main_base.tex}
