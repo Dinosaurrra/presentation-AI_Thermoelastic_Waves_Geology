@@ -12,6 +12,8 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
 
 \definecolor{AcademicNavy}{HTML}{17324D}
 \definecolor{AcademicBlue}{HTML}{2E5E88}
@@ -112,388 +114,183 @@
   \end{center}
 \end{frame}
 
-\section{Motivation and Problem}
+\section{Motivation and Foundations}
 
-\begin{frame}{Motivation and Research Problem}
+\begin{frame}{Motivation and Aim}
   \begin{columns}[T]
     \begin{column}{0.58\textwidth}
       \begin{block}{Motivation}
-        Temperature changes in rocks can affect stress, deformation, and wave
-        propagation. This is relevant to geothermal systems, underground
-        engineering, and geophysical interpretation.
+        Temperature changes in rocks affect stress, deformation, and wave
+        propagation. Relevant to geothermal systems, underground engineering,
+        and geophysical interpretation.
       \end{block}
-      \vskip 3pt
-      \begin{exampleblock}{Research problem}
-        Estimate directional thermoelastic response using AI-assisted surrogate
-        models under simplified effective-medium assumptions.
+      \begin{exampleblock}{Aim}
+        Develop and justify an AI-guided framework for directional prediction
+        of thermoelastic wave propagation in geological media under
+        simplified effective-medium assumptions.
       \end{exampleblock}
-      \vskip 2pt
-      {\footnotesize\textbf{Scope:} research prototype for source--probe
-      prediction, not field-validated industrial simulation.}
-    \end{column}
-    \begin{column}{0.38\textwidth}
-      \centering
-      \includegraphics[width=\linewidth,height=0.43\textheight,keepaspectratio]{img/basalt}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Aim, Tasks, and Scope}
-  \begin{columns}[T]
-    \begin{column}{0.58\textwidth}
-      \begin{block}{Aim}
-        Develop and justify an AI-guided framework for directional prediction of
-        thermoelastic wave propagation in geological media.
-      \end{block}
-      \vskip 2pt
-      {\footnotesize
-      \begin{enumerate}
-        \item Define the physical and geological basis.
-        \item Formulate a simplified 2D thermoelastic prediction task.
-        \item Prepare COMSOL-derived synthetic data.
-        \item Compare PINN, FNO, MeshGraphNet, and Transformer-style routes.
-        \item Interpret results, limitations, and future improvements.
-      \end{enumerate}
-      }
-      \vskip 1pt
-      {\scriptsize
-      Object: thermoelastic wave propagation in geological media.\\
-      Subject: AI-assisted source--probe directional prediction.}
-    \end{column}
-    \begin{column}{0.38\textwidth}
-      \centering
-      \includegraphics[width=\linewidth,height=0.47\textheight,keepaspectratio]{img/comsol_temperature_2d}
-      \vskip 2pt
-      {\scriptsize Controlled 2D thermoelastic field data support comparison.}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Thermoelastic Coupling Logic}
-  \begin{columns}[T]
-    \begin{column}{0.54\textwidth}
-      \begin{enumerate}
-        \item \textbf{Thermal excitation:} a local source changes the temperature field.
-        \item \textbf{Thermal expansion:} temperature change produces local strain.
-        \item \textbf{Stress formation:} constrained expansion creates thermal stress.
-        \item \textbf{Mechanical response:} stress gradients drive displacement.
-      \end{enumerate}
-      \[
-        T \longrightarrow \varepsilon_{\mathrm{th}}
-        \longrightarrow \sigma \longrightarrow u
-      \]
-    \end{column}
-    \begin{column}{0.42\textwidth}
-      \footnotesize
-      \begin{block}{Physical meaning}
-        Temperature change causes thermal strain; thermal strain contributes
-        to stress; stress affects displacement and wave propagation.
-      \end{block}
-      \scriptsize
-      $T$ -- temperature [K]; $\varepsilon_{\mathrm{th}}$ -- thermal strain
-      [dimensionless]; $\sigma$ -- stress [Pa]; $u$ -- displacement [m].
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\section{Physical Basis}
-
-\begin{frame}{Geological Media and Effective Parameters}
-  \begin{columns}[T]
-    \begin{column}{0.58\textwidth}
-      \footnotesize
-      \renewcommand{\arraystretch}{1.15}
-      \begin{tabular}{l|r|r|r|r}
-        \hline
-        \textbf{Rock} & $\rho$ & $V_P$ & $k$ & $C_p$ \\
-        & kg/m$^3$ & m/s & W/(m K) & J/(kg K) \\
-        \hline
-        Granite    & 2650 & 5850 & 2.50 & 850 \\
-        Basalt     & 3000 & 6550 & 1.95 & 1300 \\
-        Sandstone  & 2725 & 5000 & 2.25 & 1000 \\
-        Limestone  & 2675 & 5400 & 2.55 & 1050 \\
-        \hline
-      \end{tabular}
-      \vskip 6pt
-      \scriptsize
-      Effective scalar parameters support comparison under a locally
-      homogeneous isotropic approximation, not field calibration.
-    \end{column}
-    \begin{column}{0.36\textwidth}
-      \includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{img/sawn_limestone_texture}
-      \vskip 2pt
-      \scriptsize
-      Public-domain limestone texture, Wikimedia Commons / Titus Tscharntke.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Mechanical Rock Parameters}
-  \scriptsize
-  \renewcommand{\arraystretch}{1.12}
-  \setlength{\tabcolsep}{2.6pt}
-  \begin{tabular}{l|l|r|r|r|r|r|r}
-    \hline
-    \textbf{Material} & \textbf{Type} & $\rho$ & $E$ & $\nu$ & $\mu$ & $K$ & $V_P/V_S$ \\
-    & & kg/m$^3$ & GPa & -- & GPa & GPa & m/s \\
-    \hline
-    Granite & intrusive & 2650 & 76.28 & 0.245 & 30.63 & 49.84 & 5850/3400 \\
-    Granodiorite & intrusive & 2795 & 85.91 & 0.255 & 34.24 & 58.35 & 6100/3500 \\
-    Basalt & volcanic & 3000 & 103.96 & 0.266 & 41.07 & 73.95 & 6550/3700 \\
-    Diabase & hypabyssal & 2975 & 98.22 & 0.274 & 38.56 & 72.36 & 6450/3600 \\
-    Gabbro & mafic & 3075 & 114.27 & 0.287 & 44.40 & 89.33 & 6950/3800 \\
-    Sandstone & sedimentary & 2725 & 55.75 & 0.259 & 22.13 & 38.61 & 5000/2850 \\
-    Limestone & carbonate & 2675 & 61.48 & 0.277 & 24.08 & 45.90 & 5400/3000 \\
-    Marble & metamorphic & 2725 & 82.41 & 0.270 & 32.43 & 59.82 & 6150/3450 \\
-    Schist & foliated & 2800 & 68.20 & 0.267 & 26.91 & 48.82 & 5500/3100 \\
-    Quartzite & quartz-rich & 2650 & 83.50 & 0.250 & 33.40 & 55.70 & 6150/3550 \\
-    \hline
-  \end{tabular}
-  \vskip 6pt
-  Elastic constants are effective midpoint values derived under isotropic
-  assumptions for model-ready comparison.
-\end{frame}
-
-\begin{frame}{Thermal and Porosity Parameters}
-  \scriptsize
-  \renewcommand{\arraystretch}{1.12}
-  \setlength{\tabcolsep}{3.2pt}
-  \begin{tabular}{l|r|r|r|r|r|>{\raggedright\arraybackslash}p{0.22\textwidth}}
-    \hline
-    \textbf{Material} & $\alpha$ & $k$ & $C_p$ & $C$ & $\gamma$ & \textbf{Porosity} \\
-    & $10^{-6}$/K & W/(m K) & J/(kg K) & MJ/(m$^3$ K) & MPa/K & \% \\
-    \hline
-    Granite & 7.9 & 2.50 & 850 & 2.25 & 1.18 & total 45.5 \\
-    Granodiorite & -- & 2.40 & -- & -- & -- & -- \\
-    Basalt & -- & 1.95 & 1300 & 3.90 & -- & total 19.0 \\
-    Diabase & -- & 2.50 & 850 & 2.53 & -- & -- \\
-    Gabbro & -- & 2.30 & 1000 & 3.08 & -- & total 43.5 \\
-    Sandstone & 11.6 & 2.25 & 1000 & 2.73 & 1.34 & total 31.5; eff. 26.5 \\
-    Limestone & 8.0 & 2.55 & 1050 & 2.81 & 1.10 & total 31.5; eff. 18.0 \\
-    Marble & 9.8 & 2.80 & 850 & 2.32 & 1.76 & -- \\
-    Schist & -- & 2.75 & 1150 & 3.22 & -- & total 26.5; eff. 27.5 \\
-    Quartzite & -- & 5.10 & 1000 & 2.65 & -- & -- \\
-    \hline
-  \end{tabular}
-  \vskip 6pt
-  Missing thermal expansion or coupling values are shown explicitly as dashes
-  rather than inferred.
-\end{frame}
-
-\begin{frame}{Rock Properties Controlling Propagation}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Mechanical controls}
-        \begin{itemize}
-          \item Density controls inertia.
-          \item Elastic stiffness controls resistance to deformation.
-          \item Porosity, cracks, and saturation change effective stiffness.
-        \end{itemize}
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Thermal controls}
-        \begin{itemize}
-          \item Conductivity controls heat transfer.
-          \item Heat capacity controls thermal storage.
-          \item Thermal expansion converts temperature change into strain.
-        \end{itemize}
-      \end{block}
-    \end{column}
-  \end{columns}
-  \vskip 6pt
-  Directional behavior can appear because bedding, foliation, aligned
-  pores, fractures, and stress state make real rocks structurally ordered.
-\end{frame}
-
-\begin{frame}{Elastic Waves in Geological Media}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Compressional (P) waves}
-        Compressional waves. Particle motion is mainly parallel to the
-        propagation direction and involves volume change.
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Shear (S) waves}
-        Shear waves. Particle motion is mainly transverse to the direction
-        of propagation and depends on shear rigidity.
-      \end{block}
-    \end{column}
-  \end{columns}
-  \vskip 6pt
-  \[
-    V_P = \sqrt{\frac{K+\frac{4}{3}G}{\rho}},
-    \qquad
-    V_S = \sqrt{\frac{G}{\rho}}
-  \]
-  \scriptsize
-  $V_P,V_S$ -- compressional and shear wave velocities [m/s];
-  $K$ -- bulk modulus [Pa]; $G$ -- shear modulus [Pa];
-  $\rho$ -- density [kg/m$^3$]. These relations show that stiffness
-  increases wave velocity, while density increases inertia.
-\end{frame}
-
-\begin{frame}{Heat Conduction and Thermal Expansion}
-  \begin{block}{Fourier heat flux and heat equation}
-    \[
-      q = -k\nabla T,
-      \qquad
-      \rho C_p\frac{\partial T}{\partial t}
-      =
-      \nabla\cdot(k\nabla T)+Q
-    \]
-    \scriptsize
-    $q$ -- heat flux [W/m$^2$]; $k$ -- thermal conductivity [W/(m K)];
-    $T$ -- temperature [K]; $\rho$ -- density [kg/m$^3$];
-    $C_p$ -- specific heat capacity [J/(kg K)]; $t$ -- time [s];
-    $Q$ -- volumetric heat source [W/m$^3$].
-  \end{block}
-  \vskip 4pt
-  \begin{block}{Temperature perturbation and thermal strain}
-    \[
-      \theta = T-T_0,
-      \qquad
-      \varepsilon_{\mathrm{th}}=\alpha\Delta T
-    \]
-    \scriptsize
-    $\theta,\Delta T$ -- temperature change [K]; $T_0$ -- reference
-    temperature [K]; $\varepsilon_{\mathrm{th}}$ -- thermal strain
-    [dimensionless]; $\alpha$ -- linear thermal expansion [1/K].
-  \end{block}
-\end{frame}
-
-\begin{frame}{Key Physical Parameters}
-  \begin{block}{Thermal diffusivity relation}
-    \[
-      \alpha_T = \frac{k}{\rho C_p}
-    \]
-  \end{block}
-  \vskip 6pt
-  \begin{itemize}
-    \item $\alpha_T$ is thermal diffusivity [m$^2$/s].
-    \item $k$ is thermal conductivity [W/(m K)].
-    \item $\rho$ is density [kg/m$^3$], and $C_p$ is heat capacity [J/(kg K)].
-    \item Larger $\alpha_T$ means faster spreading of a temperature disturbance.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Thermoelastic Coupling}
-  \begin{columns}[T]
-    \begin{column}{0.58\textwidth}
-      \begin{block}{Thermoelastic extension of Hooke's law}
-        \[
-          \theta = T - T_0
-        \]
-        \[
-          \sigma_{ij} = \lambda\,\delta_{ij}\,\varepsilon_{kk}
-          + 2\mu\,\varepsilon_{ij}
-          - \gamma\,\delta_{ij}\,\theta,
-          \qquad
-          \gamma = 3K\alpha
-        \]
-      \end{block}
-      \begin{block}{Equation of motion}
-        \[
-          \rho\,\frac{\partial^2u_i}{\partial t^2}
-          = \frac{\partial \sigma_{ij}}{\partial x_j} + f_i
-        \]
-      \end{block}
-    \end{column}
-    \begin{column}{0.38\textwidth}
-      \scriptsize
-      $\theta$ -- temperature perturbation [K]; $T,T_0$ -- current and
-      reference temperatures [K]; $\sigma_{ij}$ -- stress tensor [Pa];
-      $\varepsilon_{ij}$ -- strain tensor [dimensionless];
-      $\varepsilon_{kk}$ -- volumetric strain [dimensionless];
-      $\lambda,\mu,K$ -- Lame and bulk moduli [Pa];
-      $\delta_{ij}$ -- Kronecker delta [dimensionless];
-      $\alpha$ -- thermal expansion [1/K]; $\gamma$ -- thermoelastic
-      coupling coefficient [Pa/K]; $u_i$ -- displacement [m];
-      $x_j$ -- coordinate [m]; $f_i$ -- body force density [N/m$^3$].
       \vskip 4pt
-      The relation states that stress depends on elastic deformation and
-      temperature-induced expansion; this is why thermal and elastic fields
-      are coupled in the model.
+      \scriptsize
+      Scope: research prototype for source--probe directional prediction,
+      not a field-validated simulator.
+    \end{column}
+    \begin{column}{0.38\textwidth}
+      \centering
+      \includegraphics[
+        width=\linewidth,
+        height=0.62\textheight,
+        keepaspectratio
+      ]{img/basalt}
+      \vskip 3pt
+      \scriptsize Basalt -- example of a target geological medium.
     \end{column}
   \end{columns}
 \end{frame}
 
-\begin{frame}{Mathematical Scope and Primary Fields}
+\begin{frame}{Geological Media We Model}
   \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Simplified model scope}
-        \footnotesize
-        \begin{itemize}
-          \item 2D continuum: $\Omega\subset\mathbb{R}^{2}$,
-                $(x,t)\in\Omega\times[0,T_f]$.
-          \item In-plane displacement: $u(x,t)=[u,v]^T$.
-          \item Small deformation and linear isotropic thermoelasticity.
-          \item Pores, fractures, fluids, plasticity, damage, and full
-                anisotropy are not resolved explicitly.
-        \end{itemize}
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.58\textwidth}
       \footnotesize
-      \begin{tabular}{@{}lll@{}}
-        \toprule
-        \textbf{Field} & \textbf{Meaning} & \textbf{Role} \\
-        \midrule
-        $T(x,t)$ & Temperature & Thermal state \\
-        $\theta(x,t)$ & Perturbation & Thermal loading \\
-        $(u,v)$ & Displacement & Probe response \\
-        $\varepsilon_{ij}$ & Strain & Deformation \\
-        $\sigma_{ij}$ & Stress & Internal force \\
-        $d,\hat d,\phi$ & Direction & Source--probe query \\
-        \bottomrule
+      \renewcommand{\arraystretch}{1.20}
+      \setlength{\tabcolsep}{4pt}
+      \begin{tabular}{l|r|r|r|r|r}
+        \hline
+        \textbf{Rock} & $\rho$ & $V_P$ & $k$ & $C_p$ & $\alpha$ \\
+        & kg/m$^3$ & m/s & W/(m K) & J/(kg K) & $10^{-6}$/K \\
+        \hline
+        Granite    & 2650 & 5850 & 2.50 &  850 &  7.9 \\
+        Basalt     & 3000 & 6550 & 1.95 & 1300 &  --  \\
+        Sandstone  & 2725 & 5000 & 2.25 & 1000 & 11.6 \\
+        Limestone  & 2675 & 5400 & 2.55 & 1050 &  8.0 \\
+        \hline
       \end{tabular}
       \vskip 6pt
-      These fields connect the physical formulation with the prediction
-      methodology used in the comparative prototype.
-    \end{column}
-  \end{columns}
-  \vskip 4pt
-  \scriptsize
-  These assumptions keep the task suitable for comparative AI-assisted
-  directional prediction and make the results interpretable within the scope
-  of a bachelor thesis. Here $\Omega$ is the model domain [m$^2$], $x$ is
-  position [m], $t$ is time [s], $T_f$ is final time [s], and $u,v$ are
-  displacement components [m].
-\end{frame}
-
-\begin{frame}{Directional Prediction Task}
-  \begin{columns}[T]
-    \begin{column}{0.56\textwidth}
-      \includegraphics[width=\textwidth]{img/web_visualization}
+      \scriptsize
+      Effective scalar parameters under a locally homogeneous isotropic
+      approximation; field calibration is out of scope. Full 10-rock tables
+      with $E$, $\nu$, $\mu$, $K$, porosity are in the backup slides.
     \end{column}
     \begin{column}{0.40\textwidth}
-      \scriptsize
-      A source point and a probe point define the directional query.
-      \[
-        d = x_p - x_s,\qquad
-        L = \|d\|,\qquad
-        \hat d = \frac{d}{\|d\|}
-      \]
-      \[
-        \phi = \operatorname{atan2}(d_y,d_x),
-        \qquad
-        \mathcal{F}:X\rightarrow\widehat{Y}
-      \]
-      \scriptsize
-      $x_s,x_p$ -- source and probe positions [m]; $d$ -- direction vector
-      [m]; $L$ -- distance [m]; $\hat d$ -- unit direction [dimensionless];
-      $\phi$ -- azimuth [rad]; $\mathcal{F}$ maps input features $X$ to
-      predicted outputs $\widehat{Y}$.
-      \begin{block}{Prediction contract}
-        \scriptsize
-        Input: material parameters, geometry, direction, and time.
-        Output: estimated temperature, displacement, directional response,
-        and travel time.
-      \end{block}
+      \centering
+      \begin{tikzpicture}[scale=0.95]
+        % 2D plane-strain domain illustration
+        \draw[thick, fill=AcademicPanel, draw=AcademicNavy]
+          (0,0) rectangle (3.2,3.2);
+        \node[AcademicMuted, font=\footnotesize] at (1.6,1.6)
+          {$\Omega \subset \mathbb{R}^{2}$};
+        \node[AcademicMuted, font=\scriptsize, below] at (1.6,0)
+          {$1$\,m};
+        \node[AcademicMuted, font=\scriptsize, left] at (0,1.6)
+          {$1$\,m};
+        % Source point
+        \fill[AcademicNavy] (0.65,1.10) circle (3pt);
+        \node[AcademicNavy, font=\scriptsize, above right=1pt]
+          at (0.65,1.10) {$x_{s}$};
+        % Probe point
+        \fill[AcademicBlue] (2.55,1.90) circle (3pt);
+        \node[AcademicBlue, font=\scriptsize, above right=1pt]
+          at (2.55,1.90) {$x_{p}$};
+        % Direction arrow
+        \draw[->, >={Stealth[length=2mm]}, thick, AcademicBlue]
+          (0.65,1.10) -- (2.55,1.90)
+          node[midway, above, sloped, font=\scriptsize] {$d$};
+        % Plane strain note
+        \node[AcademicMuted, font=\scriptsize] at (1.6,-0.55)
+          {plane strain: $\varepsilon_{zz} = 0$};
+      \end{tikzpicture}
+      \vskip 4pt
+      \scriptsize 2D plane-strain domain with source--probe geometry.
     \end{column}
   \end{columns}
 \end{frame}
+
+\begin{frame}{Coupled Thermoelastic System}
+  \setlength{\abovedisplayskip}{2pt}
+  \setlength{\belowdisplayskip}{2pt}
+  \setlength{\abovedisplayshortskip}{2pt}
+  \setlength{\belowdisplayshortskip}{2pt}
+  \begin{columns}[T]
+    \begin{column}{0.66\textwidth}
+      \begin{block}{Constitutive law (Duhamel--Neumann)}
+        \[
+          \sigma_{ij} = \lambda\,\delta_{ij}\,\varepsilon_{kk}
+                     + 2\mu\,\varepsilon_{ij}
+                     - \gamma\,\delta_{ij}\,\theta,
+          \quad
+          \gamma = 3K\alpha,
+          \quad
+          \theta = T - T_{0}
+        \]
+      \end{block}
+      \vspace{-4pt}
+      \begin{block}{Equation of motion}
+        \[
+          \rho\,\frac{\partial^{2}u_{i}}{\partial t^{2}}
+            = \frac{\partial \sigma_{ij}}{\partial x_{j}} + f_{i}
+        \]
+      \end{block}
+      \vspace{-4pt}
+      \begin{block}{Coupled heat equation}
+        \[
+          \rho C_{p}\,\frac{\partial T}{\partial t}
+            - k\,\nabla^{2}T
+            + \gamma T_{0}\,\frac{\partial}{\partial t}(\nabla\!\cdot u) = 0
+        \]
+      \end{block}
+      \scriptsize
+      $\sigma$ stress; $\varepsilon$ strain; $\lambda,\mu,K$ moduli;
+      $\gamma=3K\alpha$ coupling; $\theta=T-T_{0}$.
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=0.185\textheight,keepaspectratio]{img/wiki_thermal_expansion}\\
+      {\scriptsize Thermal expansion $\varepsilon_{\mathrm{th}}=\alpha\Delta T$}\\[2pt]
+      \includegraphics[width=0.72\linewidth,height=0.185\textheight,keepaspectratio]{img/wiki_body_waves}\\
+      {\scriptsize Elastic body waves (motion)}\\[2pt]
+      \includegraphics[width=\linewidth,height=0.135\textheight,keepaspectratio]{img/wiki_heat_conduction}\\
+      {\scriptsize Heat flux $q=-k\nabla T$}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{2D Directional Prediction Task}
+  \begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{img/web_visualization}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Scope}
+        \footnotesize
+        Domain $\Omega \subset \mathbb{R}^{2}$, plane strain, linear
+        isotropic thermoelasticity, small deformation. Primary fields are
+        the temperature $T(x,t)$ and the in-plane displacement
+        $u(x,t) = (u,v)$.
+      \end{block}
+      \begin{block}{Directional query}
+        \[
+          d = x_{p} - x_{s},
+          \quad
+          L = \|d\|,
+          \quad
+          \hat d = \frac{d}{L}
+        \]
+        \[
+          \phi = \operatorname{atan2}(d_{y}, d_{x}),
+          \qquad
+          \mathcal{F}: X \to \widehat{Y}
+        \]
+      \end{block}
+      \scriptsize
+      $x_{s},x_{p}$ source and probe positions [m];
+      $L$ distance [m]; $\hat d$ unit direction; $\phi$ azimuth [rad].
+      $\mathcal{F}$ maps input features $X$ (material, geometry, time)
+      to the predicted response $\widehat{Y}$ (temperature, displacement,
+      directional summary).
+    \end{column}
+  \end{columns}
+\end{frame}
+
 \section{Prediction Framework}
 
 \begin{frame}{COMSOL-Based Synthetic Dataset}
@@ -1636,6 +1433,117 @@
 \begin{frame}{Thank You}
   \centering
   \Large Questions?
+\end{frame}
+
+% =====================================================================
+% Backup slides for Q&A. Not part of the main 15-20 min defence flow.
+% =====================================================================
+\section{Backup}
+
+\begin{frame}{Backup: Mechanical Rock Parameters}
+  \scriptsize
+  \renewcommand{\arraystretch}{1.12}
+  \setlength{\tabcolsep}{2.6pt}
+  \begin{tabular}{l|l|r|r|r|r|r|r}
+    \hline
+    \textbf{Material} & \textbf{Type} & $\rho$ & $E$ & $\nu$ & $\mu$ & $K$ & $V_P/V_S$ \\
+    & & kg/m$^3$ & GPa & -- & GPa & GPa & m/s \\
+    \hline
+    Granite      & intrusive   & 2650 &  76.28 & 0.245 & 30.63 & 49.84 & 5850/3400 \\
+    Granodiorite & intrusive   & 2795 &  85.91 & 0.255 & 34.24 & 58.35 & 6100/3500 \\
+    Basalt       & volcanic    & 3000 & 103.96 & 0.266 & 41.07 & 73.95 & 6550/3700 \\
+    Diabase      & hypabyssal  & 2975 &  98.22 & 0.274 & 38.56 & 72.36 & 6450/3600 \\
+    Gabbro       & mafic       & 3075 & 114.27 & 0.287 & 44.40 & 89.33 & 6950/3800 \\
+    Sandstone    & sedimentary & 2725 &  55.75 & 0.259 & 22.13 & 38.61 & 5000/2850 \\
+    Limestone    & carbonate   & 2675 &  61.48 & 0.277 & 24.08 & 45.90 & 5400/3000 \\
+    Marble       & metamorphic & 2725 &  82.41 & 0.270 & 32.43 & 59.82 & 6150/3450 \\
+    Schist       & foliated    & 2800 &  68.20 & 0.267 & 26.91 & 48.82 & 5500/3100 \\
+    Quartzite    & quartz-rich & 2650 &  83.50 & 0.250 & 33.40 & 55.70 & 6150/3550 \\
+    \hline
+  \end{tabular}
+  \vskip 6pt
+  Effective midpoint values under isotropic assumptions.
+\end{frame}
+
+\begin{frame}{Backup: Thermal and Porosity Parameters}
+  \scriptsize
+  \renewcommand{\arraystretch}{1.12}
+  \setlength{\tabcolsep}{3.2pt}
+  \begin{tabular}{l|r|r|r|r|r|>{\raggedright\arraybackslash}p{0.22\textwidth}}
+    \hline
+    \textbf{Material} & $\alpha$ & $k$ & $C_p$ & $C$ & $\gamma$ & \textbf{Porosity} \\
+    & $10^{-6}$/K & W/(m K) & J/(kg K) & MJ/(m$^3$ K) & MPa/K & \% \\
+    \hline
+    Granite      &  7.9 & 2.50 &  850 & 2.25 & 1.18 & total 45.5 \\
+    Granodiorite & --   & 2.40 & --   & --   & --   & -- \\
+    Basalt       & --   & 1.95 & 1300 & 3.90 & --   & total 19.0 \\
+    Diabase      & --   & 2.50 &  850 & 2.53 & --   & -- \\
+    Gabbro       & --   & 2.30 & 1000 & 3.08 & --   & total 43.5 \\
+    Sandstone    & 11.6 & 2.25 & 1000 & 2.73 & 1.34 & total 31.5; eff. 26.5 \\
+    Limestone    &  8.0 & 2.55 & 1050 & 2.81 & 1.10 & total 31.5; eff. 18.0 \\
+    Marble       &  9.8 & 2.80 &  850 & 2.32 & 1.76 & -- \\
+    Schist       & --   & 2.75 & 1150 & 3.22 & --   & total 26.5; eff. 27.5 \\
+    Quartzite    & --   & 5.10 & 1000 & 2.65 & --   & -- \\
+    \hline
+  \end{tabular}
+  \vskip 6pt
+  Dashes mark values that are not available in the source catalogue.
+\end{frame}
+
+\begin{frame}{Backup: Elastic Wave Velocities}
+  \begin{columns}[T]
+    \begin{column}{0.50\textwidth}
+      \begin{block}{Compressional (P) waves}
+        Particle motion is mainly parallel to the propagation direction
+        and involves volume change.
+      \end{block}
+      \begin{block}{Shear (S) waves}
+        Particle motion is mainly transverse to the propagation direction
+        and depends on shear rigidity.
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \[
+        V_{P} = \sqrt{\frac{K+\tfrac{4}{3}G}{\rho}},
+        \qquad
+        V_{S} = \sqrt{\frac{G}{\rho}}
+      \]
+      \scriptsize
+      $V_{P},V_{S}$ wave velocities [m/s]; $K$ bulk modulus [Pa];
+      $G$ shear modulus [Pa]; $\rho$ density [kg/m$^3$]. Stiffness
+      increases velocity; density increases inertia.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Backup: Thermal Diffusivity}
+  \begin{block}{Definition}
+    \[
+      \alpha_{T} = \frac{k}{\rho\,C_{p}}
+    \]
+  \end{block}
+  \vskip 4pt
+  \footnotesize
+  $\alpha_{T}$ thermal diffusivity [m$^2$/s].
+  Larger $\alpha_{T}$ means a temperature disturbance spreads faster.
+  This quantity controls the time-scale of the thermal part of the
+  coupled response; it is reported here because the main flow only
+  shows the heat equation in differential form.
+\end{frame}
+
+\begin{frame}{Image Credits}
+  \footnotesize
+  \begin{itemize}
+    \item Thermal expansion diagram: ``Thermal-expansion-aera.svg'',
+          MikeRun, Wikimedia Commons, CC BY-SA 4.0.
+    \item Heat conduction diagram:
+          ``Heat-conduction-between-two-resavoirs.svg'', MikeRun,
+          Wikimedia Commons, CC BY-SA 4.0.
+    \item Elastic body-wave diagram: ``Pswaves.jpg'' (body-wave portion),
+          Wikimedia Commons, public domain.
+    \item Rock textures (basalt, limestone): Wikimedia Commons,
+          public domain / CC.
+  \end{itemize}
 \end{frame}
 
 \end{document}
