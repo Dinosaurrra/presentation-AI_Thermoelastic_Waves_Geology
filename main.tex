@@ -2,6 +2,12 @@
 % The original deck body is stored in main_base.tex.
 % Additional FNO slides are inserted before the Calculation Results section.
 
+\documentclass[aspectratio=169,10pt]{beamer}
+
+% main_base.tex contains the original \documentclass line. The wrapper has
+% already loaded the class, so that line is ignored when the base file is read.
+\renewcommand{\documentclass}[2][]{}
+
 \AtBeginDocument{%
   \let\FNOOriginalSection\section
   \renewcommand{\section}[1]{%
