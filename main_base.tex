@@ -523,45 +523,165 @@
     \end{column}
   \end{columns}
 \end{frame}
-
 \section{Prediction Framework}
 
 \begin{frame}{COMSOL-Based Synthetic Dataset}
-  \begin{block}{Controlled thermoelastic calculation}
-    Two-dimensional (2D) plane-strain rock domain $1\,\mathrm{m}\times1\,\mathrm{m}$ with a
-    heated internal source used to generate time-dependent synthetic data.
-  \end{block}
-  \vskip 4pt
-  \begin{itemize}
-    \item Initial rock temperature: $293.15$ K
-    \item Source temperature: $1500$ K
-    \item Outputs exported per node and time step: $T$, $(u,v)$, velocity,
-          stress, strain, and material features
-    \item Purpose: create a common reference dataset for model comparison
+  \begin{columns}[T]
+    \begin{column}{0.62\textwidth}
+      \centering
+      \includegraphics[
+        width=\textwidth,
+        height=0.68\textheight,
+        keepaspectratio
+      ]{img/comsol_interface_2d.png}
+    \end{column}
+
+    \begin{column}{0.35\textwidth}
+      \footnotesize
+      \begin{block}{COMSOL simulation}
+        The synthetic dataset was generated in COMSOL Multiphysics using a
+        coupled thermoelastic model.
+      \end{block}
+
+      \begin{itemize}
+        \item 2D plane-strain geological domain
+        \item Domain size: $1\,\mathrm{m}\times1\,\mathrm{m}$
+        \item Initial temperature: $293.15\,\mathrm{K}$
+        \item Source temperature: $1500\,\mathrm{K}$
+        \item Exported fields: $T$, $(u,v)$, stress, strain, velocity
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vskip 2pt
+  \scriptsize
+  The exported COMSOL fields are used as synthetic reference data for comparing
+  neural surrogate models.
+\end{frame}
   \end{itemize}
 \end{frame}
 
+
+\begin{frame}{COMSOL 2D Model and Mesh}
+  \begin{columns}[T]
+    \begin{column}{0.58\textwidth}
+      \centering
+      \includegraphics[
+        width=\textwidth,
+        height=0.70\textheight,
+        keepaspectratio
+      ]{img/mesh_2d.png}
+    \end{column}
+
+    \begin{column}{0.38\textwidth}
+      \footnotesize
+      \begin{block}{Model domain}
+        The numerical experiment represents a two-dimensional section of a
+        geological medium with an internal heated source.
+      \end{block}
+
+      \begin{block}{Mesh refinement}
+        The mesh is refined near the source, where the strongest temperature,
+        displacement, and stress gradients are expected.
+      \end{block}
+
+      \begin{block}{Role in the study}
+        This mesh defines the spatial structure from which the COMSOL fields
+        are exported for further preprocessing.
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{COMSOL Temperature Field}
+  \begin{columns}[T]
+    \begin{column}{0.60\textwidth}
+      \centering
+      \includegraphics[
+        width=\textwidth,
+        height=0.72\textheight,
+        keepaspectratio
+      ]{img/comsol_temperature_2d.png}
+    \end{column}
+
+    \begin{column}{0.36\textwidth}
+      \footnotesize
+      \begin{block}{Thermal excitation}
+        The heated source creates a localized high-temperature region inside
+        the geological medium.
+      \end{block}
+
+      \begin{block}{Temperature distribution}
+        The maximum temperature is concentrated near the source, while the
+        surrounding domain remains close to the initial temperature.
+      \end{block}
+
+      \begin{block}{Dataset variable}
+        Temperature is one of the main dynamic fields used for training and
+        validating the neural models.
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}{COMSOL Thermoelastic Response}
+  \begin{columns}[T]
+    \begin{column}{0.49\textwidth}
+      \centering
+      \includegraphics[
+        width=\textwidth,
+        height=0.62\textheight,
+        keepaspectratio
+      ]{img/comsol_displacement_2d.png}
+
+      \vskip 2pt
+      \scriptsize Total displacement field
+    \end{column}
+
+    \begin{column}{0.49\textwidth}
+      \centering
+      \includegraphics[
+        width=\textwidth,
+        height=0.62\textheight,
+        keepaspectratio
+      ]{img/comsol_stress_2d.png}
+
+      \vskip 2pt
+      \scriptsize von Mises stress field
+    \end{column}
+  \end{columns}
+
+  \vskip 4pt
+  \footnotesize
+  Local heating causes thermal expansion of the medium. As a result,
+  displacement and stress are concentrated around the heated source, confirming
+  the coupled thermoelastic behavior of the simulated process.
+\end{frame}
+
+
 \begin{frame}{Data Representation and Preprocessing}
   \begin{itemize}
-    \item COMSOL comma-separated value (CSV) exports are aligned into a single node set.
-    \item Dynamic features are assembled into a spatio-temporal tensor:
+    \item COMSOL simulation results are exported as CSV files for each field
+          and time step.
+    \item The exported data are aligned into a common node-based representation.
+    \item Dynamic fields are assembled into a spatio-temporal tensor:
           \[
             \mathbf{S}\in\mathbb{R}^{N_t \times N_p \times F_d}
           \]
-    \item Static material and geometry features are stored separately.
-    \item Feature channels are normalized before training:
+    \item Static material and geometric features are stored separately.
+    \item All feature channels are normalized before model training:
           \[
             \widetilde{x}=\frac{x-\mu}{\sigma+\varepsilon}
           \]
-    \item The same processed dataset supports coordinate, grid, and graph models.
   \end{itemize}
+
   \scriptsize
-  $\mathbf{S}$ is the assembled data tensor; $N_t$ is the number of time
-  steps, $N_p$ the number of spatial points, and $F_d$ the number of dynamic
-  feature channels. $\widetilde{x}$ is a normalized feature [dimensionless],
-  $x$ is the original feature in its native unit, $\mu$ and $\sigma$ are its
-  dataset mean and standard deviation, and $\varepsilon$ is a small
-  dimensionless stabilizer.
+  Here, $N_t$ is the number of time steps, $N_p$ is the number of spatial
+  points, and $F_d$ is the number of dynamic physical fields. The same processed
+  dataset is then reused by coordinate-based, grid-based, and graph-based
+  neural models.
 \end{frame}
 
 \section{Comparative Framework}
