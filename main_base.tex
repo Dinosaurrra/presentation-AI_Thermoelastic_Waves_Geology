@@ -712,8 +712,13 @@
         Physics-informed baseline in the comparison.
       \end{block}
       \begin{block}{Input / output}
-        Input: coordinates, time, and material parameters.
-        Output: estimated temperature and in-plane displacement.
+        \begin{itemize}
+          \item Input: $(x,y)$, time $t$, and material parameters
+                $E,\nu,\rho,\alpha,k,C_p$.
+          \item Output: temperature $T$ and in-plane displacement components
+                $(u,v)$.
+          \item Stress and strain are recovered from derivatives.
+        \end{itemize}
       \end{block}
       \begin{block}{Why and limitation}
         Used because thermoelastic residuals can be included in training.
@@ -769,32 +774,6 @@
         PINN is not an exact numerical solver. It is a neural surrogate whose
         training objective encourages physically consistent predictions.
       \end{alertblock}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{PINN Input--Output Mapping}
-  \begin{block}{Pointwise thermoelastic prediction}
-    \[
-      f_{\theta}(x,y,t,E,\nu,\rho,\alpha,k,C_p)\rightarrow(T,u,v)
-    \]
-  \end{block}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \footnotesize
-      \begin{itemize}
-        \item $(x,y)$: in-plane coordinate.
-        \item $t$: observation time.
-        \item $E,\nu,\rho,\alpha,k,C_p$: material parameters.
-      \end{itemize}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \footnotesize
-      \begin{itemize}
-        \item $T$: predicted temperature.
-        \item $u,v$: in-plane displacement components.
-        \item Stress and strain are recovered from derivatives.
-      \end{itemize}
     \end{column}
   \end{columns}
 \end{frame}
