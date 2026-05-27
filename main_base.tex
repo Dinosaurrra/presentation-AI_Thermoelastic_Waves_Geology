@@ -12,6 +12,8 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
 
 \definecolor{AcademicNavy}{HTML}{17324D}
 \definecolor{AcademicBlue}{HTML}{2E5E88}
@@ -90,7 +92,6 @@
   {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}
 }
 
-% -- Metadata -----------------------------------
 \title[AI-Guided Thermoelastic Prediction]{%
   AI-Guided Prediction of Thermoelastic Wave Propagation%
   \texorpdfstring{\\}{ }%
@@ -100,7 +101,6 @@
 \author[Group of 4]{%
   Nurshanov Dias \and Askarov Insar \and Kassymkhanov Timur \and Kaidrakhmetova Dinara%
 }
-\date{Bachelor's diploma defence, 2026}
 
 \begin{document}
 
@@ -108,396 +108,189 @@
   \begin{center}
     \includegraphics[width=0.24\linewidth]{img/iitu_logo.png}
   \end{center}
-  \vspace{2mm}
   \titlepage
-  \vspace{-2mm}
   \begin{center}\footnotesize
     Research adviser: \textbf{Bakhyt N. Alipova} (PhD, Applied Mathematics)
   \end{center}
 \end{frame}
 
-\section{Motivation and Problem}
+\section{Motivation and Foundations}
 
-\begin{frame}{Motivation and Research Problem}
+\begin{frame}{Motivation and Aim}
   \begin{columns}[T]
     \begin{column}{0.58\textwidth}
       \begin{block}{Motivation}
-        Temperature changes in rocks can affect stress, deformation, and wave
-        propagation. This is relevant to geothermal systems, underground
-        engineering, and geophysical interpretation.
+        Temperature changes in rocks affect stress, deformation, and wave
+        propagation. Relevant to geothermal systems, underground engineering,
+        and geophysical interpretation.
       \end{block}
-      \vskip 3pt
-      \begin{exampleblock}{Research problem}
-        Estimate directional thermoelastic response using AI-assisted surrogate
-        models under simplified effective-medium assumptions.
+      \begin{exampleblock}{Aim}
+        Develop and justify an AI-guided framework for directional prediction
+        of thermoelastic wave propagation in geological media under
+        simplified effective-medium assumptions.
       \end{exampleblock}
-      \vskip 2pt
-      {\footnotesize\textbf{Scope:} research prototype for source--probe
-      prediction, not field-validated industrial simulation.}
-    \end{column}
-    \begin{column}{0.38\textwidth}
-      \centering
-      \includegraphics[width=\linewidth,height=0.43\textheight,keepaspectratio]{img/basalt}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Aim, Tasks, and Scope}
-  \begin{columns}[T]
-    \begin{column}{0.58\textwidth}
-      \begin{block}{Aim}
-        Develop and justify an AI-guided framework for directional prediction of
-        thermoelastic wave propagation in geological media.
-      \end{block}
-      \vskip 2pt
-      {\footnotesize
-      \begin{enumerate}
-        \item Define the physical and geological basis.
-        \item Formulate a simplified 2D thermoelastic prediction task.
-        \item Prepare COMSOL-derived synthetic data.
-        \item Compare PINN, FNO, MeshGraphNet, and Transformer-style routes.
-        \item Interpret results, limitations, and future improvements.
-      \end{enumerate}
-      }
-      \vskip 1pt
-      {\scriptsize
-      Object: thermoelastic wave propagation in geological media.\\
-      Subject: AI-assisted source--probe directional prediction.}
-    \end{column}
-    \begin{column}{0.38\textwidth}
-      \centering
-      \includegraphics[width=\linewidth,height=0.47\textheight,keepaspectratio]{img/comsol_temperature_2d}
-      \vskip 2pt
-      {\scriptsize Controlled 2D thermoelastic field data support comparison.}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Thermoelastic Coupling Logic}
-  \begin{columns}[T]
-    \begin{column}{0.54\textwidth}
-      \begin{enumerate}
-        \item \textbf{Thermal excitation:} a local source changes the temperature field.
-        \item \textbf{Thermal expansion:} temperature change produces local strain.
-        \item \textbf{Stress formation:} constrained expansion creates thermal stress.
-        \item \textbf{Mechanical response:} stress gradients drive displacement.
-      \end{enumerate}
-      \[
-        T \longrightarrow \varepsilon_{\mathrm{th}}
-        \longrightarrow \sigma \longrightarrow u
-      \]
-    \end{column}
-    \begin{column}{0.42\textwidth}
-      \footnotesize
-      \begin{block}{Physical meaning}
-        Temperature change causes thermal strain; thermal strain contributes
-        to stress; stress affects displacement and wave propagation.
-      \end{block}
-      \scriptsize
-      $T$ -- temperature [K]; $\varepsilon_{\mathrm{th}}$ -- thermal strain
-      [dimensionless]; $\sigma$ -- stress [Pa]; $u$ -- displacement [m].
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\section{Physical Basis}
-
-\begin{frame}{Geological Media and Effective Parameters}
-  \begin{columns}[T]
-    \begin{column}{0.58\textwidth}
-      \footnotesize
-      \renewcommand{\arraystretch}{1.15}
-      \begin{tabular}{l|r|r|r|r}
-        \hline
-        \textbf{Rock} & $\rho$ & $V_P$ & $k$ & $C_p$ \\
-        & kg/m$^3$ & m/s & W/(m K) & J/(kg K) \\
-        \hline
-        Granite    & 2650 & 5850 & 2.50 & 850 \\
-        Basalt     & 3000 & 6550 & 1.95 & 1300 \\
-        Sandstone  & 2725 & 5000 & 2.25 & 1000 \\
-        Limestone  & 2675 & 5400 & 2.55 & 1050 \\
-        \hline
-      \end{tabular}
-      \vskip 6pt
-      \scriptsize
-      Effective scalar parameters support comparison under a locally
-      homogeneous isotropic approximation, not field calibration.
-    \end{column}
-    \begin{column}{0.36\textwidth}
-      \includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{img/sawn_limestone_texture}
-      \vskip 2pt
-      \scriptsize
-      Public-domain limestone texture, Wikimedia Commons / Titus Tscharntke.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Mechanical Rock Parameters}
-  \scriptsize
-  \renewcommand{\arraystretch}{1.12}
-  \setlength{\tabcolsep}{2.6pt}
-  \begin{tabular}{l|l|r|r|r|r|r|r}
-    \hline
-    \textbf{Material} & \textbf{Type} & $\rho$ & $E$ & $\nu$ & $\mu$ & $K$ & $V_P/V_S$ \\
-    & & kg/m$^3$ & GPa & -- & GPa & GPa & m/s \\
-    \hline
-    Granite & intrusive & 2650 & 76.28 & 0.245 & 30.63 & 49.84 & 5850/3400 \\
-    Granodiorite & intrusive & 2795 & 85.91 & 0.255 & 34.24 & 58.35 & 6100/3500 \\
-    Basalt & volcanic & 3000 & 103.96 & 0.266 & 41.07 & 73.95 & 6550/3700 \\
-    Diabase & hypabyssal & 2975 & 98.22 & 0.274 & 38.56 & 72.36 & 6450/3600 \\
-    Gabbro & mafic & 3075 & 114.27 & 0.287 & 44.40 & 89.33 & 6950/3800 \\
-    Sandstone & sedimentary & 2725 & 55.75 & 0.259 & 22.13 & 38.61 & 5000/2850 \\
-    Limestone & carbonate & 2675 & 61.48 & 0.277 & 24.08 & 45.90 & 5400/3000 \\
-    Marble & metamorphic & 2725 & 82.41 & 0.270 & 32.43 & 59.82 & 6150/3450 \\
-    Schist & foliated & 2800 & 68.20 & 0.267 & 26.91 & 48.82 & 5500/3100 \\
-    Quartzite & quartz-rich & 2650 & 83.50 & 0.250 & 33.40 & 55.70 & 6150/3550 \\
-    \hline
-  \end{tabular}
-  \vskip 6pt
-  Elastic constants are effective midpoint values derived under isotropic
-  assumptions for model-ready comparison.
-\end{frame}
-
-\begin{frame}{Thermal and Porosity Parameters}
-  \scriptsize
-  \renewcommand{\arraystretch}{1.12}
-  \setlength{\tabcolsep}{3.2pt}
-  \begin{tabular}{l|r|r|r|r|r|>{\raggedright\arraybackslash}p{0.22\textwidth}}
-    \hline
-    \textbf{Material} & $\alpha$ & $k$ & $C_p$ & $C$ & $\gamma$ & \textbf{Porosity} \\
-    & $10^{-6}$/K & W/(m K) & J/(kg K) & MJ/(m$^3$ K) & MPa/K & \% \\
-    \hline
-    Granite & 7.9 & 2.50 & 850 & 2.25 & 1.18 & total 45.5 \\
-    Granodiorite & -- & 2.40 & -- & -- & -- & -- \\
-    Basalt & -- & 1.95 & 1300 & 3.90 & -- & total 19.0 \\
-    Diabase & -- & 2.50 & 850 & 2.53 & -- & -- \\
-    Gabbro & -- & 2.30 & 1000 & 3.08 & -- & total 43.5 \\
-    Sandstone & 11.6 & 2.25 & 1000 & 2.73 & 1.34 & total 31.5; eff. 26.5 \\
-    Limestone & 8.0 & 2.55 & 1050 & 2.81 & 1.10 & total 31.5; eff. 18.0 \\
-    Marble & 9.8 & 2.80 & 850 & 2.32 & 1.76 & -- \\
-    Schist & -- & 2.75 & 1150 & 3.22 & -- & total 26.5; eff. 27.5 \\
-    Quartzite & -- & 5.10 & 1000 & 2.65 & -- & -- \\
-    \hline
-  \end{tabular}
-  \vskip 6pt
-  Missing thermal expansion or coupling values are shown explicitly as dashes
-  rather than inferred.
-\end{frame}
-
-\begin{frame}{Rock Properties Controlling Propagation}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Mechanical controls}
-        \begin{itemize}
-          \item Density controls inertia.
-          \item Elastic stiffness controls resistance to deformation.
-          \item Porosity, cracks, and saturation change effective stiffness.
-        \end{itemize}
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Thermal controls}
-        \begin{itemize}
-          \item Conductivity controls heat transfer.
-          \item Heat capacity controls thermal storage.
-          \item Thermal expansion converts temperature change into strain.
-        \end{itemize}
-      \end{block}
-    \end{column}
-  \end{columns}
-  \vskip 6pt
-  Directional behavior can appear because bedding, foliation, aligned
-  pores, fractures, and stress state make real rocks structurally ordered.
-\end{frame}
-
-\begin{frame}{Elastic Waves in Geological Media}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Compressional (P) waves}
-        Compressional waves. Particle motion is mainly parallel to the
-        propagation direction and involves volume change.
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Shear (S) waves}
-        Shear waves. Particle motion is mainly transverse to the direction
-        of propagation and depends on shear rigidity.
-      \end{block}
-    \end{column}
-  \end{columns}
-  \vskip 6pt
-  \[
-    V_P = \sqrt{\frac{K+\frac{4}{3}G}{\rho}},
-    \qquad
-    V_S = \sqrt{\frac{G}{\rho}}
-  \]
-  \scriptsize
-  $V_P,V_S$ -- compressional and shear wave velocities [m/s];
-  $K$ -- bulk modulus [Pa]; $G$ -- shear modulus [Pa];
-  $\rho$ -- density [kg/m$^3$]. These relations show that stiffness
-  increases wave velocity, while density increases inertia.
-\end{frame}
-
-\begin{frame}{Heat Conduction and Thermal Expansion}
-  \begin{block}{Fourier heat flux and heat equation}
-    \[
-      q = -k\nabla T,
-      \qquad
-      \rho C_p\frac{\partial T}{\partial t}
-      =
-      \nabla\cdot(k\nabla T)+Q
-    \]
-    \scriptsize
-    $q$ -- heat flux [W/m$^2$]; $k$ -- thermal conductivity [W/(m K)];
-    $T$ -- temperature [K]; $\rho$ -- density [kg/m$^3$];
-    $C_p$ -- specific heat capacity [J/(kg K)]; $t$ -- time [s];
-    $Q$ -- volumetric heat source [W/m$^3$].
-  \end{block}
-  \vskip 4pt
-  \begin{block}{Temperature perturbation and thermal strain}
-    \[
-      \theta = T-T_0,
-      \qquad
-      \varepsilon_{\mathrm{th}}=\alpha\Delta T
-    \]
-    \scriptsize
-    $\theta,\Delta T$ -- temperature change [K]; $T_0$ -- reference
-    temperature [K]; $\varepsilon_{\mathrm{th}}$ -- thermal strain
-    [dimensionless]; $\alpha$ -- linear thermal expansion [1/K].
-  \end{block}
-\end{frame}
-
-\begin{frame}{Key Physical Parameters}
-  \begin{block}{Thermal diffusivity relation}
-    \[
-      \alpha_T = \frac{k}{\rho C_p}
-    \]
-  \end{block}
-  \vskip 6pt
-  \begin{itemize}
-    \item $\alpha_T$ is thermal diffusivity [m$^2$/s].
-    \item $k$ is thermal conductivity [W/(m K)].
-    \item $\rho$ is density [kg/m$^3$], and $C_p$ is heat capacity [J/(kg K)].
-    \item Larger $\alpha_T$ means faster spreading of a temperature disturbance.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}{Thermoelastic Coupling}
-  \begin{columns}[T]
-    \begin{column}{0.58\textwidth}
-      \begin{block}{Thermoelastic extension of Hooke's law}
-        \[
-          \theta = T - T_0
-        \]
-        \[
-          \sigma_{ij} = \lambda\,\delta_{ij}\,\varepsilon_{kk}
-          + 2\mu\,\varepsilon_{ij}
-          - \gamma\,\delta_{ij}\,\theta,
-          \qquad
-          \gamma = 3K\alpha
-        \]
-      \end{block}
-      \begin{block}{Equation of motion}
-        \[
-          \rho\,\frac{\partial^2u_i}{\partial t^2}
-          = \frac{\partial \sigma_{ij}}{\partial x_j} + f_i
-        \]
-      \end{block}
-    \end{column}
-    \begin{column}{0.38\textwidth}
-      \scriptsize
-      $\theta$ -- temperature perturbation [K]; $T,T_0$ -- current and
-      reference temperatures [K]; $\sigma_{ij}$ -- stress tensor [Pa];
-      $\varepsilon_{ij}$ -- strain tensor [dimensionless];
-      $\varepsilon_{kk}$ -- volumetric strain [dimensionless];
-      $\lambda,\mu,K$ -- Lame and bulk moduli [Pa];
-      $\delta_{ij}$ -- Kronecker delta [dimensionless];
-      $\alpha$ -- thermal expansion [1/K]; $\gamma$ -- thermoelastic
-      coupling coefficient [Pa/K]; $u_i$ -- displacement [m];
-      $x_j$ -- coordinate [m]; $f_i$ -- body force density [N/m$^3$].
       \vskip 4pt
-      The relation states that stress depends on elastic deformation and
-      temperature-induced expansion; this is why thermal and elastic fields
-      are coupled in the model.
+      \scriptsize
+      Scope: research prototype for source--probe directional prediction,
+      not a field-validated simulator.
+    \end{column}
+    \begin{column}{0.38\textwidth}
+      \centering
+      \includegraphics[
+        width=\linewidth,
+        height=0.62\textheight,
+        keepaspectratio
+      ]{img/basalt}
+      \vskip 3pt
+      \scriptsize Basalt -- example of a target geological medium.
     \end{column}
   \end{columns}
 \end{frame}
 
-\begin{frame}{Mathematical Scope and Primary Fields}
+\begin{frame}{Geological Media We Model}
   \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Simplified model scope}
-        \footnotesize
-        \begin{itemize}
-          \item 2D continuum: $\Omega\subset\mathbb{R}^{2}$,
-                $(x,t)\in\Omega\times[0,T_f]$.
-          \item In-plane displacement: $u(x,t)=[u,v]^T$.
-          \item Small deformation and linear isotropic thermoelasticity.
-          \item Pores, fractures, fluids, plasticity, damage, and full
-                anisotropy are not resolved explicitly.
-        \end{itemize}
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.58\textwidth}
       \footnotesize
-      \begin{tabular}{@{}lll@{}}
-        \toprule
-        \textbf{Field} & \textbf{Meaning} & \textbf{Role} \\
-        \midrule
-        $T(x,t)$ & Temperature & Thermal state \\
-        $\theta(x,t)$ & Perturbation & Thermal loading \\
-        $(u,v)$ & Displacement & Probe response \\
-        $\varepsilon_{ij}$ & Strain & Deformation \\
-        $\sigma_{ij}$ & Stress & Internal force \\
-        $d,\hat d,\phi$ & Direction & Source--probe query \\
-        \bottomrule
+      \renewcommand{\arraystretch}{1.20}
+      \setlength{\tabcolsep}{4pt}
+      \begin{tabular}{l|r|r|r|r|r}
+        \hline
+        \textbf{Rock} & $\rho$ & $V_P$ & $k$ & $C_p$ & $\alpha$ \\
+        & kg/m$^3$ & m/s & W/(m K) & J/(kg K) & $10^{-6}$/K \\
+        \hline
+        Granite    & 2650 & 5850 & 2.50 &  850 &  7.9 \\
+        Basalt     & 3000 & 6550 & 1.95 & 1300 &  --  \\
+        Sandstone  & 2725 & 5000 & 2.25 & 1000 & 11.6 \\
+        Limestone  & 2675 & 5400 & 2.55 & 1050 &  8.0 \\
+        \hline
       \end{tabular}
       \vskip 6pt
-      These fields connect the physical formulation with the prediction
-      methodology used in the comparative prototype.
-    \end{column}
-  \end{columns}
-  \vskip 4pt
-  \scriptsize
-  These assumptions keep the task suitable for comparative AI-assisted
-  directional prediction and make the results interpretable within the scope
-  of a bachelor thesis. Here $\Omega$ is the model domain [m$^2$], $x$ is
-  position [m], $t$ is time [s], $T_f$ is final time [s], and $u,v$ are
-  displacement components [m].
-\end{frame}
-
-\begin{frame}{Directional Prediction Task}
-  \begin{columns}[T]
-    \begin{column}{0.56\textwidth}
-      \includegraphics[width=\textwidth]{img/web_visualization}
+      \scriptsize
+      Effective scalar parameters under a locally homogeneous isotropic
+      approximation; field calibration is out of scope. Full 10-rock tables
+      with $E$, $\nu$, $\mu$, $K$, porosity are in the backup slides.
     \end{column}
     \begin{column}{0.40\textwidth}
-      \scriptsize
-      A source point and a probe point define the directional query.
-      \[
-        d = x_p - x_s,\qquad
-        L = \|d\|,\qquad
-        \hat d = \frac{d}{\|d\|}
-      \]
-      \[
-        \phi = \operatorname{atan2}(d_y,d_x),
-        \qquad
-        \mathcal{F}:X\rightarrow\widehat{Y}
-      \]
-      \scriptsize
-      $x_s,x_p$ -- source and probe positions [m]; $d$ -- direction vector
-      [m]; $L$ -- distance [m]; $\hat d$ -- unit direction [dimensionless];
-      $\phi$ -- azimuth [rad]; $\mathcal{F}$ maps input features $X$ to
-      predicted outputs $\widehat{Y}$.
-      \begin{block}{Prediction contract}
-        \scriptsize
-        Input: material parameters, geometry, direction, and time.
-        Output: estimated temperature, displacement, directional response,
-        and travel time.
-      \end{block}
+      \centering
+      \begin{tikzpicture}[scale=0.95]
+        % 2D plane-strain domain illustration
+        \draw[thick, fill=AcademicPanel, draw=AcademicNavy]
+          (0,0) rectangle (3.2,3.2);
+        \node[AcademicMuted, font=\footnotesize] at (1.6,1.6)
+          {$\Omega \subset \mathbb{R}^{2}$};
+        \node[AcademicMuted, font=\scriptsize, below] at (1.6,0)
+          {$1$\,m};
+        \node[AcademicMuted, font=\scriptsize, left] at (0,1.6)
+          {$1$\,m};
+        % Source point
+        \fill[AcademicNavy] (0.65,1.10) circle (3pt);
+        \node[AcademicNavy, font=\scriptsize, above right=1pt]
+          at (0.65,1.10) {$x_{s}$};
+        % Probe point
+        \fill[AcademicBlue] (2.55,1.90) circle (3pt);
+        \node[AcademicBlue, font=\scriptsize, above right=1pt]
+          at (2.55,1.90) {$x_{p}$};
+        % Direction arrow
+        \draw[->, >={Stealth[length=2mm]}, thick, AcademicBlue]
+          (0.65,1.10) -- (2.55,1.90)
+          node[midway, above, sloped, font=\scriptsize] {$d$};
+        % Plane strain note
+        \node[AcademicMuted, font=\scriptsize] at (1.6,-0.55)
+          {plane strain: $\varepsilon_{zz} = 0$};
+      \end{tikzpicture}
+      \vskip 4pt
+      \scriptsize 2D plane-strain domain with source--probe geometry.
     \end{column}
   \end{columns}
 \end{frame}
+
+\begin{frame}{Coupled Thermoelastic System}
+  \setlength{\abovedisplayskip}{2pt}
+  \setlength{\belowdisplayskip}{2pt}
+  \setlength{\abovedisplayshortskip}{2pt}
+  \setlength{\belowdisplayshortskip}{2pt}
+  \begin{columns}[T]
+    \begin{column}{0.66\textwidth}
+      \begin{block}{Constitutive law (Duhamel--Neumann)}
+        \[
+          \sigma_{ij} = \lambda\,\delta_{ij}\,\varepsilon_{kk}
+                     + 2\mu\,\varepsilon_{ij}
+                     - \gamma\,\delta_{ij}\,\theta,
+          \quad
+          \gamma = 3K\alpha,
+          \quad
+          \theta = T - T_{0}
+        \]
+      \end{block}
+      \vspace{-4pt}
+      \begin{block}{Equation of motion}
+        \[
+          \rho\,\frac{\partial^{2}u_{i}}{\partial t^{2}}
+            = \frac{\partial \sigma_{ij}}{\partial x_{j}} + f_{i}
+        \]
+      \end{block}
+      \vspace{-4pt}
+      \begin{block}{Coupled heat equation}
+        \[
+          \rho C_{p}\,\frac{\partial T}{\partial t}
+            - k\,\nabla^{2}T
+            + \gamma T_{0}\,\frac{\partial}{\partial t}(\nabla\!\cdot u) = 0
+        \]
+      \end{block}
+      \scriptsize
+      $\sigma$ stress; $\varepsilon$ strain; $\lambda,\mu,K$ moduli;
+      $\gamma=3K\alpha$ coupling; $\theta=T-T_{0}$.
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \centering
+      \includegraphics[width=\linewidth,height=0.185\textheight,keepaspectratio]{img/wiki_thermal_expansion}\\
+      {\scriptsize Thermal expansion $\varepsilon_{\mathrm{th}}=\alpha\Delta T$}\\[2pt]
+      \includegraphics[width=0.72\linewidth,height=0.185\textheight,keepaspectratio]{img/wiki_body_waves}\\
+      {\scriptsize Elastic body waves (motion)}\\[2pt]
+      \includegraphics[width=\linewidth,height=0.135\textheight,keepaspectratio]{img/wiki_heat_conduction}\\
+      {\scriptsize Heat flux $q=-k\nabla T$}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{2D Directional Prediction Task}
+  \begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{img/web_visualization}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Scope}
+        \footnotesize
+        Domain $\Omega \subset \mathbb{R}^{2}$, plane strain, linear
+        isotropic thermoelasticity, small deformation. Primary fields are
+        the temperature $T(x,t)$ and the in-plane displacement
+        $u(x,t) = (u,v)$.
+      \end{block}
+      \begin{block}{Directional query}
+        \[
+          d = x_{p} - x_{s},
+          \quad
+          L = \|d\|,
+          \quad
+          \hat d = \frac{d}{L}
+        \]
+        \[
+          \phi = \operatorname{atan2}(d_{y}, d_{x}),
+          \qquad
+          \mathcal{F}: X \to \widehat{Y}
+        \]
+      \end{block}
+      \scriptsize
+      $x_{s},x_{p}$ source and probe positions [m];
+      $L$ distance [m]; $\hat d$ unit direction; $\phi$ azimuth [rad].
+      $\mathcal{F}$ maps input features $X$ (material, geometry, time)
+      to the predicted response $\widehat{Y}$ (temperature, displacement,
+      directional summary).
+    \end{column}
+  \end{columns}
+\end{frame}
+
 \section{Prediction Framework}
 
 \begin{frame}{COMSOL-Based Synthetic Dataset}
@@ -566,73 +359,62 @@
   \end{columns}
 \end{frame}
 
-
-\begin{frame}{COMSOL Temperature Field}
-  \begin{columns}[T]
-    \begin{column}{0.60\textwidth}
-      \centering
-      \includegraphics[
-        width=\textwidth,
-        height=0.72\textheight,
-        keepaspectratio
-      ]{img/comsol_temperature_2d.png}
+\begin{frame}{COMSOL Simulation Results}
+\begin{columns}[T,onlytextwidth]
+    
+    \begin{column}{0.32\textwidth}
+        \centering
+        \includegraphics[
+            width=\textwidth,
+            height=0.42\textheight,
+            keepaspectratio
+        ]{img/comsol_temperature_2d.png}
+        
+        \vspace{2pt}
+        \scriptsize \textbf{Temperature Field}
+        
+        \vspace{2pt}
+        \tiny
+        Local heating creates a high-temperature region near the source, while
+        the surrounding rock remains close to the initial temperature.
     \end{column}
-
-    \begin{column}{0.36\textwidth}
-      \footnotesize
-      \begin{block}{Thermal excitation}
-        The heated source creates a localized high-temperature region inside
-        the geological medium.
-      \end{block}
-
-      \begin{block}{Temperature distribution}
-        The maximum temperature is concentrated near the source, while the
-        surrounding domain remains close to the initial temperature.
-      \end{block}
-
-      \begin{block}{Dataset variable}
-        Temperature is one of the main dynamic fields used for training and
-        validating the neural models.
-      \end{block}
+    
+    \begin{column}{0.32\textwidth}
+        \centering
+        \includegraphics[
+            width=\textwidth,
+            height=0.42\textheight,
+            keepaspectratio
+        ]{img/comsol_displacement_2d.png}
+        
+        \vspace{2pt}
+        \scriptsize \textbf{Total Displacement}
+        
+        \vspace{2pt}
+        \tiny
+        Thermal expansion causes deformation of the medium, with the largest
+        displacement concentrated around the heated source.
     \end{column}
-  \end{columns}
+    
+    \begin{column}{0.32\textwidth}
+        \centering
+        \includegraphics[
+            width=\textwidth,
+            height=0.42\textheight,
+            keepaspectratio
+        ]{img/comsol_stress_2d.png}
+        
+        \vspace{2pt}
+        \scriptsize \textbf{von Mises Stress}
+        
+        \vspace{2pt}
+        \tiny
+        The induced thermoelastic response generates stress concentration near
+        the source, confirming the coupled thermal and mechanical behavior.
+    \end{column}
+    
+\end{columns}
 \end{frame}
-
-
-\begin{frame}{COMSOL Thermoelastic Response}
-  \begin{columns}[T]
-    \begin{column}{0.49\textwidth}
-      \centering
-      \includegraphics[
-        width=\textwidth,
-        height=0.62\textheight,
-        keepaspectratio
-      ]{img/comsol_displacement_2d.png}
-
-      \vskip 2pt
-      \scriptsize Total displacement field
-    \end{column}
-
-    \begin{column}{0.49\textwidth}
-      \centering
-      \includegraphics[
-        width=\textwidth,
-        height=0.62\textheight,
-        keepaspectratio
-      ]{img/comsol_stress_2d.png}
-
-      \vskip 2pt
-      \scriptsize von Mises stress field
-    \end{column}
-  \end{columns}
-
-  \vskip 4pt
-  \footnotesize
-  Local heating causes thermal expansion of the medium. As a result,
-  displacement and stress are concentrated around the heated source, confirming
-  the coupled thermoelastic behavior of the simulated process.
-\end{frame}
-
 
 \begin{frame}{Data Representation and Preprocessing}
   \begin{itemize}
@@ -886,49 +668,9 @@
   \end{columns}
 \end{frame}
 
-
-\begin{frame}{Fourier Neural Operator (FNO)}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Role}
-        Neural operator surrogate for structured two-dimensional fields.
-      \end{block}
-      \begin{block}{Input}
-        \footnotesize
-        Grid-based material and response features, together with the shared
-        source--probe and time query context.
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Output}
-        \footnotesize
-        Estimated field-style response used to derive directional quantities.
-      \end{block}
-      \begin{block}{Why and limitation}
-        \footnotesize
-        Included because Fourier operators can capture broad field patterns.
-        In the current prototype, its output scale needs recalibration.
-      \end{block}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{FNO: Field-to-Field Prediction Idea}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Why FNO fits this task}
-        \footnotesize
-        Thermoelastic simulation output is not a single scalar. It is a set
-        of spatial fields defined on a two-dimensional grid.
-      \end{block}
-      \begin{itemize}
-        \footnotesize
-        \item The model learns an operator between function spaces.
-        \item Inputs and outputs keep spatial structure.
-        \item The target can include temperature and displacement fields.
-      \end{itemize}
-    \end{column}
-    \begin{column}{0.48\textwidth}
+\begin{frame}{Fourier Neural Operator}
+  \begin{columns}
+    \begin{column}{0.50\textwidth}
       \begin{block}{Operator view}
         \[
           \mathcal{G}_{\theta}:\mathcal{A}\rightarrow\mathcal{U},
@@ -936,17 +678,6 @@
           \hat{s}=\mathcal{G}_{\theta}(a)
         \]
       \end{block}
-      \scriptsize
-      $a$ -- input field; $\hat{s}$ -- predicted thermoelastic field;
-      $\mathcal{A}$ and $\mathcal{U}$ -- input and output field spaces;
-      $\theta$ -- trainable neural-operator parameters.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{FNO Tensor Format for the 2D Setup}
-  \begin{columns}[T]
-    \begin{column}{0.50\textwidth}
       \begin{block}{Input tensor}
         \[
           A\in\mathbb{R}^{B\times C_{in}\times N_x\times N_y}
@@ -959,6 +690,10 @@
       \end{block}
     \end{column}
     \begin{column}{0.46\textwidth}
+      \scriptsize
+      $a$ -- input field; $\hat{s}$ -- predicted thermoelastic field;
+      $\mathcal{A}$ and $\mathcal{U}$ -- input and output field spaces;
+      $\theta$ -- trainable neural-operator parameters.
       \footnotesize
       \begin{itemize}
         \item $B$ is batch size.
@@ -976,25 +711,57 @@
 \end{frame}
 
 \begin{frame}{FNO Architecture Used in the Prototype}
-  \begin{block}{Main processing chain}
-    \[
-      \text{input}\rightarrow\text{lifting}\rightarrow
-      \text{Fourier blocks}\rightarrow\text{projection}\rightarrow\text{output}
-    \]
-  \end{block}
-  \vskip 4pt
+  \resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    font=\small,
+    node distance=12mm,
+    block/.style={
+        rectangle,
+        rounded corners=2pt,
+        draw=blue!55!black,
+        fill=blue!8,
+        minimum width=34mm,
+        minimum height=10mm,
+        align=center
+    },
+    fourier/.style={
+        rectangle,
+        rounded corners=2pt,
+        draw=violet!55!black,
+        fill=violet!10,
+        minimum width=42mm,
+        minimum height=10mm,
+        align=center
+    },
+    outp/.style={
+        rectangle,
+        rounded corners=2pt,
+        draw=green!50!black,
+        fill=green!12,
+        minimum width=34mm,
+        minimum height=10mm,
+        align=center
+    },
+    arr/.style={
+        -{Latex[length=2mm]},
+        thick,
+        draw=black!65
+    }
+]
+
+\node[block]   (in)   {Input};
+\node[block, right=of in] (lift) {Lifting layer};
+\node[fourier, right=of lift] (fno) {Fourier blocks};
+\node[block, right=of fno] (proj) {Projection layer};
+\node[outp, right=of proj] (out) {Output};
+
+\draw[arr] (in) -- (lift);
+\draw[arr] (lift) -- (fno);
+\draw[arr] (fno) -- (proj);
+\draw[arr] (proj) -- (out);
+
+\end{tikzpicture}}
   \begin{columns}[T]
-    \begin{column}{0.47\textwidth}
-      \footnotesize
-      \begin{block}{Implementation parameters}
-        \begin{itemize}
-          \item \texttt{modes}: retained Fourier modes
-          \item \texttt{num\_fourier\_layers}: number of blocks
-          \item \texttt{mid\_channels}: latent capacity
-          \item \texttt{projection\_channels}: output projection size
-        \end{itemize}
-      \end{block}
-    \end{column}
     \begin{column}{0.49\textwidth}
       \begin{block}{Operator composition}
         \[
@@ -1020,6 +787,14 @@
       \footnotesize
       The spectral branch captures global frequency-domain interactions;
       the local convolution branch captures neighboring spatial patterns.
+      \begin{block}{Retained modes}
+        \[
+          \texttt{modes}=[K_1,K_2],\qquad d=2
+        \]
+      \end{block}
+      \footnotesize
+      Only selected low-frequency Fourier coefficients are transformed by
+      learned weights. This controls capacity and computational cost.
     \end{column}
     \begin{column}{0.46\textwidth}
       \begin{block}{Spectral convolution}
@@ -1031,23 +806,6 @@
       \scriptsize
       $\mathcal{F}$ and $\mathcal{F}^{-1}$ are Fourier and inverse Fourier
       transforms; $R_l$ is the trainable complex-valued spectral weight tensor.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Mode Truncation and Coordinate Encoding}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Retained modes}
-        \[
-          \texttt{modes}=[K_1,K_2],\qquad d=2
-        \]
-      \end{block}
-      \footnotesize
-      Only selected low-frequency Fourier coefficients are transformed by
-      learned weights. This controls capacity and computational cost.
-    \end{column}
-    \begin{column}{0.48\textwidth}
       \begin{block}{Optional grid channels}
         \[
           \tilde{a}(x,y)=[a(x,y),x,y]
@@ -1055,7 +813,7 @@
       \end{block}
       \footnotesize
       With \texttt{add\_grid}, the model receives explicit normalized spatial
-      coordinates. This helps distinguish source, boundary, and interior regions.
+      coordinates. This helps distinguish source, boundary, and interior regions
     \end{column}
   \end{columns}
 \end{frame}
@@ -1091,386 +849,391 @@
 \end{frame}
 
 
-\begin{frame}{MeshGraphNet}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Role}
-        Graph-based surrogate model for mesh-aware prediction.
-      \end{block}
-      \begin{block}{Input}
-        \footnotesize
-        Mesh nodes, graph connectivity, material features, and query context.
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Output}
-        \footnotesize
-        Node-level or probe-level response estimates after graph message passing.
-      \end{block}
-      \begin{block}{Why and limitation}
-        \footnotesize
-        Included because graph structure can represent local mesh interactions.
-        The current route behaves mainly as a fixed-horizon predictor.
-      \end{block}
-    \end{column}
-  \end{columns}
-\end{frame}
+% Required packages:
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,fit,arrows.meta,calc}
+\begin{frame}{MeshGraphNet: Graph Formulation}
+  \setlength{\abovedisplayskip}{3pt}
+  \setlength{\belowdisplayskip}{3pt}
 
-\begin{frame}{MeshGraphNet: Why a Graph Model}
+  \begin{block}{Main idea}
+    MeshGraphNet represents the COMSOL computational mesh as a graph and
+    predicts the next physical state for every mesh node.
+  \end{block}
+
   \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Reason for using MeshGraphNet}
-        \footnotesize
-        COMSOL finite-element data are naturally mesh-based. Nodes can have
-        different neighbourhoods and nonuniform distances, unlike pixels on a
-        regular image grid.
-      \end{block}
-      \begin{itemize}
-        \footnotesize
-        \item Preserves unstructured mesh connectivity.
-        \item Avoids forced interpolation to a Cartesian grid.
-        \item Matches local thermal and mechanical interactions.
-      \end{itemize}
-    \end{column}
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.52\textwidth}
       \begin{block}{Graph representation}
         \[
           \mathcal{G}=(\mathcal{V},\mathcal{E})
         \]
+        \scriptsize
+        \(\mathcal{V}\) is the set of mesh nodes, and
+        \(\mathcal{E}\) is the set of edges connecting neighbouring nodes.
       \end{block}
-      \scriptsize
-      $\mathcal{V}$ -- mesh nodes; $\mathcal{E}$ -- local graph edges.
-      Each node represents a spatial location in the simulated geological
-      medium; each edge represents local physical neighbourhood connectivity.
+
+      \begin{block}{Node features}
+        \[
+          \mathbf{x}_i^t =
+          [\mathbf{p}_i,\mathbf{s}_i^t,\mathbf{m}_i,\mathbf{c}]
+        \]
+        \scriptsize
+        \(\mathbf{x}_i^t\) describes node \(i\) at time \(t\):
+        coordinates, current physical state, material parameters, and
+        scenario condition.
+      \end{block}
+    \end{column}
+
+    \begin{column}{0.44\textwidth}
+      \begin{block}{Edge features}
+        \[
+          \mathbf{e}_{ij} =
+          [\mathbf{p}_j-\mathbf{p}_i,\,
+          \|\mathbf{p}_j-\mathbf{p}_i\|]
+        \]
+        \scriptsize
+        \(\mathbf{e}_{ij}\) describes the spatial relation between two
+        neighbouring mesh nodes \(i\) and \(j\).
+      \end{block}
+
+      \begin{block}{Prediction}
+        \[
+          \hat{\mathbf{y}}_i^{\,t+1}
+          =
+          F_{\theta}(\mathcal{G},\mathbf{x}^t)_i
+        \]
+        \scriptsize
+        \(F_{\theta}\) is the trained MeshGraphNet model, and
+        \(\hat{\mathbf{y}}_i^{\,t+1}\) is the predicted physical field vector
+        for node \(i\) at the next time step.
+      \end{block}
     \end{column}
   \end{columns}
 \end{frame}
-
-\begin{frame}{Mesh and Edge Features}
+\begin{frame}{MeshGraphNet: Inputs and Outputs}
   \begin{columns}[T]
-    \begin{column}{0.50\textwidth}
-      \begin{block}{Geometric edge encoding}
-        \[
-          r_{ij}=p_j-p_i,\qquad d_{ij}=\|r_{ij}\|_2
-        \]
-        \[
-          a_{ij}=\begin{bmatrix}r_{ij}\\ d_{ij}\end{bmatrix}
-        \]
-      \end{block}
+    \begin{column}{0.60\textwidth}
+      \centering
+      \resizebox{\linewidth}{!}{%
+      \begin{tikzpicture}[
+        font=\small,
+        node/.style={rectangle, rounded corners=2pt,
+          draw=blue!55!black, fill=blue!8,
+          minimum width=55mm, minimum height=8mm, inner sep=3pt, align=left},
+        edge/.style={rectangle, rounded corners=2pt,
+          draw=teal!55!black, fill=teal!10,
+          minimum width=45mm, minimum height=8mm, inner sep=3pt, align=left}
+      ]
+        \node[node] (n1) {$\mathbf{x}_1=(\mathbf{p}_1,\,\mathbf{s}_1^t,\,\mathbf{m}_1,\,\mathbf{c})$};
+        \node[node, below=of n1] (n2) {$\mathbf{x}_2=(\mathbf{p}_2,\,\mathbf{s}_2^t,\,\mathbf{m}_2,\,\mathbf{c})$};
+        \node[below=2mm of n2] (dots) {$\vdots$};
+        \node[node, below=2mm of dots] (nN) {$\mathbf{x}_N=(\mathbf{p}_N,\,\mathbf{s}_N^t,\,\mathbf{m}_N,\,\mathbf{c})$};
+
+        \node[edge, right=16mm of n1.east] (e1) {$\mathbf{e}_{12}=(\Delta x,\Delta y,\Delta z,\|\Delta\mathbf{p}\|)$};
+        \node[edge, below=of e1] (e2) {$\mathbf{e}_{ij}=\text{relative geometry}$};
+        \node[below=2mm of e2] (edots) {$\vdots$};
+        \node[edge, below=2mm of edots] (eM) {$\mathbf{e}_{M}$};
+
+        \node[draw=black!50, dashed, fit=(n1)(nN), inner sep=4mm,
+          label=above:{Node features}] {};
+        \node[draw=black!50, dashed, fit=(e1)(eM), inner sep=4mm,
+          label=above:{Edge attributes}] {};
+      \end{tikzpicture}}
     \end{column}
-    \begin{column}{0.46\textwidth}
+
+    \begin{column}{0.38\textwidth}
       \footnotesize
-      The edge attributes describe both direction and distance between
-      neighbouring mesh nodes.
-      \vskip 4pt
-      This matters because heat transfer, stress redistribution, and elastic
-      wave response depend on local geometry, not only on node values.
-      \vskip 4pt
-      \scriptsize
-      $p_i,p_j$ -- node coordinates [m]; $r_{ij}$ -- relative vector [m];
-      $d_{ij}$ -- Euclidean edge length [m].
+      \begin{block}{Graph representation}
+        \[
+          \mathcal{G}=(\mathcal{V},\mathcal{E})
+        \]
+        The COMSOL mesh is represented as a graph: nodes store physical
+        states, edges store spatial relations.
+      \end{block}
+
+      \begin{block}{Node input}
+        coordinates, material parameters, scenario condition, and current
+        dynamic state.
+      \end{block}
+
+      \begin{block}{Output}
+        \[
+          \hat{\mathbf{y}}_i^{\,t+1}\in\mathbb{R}^{C_{\mathrm{out}}}
+        \]
+        Predicted next physical fields for each mesh node.
+      \end{block}
     \end{column}
   \end{columns}
 \end{frame}
 
-\begin{frame}{Node Features and Prediction Target}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Node feature vector}
-        \[
-          x_i^t=\begin{bmatrix}p_i\\ m_i\\ s\\ q_i^t\end{bmatrix}
-        \]
-      \end{block}
-      \footnotesize
-      Coordinates, material parameters, scenario conditions, and current
-      dynamic fields are concatenated before model input.
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{State transition}
-        \[
-          \hat{Y}^{t+\Delta t}=f_{\theta}(X^t,\mathcal{G})
-        \]
-      \end{block}
-      \scriptsize
-      $X^t\in\mathbb{R}^{N\times F_v}$ is the node feature matrix;
-      $\hat{Y}^{t+\Delta t}\in\mathbb{R}^{N\times C}$ is the predicted
-      future field matrix for all graph nodes.
-    \end{column}
-  \end{columns}
+
+\begin{frame}{MeshGraphNet: Encoder--Processor--Decoder}
+  \centering
+  \resizebox{!}{0.74\textheight}{%
+  \begin{tikzpicture}[
+    font=\small,
+    node distance=4mm and 14mm,
+    inp/.style={rectangle, rounded corners=2pt,
+      draw=blue!55!black, fill=blue!8,
+      minimum width=52mm, minimum height=9mm, align=center},
+    enc/.style={rectangle, rounded corners=2pt,
+      draw=violet!55!black, fill=violet!10,
+      minimum width=52mm, minimum height=9mm, align=center},
+    proc/.style={rectangle, rounded corners=2pt,
+      draw=orange!75!black, fill=orange!10,
+      minimum width=52mm, minimum height=9mm, align=center},
+    outp/.style={rectangle, rounded corners=2pt,
+      draw=green!50!black, fill=green!12,
+      minimum width=52mm, minimum height=9mm, align=center},
+    arr/.style={-{Latex[length=2mm]}, thick, draw=black!65}
+  ]
+    \node[inp] (xin) {Node features \(\mathbf{x}_i\in\mathbb{R}^{d_x}\)};
+    \node[inp, right=24mm of xin] (ein) {Edge attributes \(\mathbf{e}_{ij}\in\mathbb{R}^{d_e}\)};
+
+    \node[enc, below=of xin] (nenc) {Node encoder MLP\\ \(\mathbb{R}^{d_x}\to\mathbb{R}^{d_h}\)};
+    \node[enc, below=of ein] (eenc) {Edge encoder MLP\\ \(\mathbb{R}^{d_e}\to\mathbb{R}^{d_h}\)};
+
+    \node[proc, below=13mm of $(nenc)!0.5!(eenc)$] (p1) {Message passing block \#1};
+    \node[proc, below=of p1] (p2) {Message passing block \#2};
+    \node[below=2mm of p2] (pdots) {\(\vdots\)};
+    \node[proc, below=2mm of pdots] (pK) {Message passing block \(K=10\)};
+
+    \node[outp, below=10mm of pK] (dec) {Decoder MLP\\ \(\mathbb{R}^{d_h}\to\mathbb{R}^{C_{\mathrm{out}}}\)};
+    \node[outp, below=of dec] (yhat) {\(\hat{\mathbf{y}}_i^{\,t+1}\)};
+
+    \draw[arr] (xin) -- (nenc);
+    \draw[arr] (ein) -- (eenc);
+    \draw[arr] (nenc.south) |- (p1.west);
+    \draw[arr] (eenc.south) |- (p1.east);
+    \draw[arr] (p1) -- (p2);
+    \draw[arr] (p2) -- (pdots);
+    \draw[arr] (pdots) -- (pK);
+    \draw[arr] (pK) -- (dec);
+    \draw[arr] (dec) -- (yhat);
+  \end{tikzpicture}}
+
+  \vskip 2pt
+  {\scriptsize The model uses latent dimension \(d_h=128\), ten message-passing steps, MLP encoders, and a node-wise decoder.}
 \end{frame}
 
-\begin{frame}{Delta Prediction Mode}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Absolute mode}
-        \[
-          \hat{q}_i^{t+\Delta t}=f_{\theta}(x_i^t,\mathcal{G})
-        \]
-      \end{block}
-      \begin{block}{Delta mode}
-        \[
-          \Delta\hat{q}_i^t=f_{\theta}(x_i^t,\mathcal{G})
-        \]
-        \[
-          \hat{q}_i^{t+\Delta t}=q_i^t+\Delta\hat{q}_i^t
-        \]
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \footnotesize
-      Delta prediction is useful because neighbouring time-step changes are
-      often smoother and smaller than full thermoelastic fields.
-      \vskip 5pt
-      \begin{alertblock}{Rollout caveat}
-        \footnotesize
-        In autoregressive prediction, each predicted state becomes the next
-        input. Small one-step errors can accumulate over long horizons.
-      \end{alertblock}
-    \end{column}
-  \end{columns}
-\end{frame}
 
-\begin{frame}{Encoder--Processor--Decoder Structure}
-  \begin{block}{Model composition}
+\begin{frame}{MeshGraphNet: Message Passing Block}
+  \setlength{\abovedisplayskip}{2pt}
+  \setlength{\belowdisplayskip}{2pt}
+
+  \begin{block}{Edge update}
     \[
-      f_{\theta}=D_{\theta_D}\circ P_{\theta_P}\circ E_{\theta_E}
+      \mathbf{e}_{ij}' =
+      \operatorname{LN}\Big(
+      \mathbf{e}_{ij}+
+      \phi_e([\mathbf{h}_i,\mathbf{h}_j,\mathbf{e}_{ij}])
+      \Big)
     \]
   \end{block}
-  \vskip 4pt
+
   \begin{columns}[T]
-    \begin{column}{0.31\textwidth}
-      \begin{block}{Encoder}
-        \footnotesize
-        Maps raw node and edge features into latent vectors.
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Aggregation}
+        \scriptsize
+        \[
+          \mathbf{a}_j =
+          \sum_{i:(i,j)\in\mathcal{E}}
+          \mathbf{e}_{ij}'
+        \]
+        Incoming edge messages are accumulated for every destination node
+        using scatter-add aggregation.
       \end{block}
     \end{column}
-    \begin{column}{0.31\textwidth}
-      \begin{block}{Processor}
-        \footnotesize
-        Applies repeated message passing over mesh connectivity.
+
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Node update}
+        \scriptsize
+        \[
+          \mathbf{h}_j' =
+          \operatorname{LN}\Big(
+          \mathbf{h}_j+
+          \phi_v([\mathbf{h}_j,\mathbf{a}_j])
+          \Big)
+        \]
+        The residual connection preserves the previous node state and improves
+        stability during repeated message passing.
       \end{block}
     \end{column}
-    \begin{column}{0.31\textwidth}
-      \begin{block}{Decoder}
-        \footnotesize
-        Converts final latent node states into predicted fields.
+  \end{columns}
+
+  \vskip 4pt
+  \scriptsize
+  Here \(\phi_e\) and \(\phi_v\) are MLPs with Linear layers, LayerNorm,
+  SiLU activation, and optional Dropout.
+\end{frame}
+\begin{frame}{Transformer: Inputs and Outputs}
+  \begin{columns}[T]
+    \begin{column}{0.60\textwidth}
+      \centering
+      \resizebox{\linewidth}{!}{%
+      \begin{tikzpicture}[
+        font=\small,
+        node distance=3mm and 12mm,
+        itok/.style={rectangle, rounded corners=2pt,
+          draw=blue!55!black, fill=blue!8,
+          minimum width=60mm, minimum height=8mm, inner sep=3pt, align=left},
+        qtok/.style={rectangle, rounded corners=2pt,
+          draw=teal!55!black, fill=teal!10,
+          minimum width=34mm, minimum height=8mm, inner sep=3pt, align=left}
+      ]
+        \node[itok] (i1) {$a_1=(x_1,\,T_1^{(0)},\,u_1^{(0)},\,\dot u_1^{(0)},\,a_1^{\text{mat}})$};
+        \node[itok, below=of i1] (i2) {$a_2=(x_2,\,\ldots)$};
+        \node[below=2mm of i2] (idots) {$\vdots$};
+        \node[itok, below=2mm of idots] (iN) {$a_{N_{\mathrm{in}}}=(x_{N_{\mathrm{in}}},\,\ldots)$};
+        \node[draw=black!50, dashed, fit=(i1)(iN), inner sep=4mm,
+          label=above:{Input set (mesh nodes, state at $t=0$)}] {};
+        \node[qtok, right=16mm of i1.east] (q1) {$q_1=(x_q^{(1)})$};
+        \node[qtok, below=of q1] (q2) {$q_2=(x_q^{(2)})$};
+        \node[below=2mm of q2] (qdots) {$\vdots$};
+        \node[qtok, below=2mm of qdots] (qN) {$q_{N_q}=(x_q^{(N_q)})$};
+        \node[draw=black!50, dashed, fit=(q1)(qN), inner sep=4mm,
+          label=above:{Query set (arbitrary points)}] {};
+      \end{tikzpicture}}
+    \end{column}
+    \begin{column}{0.38\textwidth}
+      \footnotesize
+      \begin{block}{Input token \(\in\mathbb{R}^{13}\)}
+        coordinates, initial state \((T,u,v,\dot u,\dot v)\), and material
+        parameters \((E,\nu,\rho,\alpha,k,C_p)\).
+      \end{block}
+      \begin{block}{Query token \(\in\mathbb{R}^{2}\)}
+        the coordinates \(q_j=(x_q^{(j)},y_q^{(j)})\) where fields are
+        requested.
+      \end{block}
+      \begin{block}{Output \(\in\mathbb{R}^{3}\)}
+        \[ \hat y_j = (\hat T_j,\,\hat u_j,\,\hat v_j) \]
+      \end{block}
+      \scriptsize
+      \(N_{\mathrm{in}}\) and \(N_q\) are independent, so the operator is
+      discretisation-invariant.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Transformer: Architecture}
+  \centering
+  \resizebox{!}{0.72\textheight}{%
+  \begin{tikzpicture}[
+    font=\small,
+    node distance=3mm and 12mm,
+    inp/.style={rectangle, rounded corners=2pt,
+      draw=blue!55!black, fill=blue!8,
+      minimum width=48mm, minimum height=9mm, align=center},
+    enc/.style={rectangle, rounded corners=2pt,
+      draw=violet!55!black, fill=violet!10,
+      minimum width=48mm, minimum height=9mm, align=center},
+    qry/.style={rectangle, rounded corners=2pt,
+      draw=teal!55!black, fill=teal!10,
+      minimum width=42mm, minimum height=9mm, align=center},
+    dec/.style={rectangle, rounded corners=2pt,
+      draw=orange!70!black, fill=orange!10,
+      minimum width=42mm, minimum height=9mm, align=center},
+    outp/.style={rectangle, rounded corners=2pt,
+      draw=green!50!black, fill=green!12,
+      minimum width=42mm, minimum height=9mm, align=center},
+    arr/.style={-{Latex[length=2mm]}, thick, draw=black!65}
+  ]
+    \node[inp] (in)   {Input tokens \(\{a_i\}\in\mathbb{R}^{13}\)};
+    \node[inp, below=of in] (ip) {Input projection \(\mathbb{R}^{13}\!\to\!\mathbb{R}^{d_m}\)};
+    \node[enc, below=of ip] (e1) {Self-attention layer \#1};
+    \node[enc, below=of e1] (e2) {Self-attention layer \#2};
+    \node[below=2mm of e2] (edots) {\(\vdots\)};
+    \node[enc, below=2mm of edots] (eL) {Self-attention layer \(L_{\mathrm{enc}}\)};
+
+    \node[qry, right=24mm of in] (q)  {Query tokens \(\{q_j\}\in\mathbb{R}^{2}\)};
+    \node[qry, below=of q]   (qp) {Query projection \(\mathbb{R}^{2}\!\to\!\mathbb{R}^{d_m}\)};
+    \node[dec, below=of qp]  (d1) {Cross-attention layer \#1};
+    \node[dec, below=of d1]  (d2) {Cross-attention layer \#2};
+    \node[below=2mm of d2]   (ddots) {\(\vdots\)};
+    \node[dec, below=2mm of ddots] (dL) {Cross-attention layer \(L_{\mathrm{dec}}\)};
+
+    \node[outp, below=18mm of $(eL)!0.5!(dL)$] (head) {Linear head \(\mathbb{R}^{d_m}\!\to\!\mathbb{R}^{3}\)};
+    \node[outp, below=of head] (yhat) {\(\hat{y}_j = (\hat T_j,\,\hat u_j,\,\hat v_j)\)};
+
+    \draw[arr] (in) -- (ip);
+    \draw[arr] (ip) -- (e1);
+    \draw[arr] (e1) -- (e2);
+    \draw[arr] (e2) -- (edots);
+    \draw[arr] (edots) -- (eL);
+
+    \draw[arr] (q)  -- (qp);
+    \draw[arr] (qp) -- (d1);
+    \draw[arr] (d1) -- (d2);
+    \draw[arr] (d2) -- (ddots);
+    \draw[arr] (ddots) -- (dL);
+
+    \draw[arr] (eL.east) -- ++(8mm,0) |- (d1.west) node[pos=0.25, right] {\scriptsize \(K,\,V\)};
+    \draw[arr, dashed, draw=black!40] (eL.east) -- ++(8mm,0) |- (dL.west);
+
+    \draw[arr] (dL.south) -- ++(0,-4mm) -| (head.north);
+    \draw[arr] (head) -- (yhat);
+  \end{tikzpicture}}
+
+  \vskip 2pt
+  {\scriptsize Encoder self-attention; decoder cross-attention from queries;
+   linear head returns \((T,u,v)\).}
+\end{frame}
+
+\begin{frame}{Transformer: Training Loss}
+  \setlength{\abovedisplayskip}{2pt}
+  \setlength{\belowdisplayskip}{2pt}
+  \setlength{\abovedisplayshortskip}{1pt}
+  \setlength{\belowdisplayshortskip}{1pt}
+  \begin{block}{Composite objective}
+    \[
+      \mathcal{L}(\theta)=
+      \lambda_{\mathrm{sup}}\mathcal{L}_{\mathrm{sup}}
+      +\lambda_{\mathrm{vel}}\mathcal{L}_{\mathrm{vel}}
+      +\lambda_{\mathrm{th}}\mathcal{L}_{\mathrm{th}},
+      \qquad
+      (\lambda_{\mathrm{sup}},\lambda_{\mathrm{vel}},\lambda_{\mathrm{th}})
+      =(1.0,\,0.25,\,0.05)
+    \]
+  \end{block}
+  \begin{columns}[T]
+    \begin{column}{0.33\textwidth}
+      \begin{block}{Supervised (data)}
+        \scriptsize
+        \[
+          \mathcal{L}_{\mathrm{sup}}=
+          \frac{1}{N_q C_{\mathrm{out}}}
+          \sum_{j,c}\big(\hat y_{j,c}-y_{j,c}\big)^2
+        \]
+        Reconstructs the COMSOL reference fields.
+      \end{block}
+    \end{column}
+    \begin{column}{0.33\textwidth}
+      \begin{block}{Velocity consistency}
+        \scriptsize
+        \[
+          \mathcal{L}_{\mathrm{vel}}=
+          \frac{1}{N_q}\sum_{j}
+          \big\|\partial_t\hat u_j-\dot u_j^{\mathrm{ref}}\big\|_2^2
+        \]
+        Aligns the displacement rate with the exported velocity.
+      \end{block}
+    \end{column}
+    \begin{column}{0.33\textwidth}
+      \begin{block}{Thermal residual}
+        \scriptsize
+        \[
+          \mathcal{L}_{\mathrm{th}}=
+          \frac{1}{N_q}\sum_{j}
+          \big(\partial_t\hat T_j-\mathfrak{a}_j\nabla^2\hat T_j\big)^2
+        \]
+        Enforces diffusion with \(\mathfrak{a}_j=k_j/(\rho_j C_{p,j})\).
       \end{block}
     \end{column}
   \end{columns}
   \vskip 4pt
   \scriptsize
-  The repository implementation uses multilayer perceptrons, smooth SiLU
-  activations, residual connections, and layer normalization inside the graph
-  processing path.
+  Optimised with AdamW; tokens subsampled at \(N_{\mathrm{in}}=N_q=1024\).
 \end{frame}
-
-\begin{frame}{Message Passing, Training, and Limits}
-  \begin{columns}[T]
-    \begin{column}{0.52\textwidth}
-      \begin{block}{Message passing step}
-        \[
-          \tilde{e}_{ij}^{k+1}=\phi_e^k([h_i^k,h_j^k,e_{ij}^k])
-        \]
-        \[
-          m_j^{k+1}=\sum_{i:(i,j)\in\mathcal{E}}e_{ij}^{k+1}
-        \]
-        \[
-          h_j^{k+1}=\phi_v^k([h_j^k,m_j^{k+1}])
-        \]
-      \end{block}
-    \end{column}
-    \begin{column}{0.44\textwidth}
-      \begin{block}{Training objective}
-        \[
-          \mathcal{L}=\frac{1}{\sum_c w_c}\sum_{c=1}^{C}w_c
-          \frac{1}{N}\sum_{i=1}^{N}(\hat{y}_{i,c}-y_{i,c})^2
-        \]
-      \end{block}
-      \scriptsize
-      MeshGraphNet is a supervised COMSOL surrogate. It preserves mesh topology
-      and supports material conditioning, but physical equations are learned
-      implicitly and must be checked through validation plots and metrics.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Transformer-Style Surrogate Model}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Role}
-        Attention-based baseline surrogate for fast query prediction.
-      \end{block}
-      \begin{block}{Input}
-        \footnotesize
-        Tokens describing geometry, material parameters, state variables,
-        and requested observation time.
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Output}
-        \footnotesize
-        Fast estimates of temperature, displacement, travel time, and diagnostics.
-      \end{block}
-      \begin{block}{Why and limitation}
-        \footnotesize
-        Included as a flexible low-latency route. Its physics priors are limited,
-        so results require cautious interpretation.
-      \end{block}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Transformer: Attention-Based Surrogate}
-  \begin{columns}[T]
-    \begin{column}{0.50\textwidth}
-      \begin{block}{Role in the framework}
-        \footnotesize
-        The Transformer-style route is an attention-based surrogate for fast
-        prediction under the shared input--output contract.
-      \end{block}
-      \begin{itemize}
-        \footnotesize
-        \item Treats sampled points as tokens.
-        \item Relates distant points through attention.
-        \item Supports query-style prediction at requested locations.
-      \end{itemize}
-    \end{column}
-    \begin{column}{0.46\textwidth}
-      \begin{alertblock}{Interpretation}
-        \footnotesize
-        This route is mainly data-driven. It can be fast and flexible, but its
-        physical priors are weaker than those of the PINN route.
-      \end{alertblock}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Transformer Tokenisation}
-  \begin{columns}[T]
-    \begin{column}{0.52\textwidth}
-      \begin{block}{Input token}
-        {\scriptsize
-        \[
-          a_i=[x_i,y_i,T_i^{(0)},u_i^{(0)},v_i^{(0)},
-          \dot u_i^{(0)},\dot v_i^{(0)},E_i,\nu_i,\rho_i,
-          \alpha_i,k_i,C_{p,i}]
-        \]
-        }
-      \end{block}
-    \end{column}
-    \begin{column}{0.44\textwidth}
-      \begin{block}{Query token}
-        \[
-          q_j=(x_q^{(j)},y_q^{(j)})
-        \]
-      \end{block}
-      \footnotesize
-      Input tokens describe known mesh samples. Query tokens describe where the
-      predicted fields are requested.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Scaled Dot-Product Attention}
-  \begin{block}{Attention operation}
-    \[
-      \operatorname{Attention}(Q,K,V)=
-      \operatorname{softmax}\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V
-    \]
-  \end{block}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \footnotesize
-      \begin{itemize}
-        \item $Q$ stores query representations.
-        \item $K$ stores key representations.
-        \item $V$ stores value representations.
-      \end{itemize}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \footnotesize
-      The score matrix connects every query with every input token. This gives
-      the model a direct route for long-range interactions in the domain.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Transformer Encoder and Decoder}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Encoder}
-        \footnotesize
-        Input tokens are projected to an embedding space and refined through
-        multi-head self-attention and feed-forward layers.
-      \end{block}
-      \[
-        H^{(\ell+1)}=\operatorname{EncoderBlock}(H^{(\ell)})
-      \]
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Decoder}
-        \footnotesize
-        Query tokens attend to encoded input tokens through cross-attention.
-      \end{block}
-      \[
-        Z^{(\ell+1)}=\operatorname{DecoderBlock}(Z^{(\ell)},H)
-      \]
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Transformer Output Head}
-  \begin{columns}[T]
-    \begin{column}{0.52\textwidth}
-      \begin{block}{Predicted fields at query points}
-        \[
-          \hat{y}_j=(\hat T_j,\hat u_j,\hat v_j)
-        \]
-        \[
-          \hat{y}_j=W_{\mathrm{out}}Z_{j,:}^{(L_{\mathrm{dec}})}
-        \]
-      \end{block}
-    \end{column}
-    \begin{column}{0.44\textwidth}
-      \footnotesize
-      The model predicts temperature and two in-plane displacement components.
-      Stress and strain can be derived later from displacement gradients or
-      added as future output channels.
-      \vskip 4pt
-      \scriptsize
-      The baseline described in the source text uses an embedding dimension of
-      $d_m=128$ and multi-head attention with $h=4$ heads.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{Transformer Training Objective}
-  \begin{block}{Hybrid supervised objective}
-    \[
-      \mathcal{L}=\lambda_{\mathrm{sup}}\mathcal{L}_{\mathrm{sup}}
-      +\lambda_{\mathrm{vel}}\mathcal{L}_{\mathrm{vel}}
-      +\lambda_{\mathrm{th}}\mathcal{L}_{\mathrm{th}}
-    \]
-  \end{block}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \footnotesize
-      \begin{itemize}
-        \item supervised reconstruction of reference fields;
-        \item velocity consistency for displacement evolution;
-        \item thermal residual regularisation.
-      \end{itemize}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \footnotesize
-      Token subsampling controls attention cost and encourages operation on
-      different spatial samplings. Predictions still require careful validation
-      against COMSOL-derived references.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-
 \section{Calculation Results}
 
 \begin{frame}{Calculation Status}
@@ -1619,6 +1382,117 @@
 \begin{frame}{Thank You}
   \centering
   \Large Questions?
+\end{frame}
+
+% =====================================================================
+% Backup slides for Q&A. Not part of the main 15-20 min defence flow.
+% =====================================================================
+\section{Backup}
+
+\begin{frame}{Backup: Mechanical Rock Parameters}
+  \scriptsize
+  \renewcommand{\arraystretch}{1.12}
+  \setlength{\tabcolsep}{2.6pt}
+  \begin{tabular}{l|l|r|r|r|r|r|r}
+    \hline
+    \textbf{Material} & \textbf{Type} & $\rho$ & $E$ & $\nu$ & $\mu$ & $K$ & $V_P/V_S$ \\
+    & & kg/m$^3$ & GPa & -- & GPa & GPa & m/s \\
+    \hline
+    Granite      & intrusive   & 2650 &  76.28 & 0.245 & 30.63 & 49.84 & 5850/3400 \\
+    Granodiorite & intrusive   & 2795 &  85.91 & 0.255 & 34.24 & 58.35 & 6100/3500 \\
+    Basalt       & volcanic    & 3000 & 103.96 & 0.266 & 41.07 & 73.95 & 6550/3700 \\
+    Diabase      & hypabyssal  & 2975 &  98.22 & 0.274 & 38.56 & 72.36 & 6450/3600 \\
+    Gabbro       & mafic       & 3075 & 114.27 & 0.287 & 44.40 & 89.33 & 6950/3800 \\
+    Sandstone    & sedimentary & 2725 &  55.75 & 0.259 & 22.13 & 38.61 & 5000/2850 \\
+    Limestone    & carbonate   & 2675 &  61.48 & 0.277 & 24.08 & 45.90 & 5400/3000 \\
+    Marble       & metamorphic & 2725 &  82.41 & 0.270 & 32.43 & 59.82 & 6150/3450 \\
+    Schist       & foliated    & 2800 &  68.20 & 0.267 & 26.91 & 48.82 & 5500/3100 \\
+    Quartzite    & quartz-rich & 2650 &  83.50 & 0.250 & 33.40 & 55.70 & 6150/3550 \\
+    \hline
+  \end{tabular}
+  \vskip 6pt
+  Effective midpoint values under isotropic assumptions.
+\end{frame}
+
+\begin{frame}{Backup: Thermal and Porosity Parameters}
+  \scriptsize
+  \renewcommand{\arraystretch}{1.12}
+  \setlength{\tabcolsep}{3.2pt}
+  \begin{tabular}{l|r|r|r|r|r|>{\raggedright\arraybackslash}p{0.22\textwidth}}
+    \hline
+    \textbf{Material} & $\alpha$ & $k$ & $C_p$ & $C$ & $\gamma$ & \textbf{Porosity} \\
+    & $10^{-6}$/K & W/(m K) & J/(kg K) & MJ/(m$^3$ K) & MPa/K & \% \\
+    \hline
+    Granite      &  7.9 & 2.50 &  850 & 2.25 & 1.18 & total 45.5 \\
+    Granodiorite & --   & 2.40 & --   & --   & --   & -- \\
+    Basalt       & --   & 1.95 & 1300 & 3.90 & --   & total 19.0 \\
+    Diabase      & --   & 2.50 &  850 & 2.53 & --   & -- \\
+    Gabbro       & --   & 2.30 & 1000 & 3.08 & --   & total 43.5 \\
+    Sandstone    & 11.6 & 2.25 & 1000 & 2.73 & 1.34 & total 31.5; eff. 26.5 \\
+    Limestone    &  8.0 & 2.55 & 1050 & 2.81 & 1.10 & total 31.5; eff. 18.0 \\
+    Marble       &  9.8 & 2.80 &  850 & 2.32 & 1.76 & -- \\
+    Schist       & --   & 2.75 & 1150 & 3.22 & --   & total 26.5; eff. 27.5 \\
+    Quartzite    & --   & 5.10 & 1000 & 2.65 & --   & -- \\
+    \hline
+  \end{tabular}
+  \vskip 6pt
+  Dashes mark values that are not available in the source catalogue.
+\end{frame}
+
+\begin{frame}{Backup: Elastic Wave Velocities}
+  \begin{columns}[T]
+    \begin{column}{0.50\textwidth}
+      \begin{block}{Compressional (P) waves}
+        Particle motion is mainly parallel to the propagation direction
+        and involves volume change.
+      \end{block}
+      \begin{block}{Shear (S) waves}
+        Particle motion is mainly transverse to the propagation direction
+        and depends on shear rigidity.
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \[
+        V_{P} = \sqrt{\frac{K+\tfrac{4}{3}G}{\rho}},
+        \qquad
+        V_{S} = \sqrt{\frac{G}{\rho}}
+      \]
+      \scriptsize
+      $V_{P},V_{S}$ wave velocities [m/s]; $K$ bulk modulus [Pa];
+      $G$ shear modulus [Pa]; $\rho$ density [kg/m$^3$]. Stiffness
+      increases velocity; density increases inertia.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Backup: Thermal Diffusivity}
+  \begin{block}{Definition}
+    \[
+      \alpha_{T} = \frac{k}{\rho\,C_{p}}
+    \]
+  \end{block}
+  \vskip 4pt
+  \footnotesize
+  $\alpha_{T}$ thermal diffusivity [m$^2$/s].
+  Larger $\alpha_{T}$ means a temperature disturbance spreads faster.
+  This quantity controls the time-scale of the thermal part of the
+  coupled response; it is reported here because the main flow only
+  shows the heat equation in differential form.
+\end{frame}
+
+\begin{frame}{Image Credits}
+  \footnotesize
+  \begin{itemize}
+    \item Thermal expansion diagram: ``Thermal-expansion-aera.svg'',
+          MikeRun, Wikimedia Commons, CC BY-SA 4.0.
+    \item Heat conduction diagram:
+          ``Heat-conduction-between-two-resavoirs.svg'', MikeRun,
+          Wikimedia Commons, CC BY-SA 4.0.
+    \item Elastic body-wave diagram: ``Pswaves.jpg'' (body-wave portion),
+          Wikimedia Commons, public domain.
+    \item Rock textures (basalt, limestone): Wikimedia Commons,
+          public domain / CC.
+  \end{itemize}
 \end{frame}
 
 \end{document}
