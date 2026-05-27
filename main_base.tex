@@ -486,184 +486,104 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{Physics-Informed Neural Network (PINN)}
-  \begin{columns}[T]
-    \begin{column}{0.42\textwidth}
-      \footnotesize
-      \begin{block}{Role}
-        Physics-informed baseline in the comparison.
-      \end{block}
-      \begin{block}{Input / output}
-        \begin{itemize}
-          \item Input: $(x,y)$, time $t$, and material parameters
-                $E,\nu,\rho,\alpha,k,C_p$.
-          \item Output: temperature $T$ and in-plane displacement components
-                $(u,v)$.
-          \item Stress and strain are recovered from derivatives.
-        \end{itemize}
-      \end{block}
-      \begin{block}{Why and limitation}
-        Used because thermoelastic residuals can be included in training.
-        It is still a baseline model, not an exact equation solver.
-      \end{block}
-    \end{column}
-    \begin{column}{0.54\textwidth}
-      \begin{block}{Model relation}
-        \[
-          f_{\theta}(x,y,t,E,\nu,\rho,\alpha,k,C_p)\rightarrow(T,u,v)
-        \]
-        \[
-          \mathcal{L}
-          =
-          \lambda_{\mathrm{sup}}\mathcal{L}_{\mathrm{sup}}
-          +
-          \lambda_{\mathrm{vel}}\mathcal{L}_{\mathrm{vel}}
-          +
-          \lambda_{\mathrm{el}}\mathcal{L}_{\mathrm{elastic}}
-          +
-          \lambda_{\mathrm{th}}\mathcal{L}_{\mathrm{thermal}}
-        \]
-      \end{block}
-      \scriptsize
-      $x,y$ -- coordinates [m]; $t$ -- time [s]; $E$ -- Young's modulus [Pa];
-      $\nu$ -- Poisson's ratio [dimensionless]; $\rho$ -- density [kg/m$^3$];
-      $\alpha$ -- thermal expansion [1/K]; $k$ -- conductivity [W/(m K)];
-      $C_p$ -- heat capacity [J/(kg K)]; $T,u,v$ -- predicted temperature [K]
-      and displacements [m]. $\mathcal{L}$ and $\mathcal{L}_{\cdot}$ are
-      normalized loss terms; $\lambda_{\cdot}$ are dimensionless loss weights.
-    \end{column}
-  \end{columns}
-\end{frame}
-
 \begin{frame}{PINN: Physics-Informed Baseline}
   \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Role in the comparison}
+    \begin{column}{0.50\textwidth}
+      \begin{block}{Role in the framework}
         \footnotesize
-        The Physics-Informed Neural Network (PINN) is the route whose loss
-        explicitly contains thermoelastic equation residuals.
+        PINN is the explicitly physics-informed route in the comparison.
       \end{block}
       \begin{itemize}
         \footnotesize
-        \item Candidate predictor for the shared task.
-        \item Physics-informed baseline for the data-driven routes.
-        \item Uses supervised data and governing-equation constraints.
+        \item Uses supervised data and thermoelastic residuals.
+        \item Predicts temperature and displacement fields.
+        \item Serves as the physics-informed baseline for data-driven routes.
       \end{itemize}
     \end{column}
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.46\textwidth}
       \begin{alertblock}{Interpretation}
         \footnotesize
-        PINN is not an exact numerical solver. It is a neural surrogate whose
-        training objective encourages physically consistent predictions.
+        PINN is a neural surrogate whose loss encourages physical consistency.
+        It is not an exact numerical solver.
       \end{alertblock}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{PINN Network Structure}
-  \begin{columns}[T]
-    \begin{column}{0.50\textwidth}
-      \begin{block}{Multilayer perceptron}
-        \[
-          h^{(\ell)}=\varphi\left(W^{(\ell)}h^{(\ell-1)}+b^{(\ell)}\right)
-        \]
-        \[
-          h^{(0)}=(x,y,t,E,\nu,\rho,\alpha,k,C_p)
-        \]
+      \begin{block}{Practical setup}
+        \footnotesize
+        Used in the simplified 2D source--probe prediction workflow.
       \end{block}
     \end{column}
-    \begin{column}{0.46\textwidth}
-      \footnotesize
-      The implementation uses a smooth activation such as $\tanh$, because the
-      PDE residuals require derivatives of the network output with respect to
-      space and time.
-      \vskip 4pt
-      \scriptsize
-      $\theta$ collects all trainable weights and biases; automatic
-      differentiation provides the derivatives used in the loss.
-    \end{column}
   \end{columns}
 \end{frame}
 
-\begin{frame}{PINN Composite Loss}
-  \begin{block}{Training objective}
+\begin{frame}{PINN Input and Architecture}
+  \begin{block}{Public neural contract}
     \[
-      \mathcal{L}=\lambda_{\mathrm{sup}}\mathcal{L}_{\mathrm{sup}}
-      +\lambda_{\mathrm{vel}}\mathcal{L}_{\mathrm{vel}}
-      +\lambda_{\mathrm{el}}\mathcal{L}_{\mathrm{elastic}}
-      +\lambda_{\mathrm{th}}\mathcal{L}_{\mathrm{thermal}}
+      [x,y,z,t,E,\nu,\rho,\alpha,k,C_p]\rightarrow[T,u,v,w]
     \]
   \end{block}
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
-      \footnotesize
-      \begin{block}{Data terms}
-        \begin{itemize}
-          \item supervised error for $(T,u,v)$;
-          \item velocity consistency with exported COMSOL velocities.
-        \end{itemize}
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \footnotesize
-      \begin{block}{Physics terms}
-        \begin{itemize}
-          \item elastic-wave residual;
-          \item coupled thermal residual.
-        \end{itemize}
-      \end{block}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}{PINN Thermoelastic Residuals}
-  \begin{columns}[T]
-    \begin{column}{0.52\textwidth}
-      \begin{block}{Momentum balance}
+      \begin{block}{Baseline MLP}
         \[
-          \rho\,\partial_t^2 u-\nabla\!\cdot\!\sigma=0
-        \]
-        \[
-          \sigma=\lambda(\nabla\!\cdot\!u)I+2\mu\varepsilon-
-          \gamma\theta I
-        \]
-      \end{block}
-    \end{column}
-    \begin{column}{0.44\textwidth}
-      \begin{block}{Coupled heat equation}
-        \[
-          \rho C_p\partial_tT-k\nabla^2T+
-          \gamma T_0\partial_t(\nabla\!\cdot\!u)=0
+          X\rightarrow\mathrm{MLP}_{\theta}(X)\rightarrow\widehat{Y}
         \]
       \end{block}
       \scriptsize
-      $\theta=T-T_{\mathrm{ref}}$ and $\gamma=3K\alpha$ connect temperature,
-      strain, and stress inside the residual terms.
+      Plain fully connected baseline kept for comparison and checkpoint
+      compatibility.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \begin{block}{ResSplitPINN}
+        \[
+          [x,y,z,t]\rightarrow E_c,\qquad
+          [E,\nu,\rho,\alpha,k,C_p]\rightarrow E_m
+        \]
+        \[
+          [E_c,E_m]\rightarrow\mathrm{trunk}\rightarrow
+          (\hat{T},\hat{u},\hat{v},\hat{w})
+        \]
+      \end{block}
+      \scriptsize
+      Coordinates and material parameters are encoded separately, then fused and
+      decoded by split temperature and displacement heads.
     \end{column}
   \end{columns}
 \end{frame}
 
-\begin{frame}{PINN Data Use and Resulting Role}
+\begin{frame}{PINN Composite Loss and Residuals}
+  \begin{block}{Hybrid training objective}
+    \[
+      \mathcal{L}
+      =
+      \lambda_{\mathrm{sup}}\mathcal{L}_{\mathrm{sup}}
+      +
+      \lambda_{\mathrm{vel}}\mathcal{L}_{\mathrm{vel}}
+      +
+      \lambda_{\mathrm{wave}}\mathcal{L}_{\mathrm{wave}}
+      +
+      \lambda_{\mathrm{th}}\mathcal{L}_{\mathrm{th}}
+    \]
+  \end{block}
   \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Training data}
-        \footnotesize
-        PINN uses the same COMSOL-derived 2D datasets: coordinates, time,
-        material parameters, and ground-truth temperature and displacement.
-      \end{block}
+    \begin{column}{0.50\textwidth}
       \footnotesize
-      Residuals are evaluated at collocation points using automatic
-      differentiation.
+      \begin{itemize}
+        \item $\mathcal{L}_{\mathrm{sup}}$: supervised field loss for
+              $T,u,v,w$.
+        \item $\mathcal{L}_{\mathrm{vel}}$: velocity consistency from time
+              derivatives.
+        \item $\mathcal{L}_{\mathrm{wave}}$: elastic wave residual.
+        \item $\mathcal{L}_{\mathrm{th}}$: coupled thermal residual.
+      \end{itemize}
     \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Why it matters}
+    \begin{column}{0.46\textwidth}
+      \begin{alertblock}{Current limitation}
         \footnotesize
-        Because governing-equation residuals are part of training, PINN is the
-        physically grounded reference route in the comparison framework.
-      \end{block}
-      \footnotesize
-      Its outputs should still be interpreted within the simplified 2D
-      assumptions and available training-data coverage.
+        Dedicated boundary-condition and initial-condition losses are not yet
+        enforced.
+      \end{alertblock}
+      \scriptsize
+      In the implemented 2D mode, strain, stress, wave residual, and coupled
+      thermal residual are computed from automatic derivatives.
     \end{column}
   \end{columns}
 \end{frame}
