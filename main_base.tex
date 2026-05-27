@@ -181,32 +181,76 @@
 
 \begin{frame}{Motivation and Aim}
   \begin{columns}[T]
-    \begin{column}{0.58\textwidth}
+
+    \begin{column}{0.56\textwidth}
+
       \begin{block}{Motivation}
+        \footnotesize
         Temperature changes in rocks affect stress, deformation, and wave
-        propagation. Relevant to geothermal systems, underground engineering,
-        and geophysical interpretation.
+        propagation. These processes are relevant to geothermal systems,
+        underground engineering, and geophysical interpretation.
       \end{block}
+
+      \vspace{2mm}
+
       \begin{exampleblock}{Aim}
+        \footnotesize
         Develop and justify an AI-guided framework for directional prediction
-        of thermoelastic wave propagation in geological media under
-        simplified effective-medium assumptions.
+        of thermoelastic wave propagation in geological media under simplified
+        effective-medium assumptions.
       \end{exampleblock}
-      \vskip 4pt
-      \scriptsize
-      Scope: research prototype for source--probe directional prediction,
-      not a field-validated simulator.
+
+      \vspace{2mm}
+
+      \begin{alertblock}{Scope}
+        \footnotesize
+        Research prototype for source--probe directional prediction,
+        not a field-validated simulator.
+      \end{alertblock}
+
     \end{column}
-    \begin{column}{0.38\textwidth}
+
+    \begin{column}{0.40\textwidth}
       \centering
+
       \includegraphics[
         width=\linewidth,
-        height=0.62\textheight,
+        height=0.28\textheight,
         keepaspectratio
       ]{img/basalt}
-      \vskip 3pt
-      \scriptsize Basalt -- example of a target geological medium.
+
+      \vspace{1mm}
+
+      {\scriptsize Basalt -- example of a target geological medium.}
+
+      \vspace{3mm}
+
+      \begin{tikzpicture}[
+        node distance=0.32cm,
+        box/.style={
+          draw,
+          rounded corners,
+          align=center,
+          minimum width=3.0cm,
+          minimum height=0.52cm,
+          font=\scriptsize
+        },
+        >=Latex
+      ]
+
+        \node[box] (temp) {Temperature change};
+        \node[box, below=of temp] (stress) {Stress and deformation};
+        \node[box, below=of stress] (wave) {Thermoelastic wave};
+        \node[box, below=of wave] (direction) {Direction prediction};
+
+        \draw[->, thick] (temp) -- (stress);
+        \draw[->, thick] (stress) -- (wave);
+        \draw[->, thick] (wave) -- (direction);
+
+      \end{tikzpicture}
+
     \end{column}
+
   \end{columns}
 \end{frame}
 
