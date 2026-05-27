@@ -894,209 +894,223 @@
 \end{frame}
 
 
-\begin{frame}{MeshGraphNet}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Role}
-        Graph-based surrogate model for mesh-aware prediction.
-      \end{block}
-      \begin{block}{Input}
-        \footnotesize
-        Mesh nodes, graph connectivity, material features, and query context.
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Output}
-        \footnotesize
-        Node-level or probe-level response estimates after graph message passing.
-      \end{block}
-      \begin{block}{Why and limitation}
-        \footnotesize
-        Included because graph structure can represent local mesh interactions.
-        The current route behaves mainly as a fixed-horizon predictor.
-      \end{block}
-    \end{column}
-  \end{columns}
-\end{frame}
+% Required packages:
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,fit,arrows.meta,calc}
+\begin{frame}{MeshGraphNet: Graph Formulation}
+  \setlength{\abovedisplayskip}{3pt}
+  \setlength{\belowdisplayskip}{3pt}
 
-\begin{frame}{MeshGraphNet: Why a Graph Model}
+  \begin{block}{Main idea}
+    MeshGraphNet represents the COMSOL computational mesh as a graph and
+    predicts the next physical state for every mesh node.
+  \end{block}
+
   \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Reason for using MeshGraphNet}
-        \footnotesize
-        COMSOL finite-element data are naturally mesh-based. Nodes can have
-        different neighbourhoods and nonuniform distances, unlike pixels on a
-        regular image grid.
-      \end{block}
-      \begin{itemize}
-        \footnotesize
-        \item Preserves unstructured mesh connectivity.
-        \item Avoids forced interpolation to a Cartesian grid.
-        \item Matches local thermal and mechanical interactions.
-      \end{itemize}
-    \end{column}
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.52\textwidth}
       \begin{block}{Graph representation}
         \[
           \mathcal{G}=(\mathcal{V},\mathcal{E})
         \]
+        \scriptsize
+        \(\mathcal{V}\) is the set of mesh nodes, and
+        \(\mathcal{E}\) is the set of edges connecting neighbouring nodes.
       \end{block}
-      \scriptsize
-      $\mathcal{V}$ -- mesh nodes; $\mathcal{E}$ -- local graph edges.
-      Each node represents a spatial location in the simulated geological
-      medium; each edge represents local physical neighbourhood connectivity.
+
+      \begin{block}{Node features}
+        \[
+          \mathbf{x}_i^t =
+          [\mathbf{p}_i,\mathbf{s}_i^t,\mathbf{m}_i,\mathbf{c}]
+        \]
+        \scriptsize
+        \(\mathbf{x}_i^t\) describes node \(i\) at time \(t\):
+        coordinates, current physical state, material parameters, and
+        scenario condition.
+      \end{block}
+    \end{column}
+
+    \begin{column}{0.44\textwidth}
+      \begin{block}{Edge features}
+        \[
+          \mathbf{e}_{ij} =
+          [\mathbf{p}_j-\mathbf{p}_i,\,
+          \|\mathbf{p}_j-\mathbf{p}_i\|]
+        \]
+        \scriptsize
+        \(\mathbf{e}_{ij}\) describes the spatial relation between two
+        neighbouring mesh nodes \(i\) and \(j\).
+      \end{block}
+
+      \begin{block}{Prediction}
+        \[
+          \hat{\mathbf{y}}_i^{\,t+1}
+          =
+          F_{\theta}(\mathcal{G},\mathbf{x}^t)_i
+        \]
+        \scriptsize
+        \(F_{\theta}\) is the trained MeshGraphNet model, and
+        \(\hat{\mathbf{y}}_i^{\,t+1}\) is the predicted physical field vector
+        for node \(i\) at the next time step.
+      \end{block}
     \end{column}
   \end{columns}
 \end{frame}
-
-\begin{frame}{Mesh and Edge Features}
+\begin{frame}{MeshGraphNet: Inputs and Outputs}
   \begin{columns}[T]
-    \begin{column}{0.50\textwidth}
-      \begin{block}{Geometric edge encoding}
-        \[
-          r_{ij}=p_j-p_i,\qquad d_{ij}=\|r_{ij}\|_2
-        \]
-        \[
-          a_{ij}=\begin{bmatrix}r_{ij}\\ d_{ij}\end{bmatrix}
-        \]
-      \end{block}
+    \begin{column}{0.60\textwidth}
+      \centering
+      \resizebox{\linewidth}{!}{%
+      \begin{tikzpicture}[
+        font=\small,
+        node/.style={rectangle, rounded corners=2pt,
+          draw=blue!55!black, fill=blue!8,
+          minimum width=55mm, minimum height=8mm, inner sep=3pt, align=left},
+        edge/.style={rectangle, rounded corners=2pt,
+          draw=teal!55!black, fill=teal!10,
+          minimum width=45mm, minimum height=8mm, inner sep=3pt, align=left}
+      ]
+        \node[node] (n1) {$\mathbf{x}_1=(\mathbf{p}_1,\,\mathbf{s}_1^t,\,\mathbf{m}_1,\,\mathbf{c})$};
+        \node[node, below=of n1] (n2) {$\mathbf{x}_2=(\mathbf{p}_2,\,\mathbf{s}_2^t,\,\mathbf{m}_2,\,\mathbf{c})$};
+        \node[below=2mm of n2] (dots) {$\vdots$};
+        \node[node, below=2mm of dots] (nN) {$\mathbf{x}_N=(\mathbf{p}_N,\,\mathbf{s}_N^t,\,\mathbf{m}_N,\,\mathbf{c})$};
+
+        \node[edge, right=16mm of n1.east] (e1) {$\mathbf{e}_{12}=(\Delta x,\Delta y,\Delta z,\|\Delta\mathbf{p}\|)$};
+        \node[edge, below=of e1] (e2) {$\mathbf{e}_{ij}=\text{relative geometry}$};
+        \node[below=2mm of e2] (edots) {$\vdots$};
+        \node[edge, below=2mm of edots] (eM) {$\mathbf{e}_{M}$};
+
+        \node[draw=black!50, dashed, fit=(n1)(nN), inner sep=4mm,
+          label=above:{Node features}] {};
+        \node[draw=black!50, dashed, fit=(e1)(eM), inner sep=4mm,
+          label=above:{Edge attributes}] {};
+      \end{tikzpicture}}
     \end{column}
-    \begin{column}{0.46\textwidth}
+
+    \begin{column}{0.38\textwidth}
       \footnotesize
-      The edge attributes describe both direction and distance between
-      neighbouring mesh nodes.
-      \vskip 4pt
-      This matters because heat transfer, stress redistribution, and elastic
-      wave response depend on local geometry, not only on node values.
-      \vskip 4pt
-      \scriptsize
-      $p_i,p_j$ -- node coordinates [m]; $r_{ij}$ -- relative vector [m];
-      $d_{ij}$ -- Euclidean edge length [m].
+      \begin{block}{Graph representation}
+        \[
+          \mathcal{G}=(\mathcal{V},\mathcal{E})
+        \]
+        The COMSOL mesh is represented as a graph: nodes store physical
+        states, edges store spatial relations.
+      \end{block}
+
+      \begin{block}{Node input}
+        coordinates, material parameters, scenario condition, and current
+        dynamic state.
+      \end{block}
+
+      \begin{block}{Output}
+        \[
+          \hat{\mathbf{y}}_i^{\,t+1}\in\mathbb{R}^{C_{\mathrm{out}}}
+        \]
+        Predicted next physical fields for each mesh node.
+      \end{block}
     \end{column}
   \end{columns}
 \end{frame}
 
-\begin{frame}{Node Features and Prediction Target}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Node feature vector}
-        \[
-          x_i^t=\begin{bmatrix}p_i\\ m_i\\ s\\ q_i^t\end{bmatrix}
-        \]
-      \end{block}
-      \footnotesize
-      Coordinates, material parameters, scenario conditions, and current
-      dynamic fields are concatenated before model input.
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{State transition}
-        \[
-          \hat{Y}^{t+\Delta t}=f_{\theta}(X^t,\mathcal{G})
-        \]
-      \end{block}
-      \scriptsize
-      $X^t\in\mathbb{R}^{N\times F_v}$ is the node feature matrix;
-      $\hat{Y}^{t+\Delta t}\in\mathbb{R}^{N\times C}$ is the predicted
-      future field matrix for all graph nodes.
-    \end{column}
-  \end{columns}
+
+\begin{frame}{MeshGraphNet: Encoder--Processor--Decoder}
+  \centering
+  \resizebox{!}{0.74\textheight}{%
+  \begin{tikzpicture}[
+    font=\small,
+    node distance=4mm and 14mm,
+    inp/.style={rectangle, rounded corners=2pt,
+      draw=blue!55!black, fill=blue!8,
+      minimum width=52mm, minimum height=9mm, align=center},
+    enc/.style={rectangle, rounded corners=2pt,
+      draw=violet!55!black, fill=violet!10,
+      minimum width=52mm, minimum height=9mm, align=center},
+    proc/.style={rectangle, rounded corners=2pt,
+      draw=orange!75!black, fill=orange!10,
+      minimum width=52mm, minimum height=9mm, align=center},
+    outp/.style={rectangle, rounded corners=2pt,
+      draw=green!50!black, fill=green!12,
+      minimum width=52mm, minimum height=9mm, align=center},
+    arr/.style={-{Latex[length=2mm]}, thick, draw=black!65}
+  ]
+    \node[inp] (xin) {Node features \(\mathbf{x}_i\in\mathbb{R}^{d_x}\)};
+    \node[inp, right=24mm of xin] (ein) {Edge attributes \(\mathbf{e}_{ij}\in\mathbb{R}^{d_e}\)};
+
+    \node[enc, below=of xin] (nenc) {Node encoder MLP\\ \(\mathbb{R}^{d_x}\to\mathbb{R}^{d_h}\)};
+    \node[enc, below=of ein] (eenc) {Edge encoder MLP\\ \(\mathbb{R}^{d_e}\to\mathbb{R}^{d_h}\)};
+
+    \node[proc, below=13mm of $(nenc)!0.5!(eenc)$] (p1) {Message passing block \#1};
+    \node[proc, below=of p1] (p2) {Message passing block \#2};
+    \node[below=2mm of p2] (pdots) {\(\vdots\)};
+    \node[proc, below=2mm of pdots] (pK) {Message passing block \(K=10\)};
+
+    \node[outp, below=10mm of pK] (dec) {Decoder MLP\\ \(\mathbb{R}^{d_h}\to\mathbb{R}^{C_{\mathrm{out}}}\)};
+    \node[outp, below=of dec] (yhat) {\(\hat{\mathbf{y}}_i^{\,t+1}\)};
+
+    \draw[arr] (xin) -- (nenc);
+    \draw[arr] (ein) -- (eenc);
+    \draw[arr] (nenc.south) |- (p1.west);
+    \draw[arr] (eenc.south) |- (p1.east);
+    \draw[arr] (p1) -- (p2);
+    \draw[arr] (p2) -- (pdots);
+    \draw[arr] (pdots) -- (pK);
+    \draw[arr] (pK) -- (dec);
+    \draw[arr] (dec) -- (yhat);
+  \end{tikzpicture}}
+
+  \vskip 2pt
+  {\scriptsize The model uses latent dimension \(d_h=128\), ten message-passing steps, MLP encoders, and a node-wise decoder.}
 \end{frame}
 
-\begin{frame}{Delta Prediction Mode}
-  \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Absolute mode}
-        \[
-          \hat{q}_i^{t+\Delta t}=f_{\theta}(x_i^t,\mathcal{G})
-        \]
-      \end{block}
-      \begin{block}{Delta mode}
-        \[
-          \Delta\hat{q}_i^t=f_{\theta}(x_i^t,\mathcal{G})
-        \]
-        \[
-          \hat{q}_i^{t+\Delta t}=q_i^t+\Delta\hat{q}_i^t
-        \]
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \footnotesize
-      Delta prediction is useful because neighbouring time-step changes are
-      often smoother and smaller than full thermoelastic fields.
-      \vskip 5pt
-      \begin{alertblock}{Rollout caveat}
-        \footnotesize
-        In autoregressive prediction, each predicted state becomes the next
-        input. Small one-step errors can accumulate over long horizons.
-      \end{alertblock}
-    \end{column}
-  \end{columns}
-\end{frame}
 
-\begin{frame}{Encoder--Processor--Decoder Structure}
-  \begin{block}{Model composition}
+\begin{frame}{MeshGraphNet: Message Passing Block}
+  \setlength{\abovedisplayskip}{2pt}
+  \setlength{\belowdisplayskip}{2pt}
+
+  \begin{block}{Edge update}
     \[
-      f_{\theta}=D_{\theta_D}\circ P_{\theta_P}\circ E_{\theta_E}
+      \mathbf{e}_{ij}' =
+      \operatorname{LN}\Big(
+      \mathbf{e}_{ij}+
+      \phi_e([\mathbf{h}_i,\mathbf{h}_j,\mathbf{e}_{ij}])
+      \Big)
     \]
   \end{block}
-  \vskip 4pt
+
   \begin{columns}[T]
-    \begin{column}{0.31\textwidth}
-      \begin{block}{Encoder}
-        \footnotesize
-        Maps raw node and edge features into latent vectors.
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Aggregation}
+        \scriptsize
+        \[
+          \mathbf{a}_j =
+          \sum_{i:(i,j)\in\mathcal{E}}
+          \mathbf{e}_{ij}'
+        \]
+        Incoming edge messages are accumulated for every destination node
+        using scatter-add aggregation.
       \end{block}
     \end{column}
-    \begin{column}{0.31\textwidth}
-      \begin{block}{Processor}
-        \footnotesize
-        Applies repeated message passing over mesh connectivity.
-      \end{block}
-    \end{column}
-    \begin{column}{0.31\textwidth}
-      \begin{block}{Decoder}
-        \footnotesize
-        Converts final latent node states into predicted fields.
+
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Node update}
+        \scriptsize
+        \[
+          \mathbf{h}_j' =
+          \operatorname{LN}\Big(
+          \mathbf{h}_j+
+          \phi_v([\mathbf{h}_j,\mathbf{a}_j])
+          \Big)
+        \]
+        The residual connection preserves the previous node state and improves
+        stability during repeated message passing.
       \end{block}
     \end{column}
   \end{columns}
+
   \vskip 4pt
   \scriptsize
-  The repository implementation uses multilayer perceptrons, smooth SiLU
-  activations, residual connections, and layer normalization inside the graph
-  processing path.
+  Here \(\phi_e\) and \(\phi_v\) are MLPs with Linear layers, LayerNorm,
+  SiLU activation, and optional Dropout.
 \end{frame}
-
-\begin{frame}{Message Passing, Training, and Limits}
-  \begin{columns}[T]
-    \begin{column}{0.52\textwidth}
-      \begin{block}{Message passing step}
-        \[
-          \tilde{e}_{ij}^{k+1}=\phi_e^k([h_i^k,h_j^k,e_{ij}^k])
-        \]
-        \[
-          m_j^{k+1}=\sum_{i:(i,j)\in\mathcal{E}}e_{ij}^{k+1}
-        \]
-        \[
-          h_j^{k+1}=\phi_v^k([h_j^k,m_j^{k+1}])
-        \]
-      \end{block}
-    \end{column}
-    \begin{column}{0.44\textwidth}
-      \begin{block}{Training objective}
-        \[
-          \mathcal{L}=\frac{1}{\sum_c w_c}\sum_{c=1}^{C}w_c
-          \frac{1}{N}\sum_{i=1}^{N}(\hat{y}_{i,c}-y_{i,c})^2
-        \]
-      \end{block}
-      \scriptsize
-      MeshGraphNet is a supervised COMSOL surrogate. It preserves mesh topology
-      and supports material conditioning, but physical equations are learned
-      implicitly and must be checked through validation plots and metrics.
-    \end{column}
-  \end{columns}
-\end{frame}
-
 \begin{frame}{Transformer: Inputs and Outputs}
   \begin{columns}[T]
     \begin{column}{0.60\textwidth}
