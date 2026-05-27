@@ -82,18 +82,36 @@
 }
 
 \setbeamertemplate{title page}{%
-  \vspace{10mm}
-  {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
-  \vspace{3mm}
-  {\color{AcademicRule}\rule{0.68\linewidth}{0.6pt}\par}
-  \vspace{4mm}
-  {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}
-  \vfill
-  {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}
-  \vspace{2mm}
-  {\usebeamerfont{institute}\usebeamercolor[fg]{institute}\insertinstitute\par}
-  \vspace{2mm}
-  {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}
+  \begin{center}
+    \vspace{2mm}
+    \includegraphics[width=0.18\textwidth]{img/iitu_logo.png}
+    \vspace{4mm}
+    {\scriptsize Faculty of Computer Technology and Cybersecurity\par}
+    \vspace{1mm}
+    {\scriptsize Department of Mathematical and Computer Modeling\par}
+    \vspace{1mm}
+    {\scriptsize Educational Program: 6B06112 Data Science\par}
+    \vspace{7mm}
+    {\usebeamerfont{title}\usebeamercolor[fg]{title}
+    \textbf{AI-Guided Prediction of Thermoelastic Wave Propagation\\
+    in Geological Media}\par}
+    \vspace{5mm}
+    {\color{AcademicMuted}\rule{0.72\linewidth}{0.45pt}}
+    \vspace{5mm}
+    {\scriptsize
+    Nurshanov Dias \quad
+    Askarov Insar \quad
+    Kassymkhanov Timur \quad
+    Kaidrakhmetova Dinara
+    \par}
+    \vspace{3mm}
+    {\scriptsize
+    Advisor: \textit{Bakhyt N. Alipova} (PhD, Applied Mathematics)
+    \par}
+    \vfill
+    {\scriptsize Almaty, 2026}
+    \vspace{2mm}
+  \end{center}
 }
 
 \title[AI-Guided Thermoelastic Prediction]{%
@@ -108,15 +126,56 @@
 
 \begin{document}
 
+{
+\setbeamertemplate{footline}{}
 \begin{frame}[plain]
-  \begin{center}
-    \includegraphics[width=0.24\linewidth]{img/iitu_logo.png}
-  \end{center}
-  \titlepage
-  \begin{center}\footnotesize
-    Research adviser: \textbf{Bakhyt N. Alipova} (PhD, Applied Mathematics)
-  \end{center}
+    \centering
+
+    \vspace{2mm}
+
+    \includegraphics[width=0.16\textwidth]{img/iitu_logo.png}
+
+    \vspace{4mm}
+
+    {\scriptsize Faculty of Computer Technology and Cybersecurity\par}
+    {\scriptsize Department of Mathematical and Computer Modeling\par}
+    {\scriptsize Educational Program: 6B06112 Data Science\par}
+
+    \vspace{7mm}
+
+    \begin{minipage}{0.82\textwidth}
+        \centering
+        {\Large\textbf{
+        AI-Guided Prediction of Thermoelastic Wave Propagation\\
+        in Geological Media
+        }\par}
+    \end{minipage}
+
+    \vspace{4mm}
+
+    {\color{AcademicMuted}\rule{0.68\linewidth}{0.45pt}}
+
+    \vspace{4mm}
+
+    {\scriptsize
+    Nurshanov Dias \quad
+    Askarov Insar \quad
+    Kassymkhanov Timur \quad
+    Kaidrakhmetova Dinara
+    \par}
+
+    \vspace{2mm}
+
+    {\scriptsize Advisor: \textit{Bakhyt N. Alipova} (PhD, Applied Mathematics)\par}
+
+    \vfill
+
+    {\scriptsize Almaty, 2026}
+
+    \vspace{2mm}
+
 \end{frame}
+}
 
 \section{Motivation and Foundations}
 
