@@ -521,30 +521,64 @@
     \]
   \end{block}
   \begin{columns}[T]
-    \begin{column}{0.48\textwidth}
-      \begin{block}{Baseline MLP}
-        \[
-          X\rightarrow\mathrm{MLP}_{\theta}(X)\rightarrow\widehat{Y}
-        \]
+    \begin{column}{0.58\textwidth}
+      \centering
+      \resizebox{\linewidth}{!}{%
+      \begin{tikzpicture}[
+        font=\scriptsize,
+        node distance=4mm and 5mm,
+        box/.style={draw=AcademicBlue, fill=AcademicPanel, rounded corners=1pt,
+          align=center, inner sep=2.5pt, minimum height=6mm},
+        head/.style={draw=AcademicNavy, fill=white, rounded corners=1pt,
+          align=center, inner sep=2.5pt, minimum height=6mm},
+        arrow/.style={-{Latex[length=2mm]}, thick, draw=AcademicBlue}
+      ]
+        \node[box] (coord) {coordinates\\$x,y,z,t$};
+        \node[box, below=of coord] (mat) {material\\$E,\nu,\rho,\alpha,k,C_p$};
+        \node[box, right=of coord] (ce) {coordinate\\encoder};
+        \node[box, right=of mat] (me) {material\\encoder};
+        \coordinate (mid) at ($(ce)!0.5!(me)$);
+        \node[box, right=8mm of mid] (fusion) {fusion};
+        \node[box, right=of fusion] (trunk) {residual\\trunk};
+        \node[head, right=of trunk, yshift=5mm] (thead) {$T$ head};
+        \node[head, right=of trunk, yshift=-5mm] (uhead) {$u,v,w$ head};
+        \draw[arrow] (coord) -- (ce);
+        \draw[arrow] (mat) -- (me);
+        \draw[arrow] (ce) -- (fusion);
+        \draw[arrow] (me) -- (fusion);
+        \draw[arrow] (fusion) -- (trunk);
+        \draw[arrow] (trunk) -- (thead);
+        \draw[arrow] (trunk) -- (uhead);
+      \end{tikzpicture}
+      }
+
+      \vspace{1mm}
+      \begin{block}{Architecture variants}
+        \scriptsize
+        Baseline: $X\rightarrow\mathrm{MLP}_{\theta}(X)\rightarrow\widehat{Y}$.
+        Improved route: separate coordinate/material encoders, fused residual
+        trunk, and split temperature/displacement heads.
       \end{block}
-      \scriptsize
-      Plain fully connected baseline kept for comparison and checkpoint
-      compatibility.
     \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{ResSplitPINN}
-        \[
-          [x,y,z,t]\rightarrow E_c,\qquad
-          [E,\nu,\rho,\alpha,k,C_p]\rightarrow E_m
-        \]
-        \[
-          [E_c,E_m]\rightarrow\mathrm{trunk}\rightarrow
-          (\hat{T},\hat{u},\hat{v},\hat{w})
-        \]
+    \begin{column}{0.38\textwidth}
+      \begin{block}{Notation and units}
+        \scriptsize
+        \begin{tabular}{@{}ll@{}}
+          $x,y,z$ & coordinates [m]\\
+          $t$ & time [s]\\
+          $E$ & Young's modulus [Pa]\\
+          $\nu$ & Poisson's ratio [-]\\
+          $\rho$ & density [kg/m$^3$]\\
+          $\alpha$ & expansion [1/K]\\
+          $k$ & conductivity [W/(m K)]\\
+          $C_p$ & heat capacity [J/(kg K)]\\
+          $T$ & temperature [K]\\
+          $u,v,w$ & displacement [m]
+        \end{tabular}
       \end{block}
       \scriptsize
-      Coordinates and material parameters are encoded separately, then fused and
-      decoded by split temperature and displacement heads.
+      Stress and strain are not direct network outputs here; they are recovered
+      from spatial derivatives when physics residuals are evaluated.
     \end{column}
   \end{columns}
 \end{frame}
