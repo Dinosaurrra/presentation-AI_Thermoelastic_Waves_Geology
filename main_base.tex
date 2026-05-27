@@ -668,142 +668,193 @@
   \end{columns}
 \end{frame}
 
-\begin{frame}{FNO Architecture Used in the Prototype}
-  \resizebox{\textwidth}{!}{%
+\begin{frame}{FNO Pipeline}
+\centering
 \begin{tikzpicture}[
-    font=\small,
-    node distance=12mm,
-    block/.style={
-        rectangle,
-        rounded corners=2pt,
-        draw=blue!55!black,
-        fill=blue!8,
-        minimum width=34mm,
-        minimum height=10mm,
-        align=center
+    node distance=0.9cm and 0.6cm,
+    box/.style={
+        draw,
+        rounded corners,
+        align=center,
+        minimum width=2.4cm,
+        minimum height=1cm,
+        font=\footnotesize
     },
-    fourier/.style={
-        rectangle,
-        rounded corners=2pt,
-        draw=violet!55!black,
-        fill=violet!10,
-        minimum width=42mm,
-        minimum height=10mm,
-        align=center
+    smallbox/.style={
+        draw,
+        rounded corners,
+        align=center,
+        minimum width=1.8cm,
+        minimum height=0.8cm,
+        font=\scriptsize
     },
-    outp/.style={
-        rectangle,
-        rounded corners=2pt,
-        draw=green!50!black,
-        fill=green!12,
-        minimum width=34mm,
-        minimum height=10mm,
-        align=center
-    },
-    arr/.style={
-        -{Latex[length=2mm]},
-        thick,
-        draw=black!65
-    }
+    >=Latex
 ]
 
-\node[block]   (in)   {Input};
-\node[block, right=of in] (lift) {Lifting layer};
-\node[fourier, right=of lift] (fno) {Fourier blocks};
-\node[block, right=of fno] (proj) {Projection layer};
-\node[outp, right=of proj] (out) {Output};
+\node[box] (input) {Input field\\$a(x,y)$};
+\node[box, right=of input] (lift) {Lifting layer\\to latent features};
+\node[box, right=of lift] (spec) {Spectral block\\$\times L$};
+\node[box, right=of spec] (proj) {Projection layer};
+\node[box, right=of proj] (out) {Output field\\$\hat{u}(x,y)$};
 
-\draw[arr] (in) -- (lift);
-\draw[arr] (lift) -- (fno);
-\draw[arr] (fno) -- (proj);
-\draw[arr] (proj) -- (out);
+\draw[->, thick] (input) -- (lift);
+\draw[->, thick] (lift) -- (spec);
+\draw[->, thick] (spec) -- (proj);
+\draw[->, thick] (proj) -- (out);
 
-\end{tikzpicture}}
-  \begin{columns}[T]
-    \begin{column}{0.49\textwidth}
-      \begin{block}{Operator composition}
-        \[
-          \mathcal{G}_{\theta}=Q\circ\mathcal{B}_{L-1}\circ\cdots
-          \circ\mathcal{B}_0\circ P
-        \]
-      \end{block}
-      \scriptsize
-      $P$ -- lifting layer; $\mathcal{B}_l$ -- Fourier block;
-      $Q$ -- projection layer; $L$ -- number of Fourier blocks.
-    \end{column}
-  \end{columns}
+% inner spectral block
+\node[smallbox, below=1.2cm of spec, xshift=-2.7cm] (fft) {FFT};
+\node[smallbox, right=of fft] (modes) {Retained modes\\+ weights};
+\node[smallbox, right=of modes] (ifft) {Inverse FFT};
+\node[smallbox, right=of ifft] (conv) {Local\\convolution};
+
+\draw[->, thick] (fft) -- (modes);
+\draw[->, thick] (modes) -- (ifft);
+\draw[->, thick] (ifft) -- (conv);
+
+\draw[dashed, ->] (spec.south) -- ++(0,-0.3) -| (fft.north);
+\draw[dashed, ->] (conv.north) |- (spec.south);
+
+\end{tikzpicture}
+
+\vspace{0.4cm}
+
+\footnotesize
+FNO maps an input field to an output field by combining
+global spectral interactions and local spatial corrections.
 \end{frame}
 
 \begin{frame}{FNO Spectral Block}
-  \begin{columns}[T]
-    \begin{column}{0.50\textwidth}
-      \begin{block}{Block update}
+\begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+        \begin{block}{Layer update}
         \[
-          v_{l+1}=\sigma\left(\mathcal{S}_l(v_l)+\mathcal{C}_l(v_l)\right)
+        v_{l+1}=\sigma\left(\mathcal{S}_l(v_l)+\mathcal{C}_l(v_l)\right)
         \]
-      \end{block}
-      \footnotesize
-      The spectral branch captures global frequency-domain interactions;
-      the local convolution branch captures neighboring spatial patterns.
-      \begin{block}{Retained modes}
+        \scriptsize
+        where \(v_l\) is the latent feature field at layer \(l\);\\
+        \(\mathcal{S}_l\) is the spectral branch;\\
+        \(\mathcal{C}_l\) is the local convolution branch;\\
+        \(\sigma\) is the activation function.
+        \end{block}
+
+        \begin{block}{Spectral transform}
         \[
-          \texttt{modes}=[K_1,K_2],\qquad d=2
+        \hat{v}_l=\mathcal{F}(v_l), \qquad
+        z_l=\mathcal{F}^{-1}(R_l\hat{v}_l)
         \]
-      \end{block}
-      \footnotesize
-      Only selected low-frequency Fourier coefficients are transformed by
-      learned weights. This controls capacity and computational cost.
+        \scriptsize
+        where \(\mathcal{F}\) is the Fourier transform;\\
+        \(\mathcal{F}^{-1}\) is the inverse Fourier transform;\\
+        \(R_l\) is the trainable spectral weight tensor.
+        \end{block}
     \end{column}
-    \begin{column}{0.46\textwidth}
-      \begin{block}{Spectral convolution}
+
+    \begin{column}{0.44\textwidth}
+        \footnotesize
+        \textbf{Interpretation:}
+        \begin{itemize}
+            \item Fourier transform moves the field into frequency space.
+            \item Only low-frequency modes are retained and transformed.
+            \item Inverse transform returns the result to physical space.
+            \item Local convolution restores short-range spatial details.
+        \end{itemize}
+
+        \vspace{0.3cm}
+
+        \begin{block}{Retained modes}
         \[
-          \hat{v}_l=\mathcal{F}(v_l),\qquad
-          z_l=\mathcal{F}^{-1}\left(R_l\cdot\hat{v}_l\right)
+        \texttt{modes}=[K_1,K_2], \qquad d=2
         \]
-      \end{block}
-      \scriptsize
-      $\mathcal{F}$ and $\mathcal{F}^{-1}$ are Fourier and inverse Fourier
-      transforms; $R_l$ is the trainable complex-valued spectral weight tensor.
-      \begin{block}{Optional grid channels}
-        \[
-          \tilde{a}(x,y)=[a(x,y),x,y]
-        \]
-      \end{block}
-      \footnotesize
-      With \texttt{add\_grid}, the model receives explicit normalized spatial
-      coordinates. This helps distinguish source, boundary, and interior regions
+        \scriptsize
+        \(K_1,K_2\) are the retained Fourier modes in two spatial directions.
+        \end{block}
     \end{column}
-  \end{columns}
+\end{columns}
 \end{frame}
 
-\begin{frame}{Training, Evaluation, and Current FNO Caveat}
-  \begin{columns}[T]
+\begin{frame}{Training and Evaluation of FNO}
+\centering
+
+\begin{tikzpicture}[
+    node distance=0.45cm and 0.75cm,
+    box/.style={
+        draw,
+        rounded corners,
+        align=center,
+        minimum width=2.15cm,
+        minimum height=0.55cm,
+        font=\scriptsize
+    },
+    >=Latex
+]
+
+\node[box] (data) {Dataset};
+\node[box, right=of data] (norm) {Normalization};
+\node[box, right=of norm] (model) {FNO model};
+
+\node[box, below=of model] (pred) {Prediction};
+\node[box, left=of pred] (loss) {Loss};
+\node[box, left=of loss] (eval) {Evaluation};
+
+\draw[->, thick] (data) -- (norm);
+\draw[->, thick] (norm) -- (model);
+\draw[->, thick] (model) -- (pred);
+\draw[->, thick] (pred) -- (loss);
+\draw[->, thick] (loss) -- (eval);
+
+\end{tikzpicture}
+
+\vspace{0.15cm}
+
+\begin{columns}[T]
     \begin{column}{0.52\textwidth}
-      \begin{block}{Supervised objective}
+
+        \begin{block}{Training objective}
         \[
-          \mathcal{L}=\lambda_{MSE}\mathcal{L}_{MSE}
-          +\lambda_{rel}\mathcal{L}_{rel}
+        \mathcal{L}=\lambda_{MSE}\mathcal{L}_{MSE}
+        +\lambda_{rel}\mathcal{L}_{rel}
         \]
-      \end{block}
-      \scriptsize
-      Channel normalization is computed on the training set and reused for
-      validation, testing, and inference.
-      \[
-        \tilde{s}_{i,c}=\frac{s_{i,c}-\mu_c}{\sigma_c}
-      \]
+        \scriptsize
+        \(\mathcal{L}\) is the total loss;
+        \(\mathcal{L}_{MSE}\) measures point-wise field error;
+        \(\mathcal{L}_{rel}\) measures relative \(L^2\) deviation;
+        \(\lambda_{MSE}\), \(\lambda_{rel}\) control their contribution.
+        \end{block}
+
+        \scriptsize
+        Normalization is computed on the training set and reused during
+        validation, testing, and inference:
+        \[
+          \tilde{s}_{i,c}=\frac{s_{i,c}-\mu_c}{\sigma_c}.
+        \]
+
     \end{column}
-    \begin{column}{0.44\textwidth}
-      \begin{alertblock}{Interpretation in this thesis}
+
+    \begin{column}{0.42\textwidth}
+
         \footnotesize
-        FNO is valuable as a field-based neural-operator route, but the current
-        prototype still needs output-scale recalibration before it can be read
-        as a physically reliable predictor.
-      \end{alertblock}
-      \footnotesize
-      Evaluation should use field-level plots, channel-wise errors, relative
-      $L^2$ error, and travel-time sanity checks.
+        \textbf{Evaluation includes:}
+        \scriptsize
+        \begin{itemize}
+            \item field-level visual comparison;
+            \item channel-wise prediction errors;
+            \item relative \(L^2\) error;
+            \item physical sanity checks.
+        \end{itemize}
+
+        \vspace{-2pt}
+
+        \begin{alertblock}{Current caveat}
+        \scriptsize
+        The FNO prototype is useful as a field-based neural-operator baseline,
+        but still requires output-scale recalibration before being treated as
+        a physically reliable predictor.
+        \end{alertblock}
+
     \end{column}
-  \end{columns}
+\end{columns}
+
 \end{frame}
 
 
