@@ -593,6 +593,83 @@
   \end{columns}
 \end{frame}
 
+\begin{frame}{Implementation Stack}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.47\textwidth}
+      \begin{block}{Local thesis-demo stack}
+        \footnotesize
+        The prototype is packaged as a local Docker Compose workspace with
+        a FastAPI orchestration backend, a native web frontend, and separate
+        Python model services.
+      \end{block}
+      \vspace{2mm}
+      \footnotesize
+      \begin{itemize}
+        \item \textbf{Frontend:} HTML, CSS, JavaScript interface for scenario setup.
+        \item \textbf{Backend:} FastAPI validates requests and normalizes responses.
+        \item \textbf{Services:} Python inference endpoints for PINN, FNO,
+              MeshGraphNet, and Transformer routes.
+        \item \textbf{Deployment:} Docker Compose starts the demo stack locally.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.49\textwidth}
+      \centering
+      \resizebox{\linewidth}{!}{%
+      \begin{tikzpicture}[
+        font=\scriptsize,
+        node distance=5mm,
+        box/.style={
+          draw=AcademicBlue,
+          fill=AcademicPanel,
+          rounded corners=1pt,
+          align=center,
+          inner sep=4pt,
+          minimum width=42mm,
+          minimum height=8mm
+        },
+        service/.style={
+          draw=AcademicNavy,
+          fill=white,
+          rounded corners=1pt,
+          align=center,
+          inner sep=3pt,
+          minimum width=27mm,
+          minimum height=7mm
+        },
+        arrow/.style={-{Latex[length=2mm]}, thick, draw=AcademicBlue}
+      ]
+        \node[box] (ui) {Web UI\\HTML/CSS/JavaScript};
+        \node[box, below=of ui] (api) {FastAPI backend\\validation + routing};
+        \node[box, below=of api] (catalog) {Material catalog\\JSON rock presets};
+        \node[box, right=16mm of api] (docker) {Docker Compose\\local services};
+
+        \node[service, below=13mm of catalog, xshift=-42mm] (pinn) {PINN\\Python};
+        \node[service, right=4mm of pinn] (fno) {FNO\\Python};
+        \node[service, right=4mm of fno] (mgn) {MeshGraphNet\\Python};
+        \node[service, right=4mm of mgn] (tr) {Transformer\\Python};
+
+        \node[box, below=11mm of fno, xshift=31mm] (out) {Normalized response\\$T$, $u$, $v$, travel time};
+
+        \draw[arrow] (ui) -- (api);
+        \draw[arrow] (api) -- (catalog);
+        \draw[arrow] (api.east) -- (docker.west);
+        \draw[arrow] (api.south) -- ++(0,-6mm) -| (pinn.north);
+        \draw[arrow] (api.south) -- ++(0,-6mm) -| (fno.north);
+        \draw[arrow] (api.south) -- ++(0,-6mm) -| (mgn.north);
+        \draw[arrow] (api.south) -- ++(0,-6mm) -| (tr.north);
+        \draw[arrow] (pinn.south) |- (out.west);
+        \draw[arrow] (fno.south) -- (out.north);
+        \draw[arrow] (mgn.south) |- (out.east);
+        \draw[arrow] (tr.south) |- (out.east);
+      \end{tikzpicture}}
+      \vspace{2mm}
+
+      {\scriptsize The backend does not replace the models; it orchestrates
+      model-specific services and returns one comparable response format.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
 \begin{frame}{PINN: Physics-Informed Baseline}
   \begin{columns}[T]
     \begin{column}{0.50\textwidth}
@@ -1463,12 +1540,12 @@ global spectral interactions and local spatial corrections.
   \begin{columns}[T,onlytextwidth]
     \begin{column}{0.34\textwidth}
       \begin{block}{Implemented MVP}
-        \footnotesize
+        \scriptsize
         A local web workspace connects the frontend, backend orchestrator,
         material catalog, and model services under one prediction contract.
       \end{block}
-      \vspace{1mm}
-      \footnotesize
+      \vspace{0.5mm}
+      \scriptsize
       \begin{itemize}
         \item Select geological medium and model route:
               MeshGraphNet, FNO, Transformer, or PINN.
@@ -1476,12 +1553,9 @@ global spectral interactions and local spatial corrections.
         \item Inspect normalized thermal, mechanical, directional, and
               temporal response.
       \end{itemize}
-      \vspace{1mm}
-      \begin{alertblock}{Scientific scope}
-        \scriptsize
-        Thesis-demo interface for reproducible comparison; not a
-        field-validated thermoelastic simulator.
-      \end{alertblock}
+      \vspace{0.5mm}
+      {\scriptsize\textbf{Scientific scope.} Thesis-demo interface for
+      reproducible comparison; not a field-validated thermoelastic simulator.}
     \end{column}
     \begin{column}{0.64\textwidth}
       \includegraphics[

@@ -244,7 +244,25 @@ All routes are treated as surrogate modelling approaches for the same AI-guided 
 \end{itemize}
 
 \Transition
-I will start the model discussion with the physics-informed baseline.
+Before discussing the individual models, I will briefly describe the implementation stack.
+\end{slidenote}
+
+\begin{slidenote}{Implementation Stack}
+\Purpose
+Explain the software stack that connects the web interface with the model routes.
+
+\WhatToSay
+This slide summarizes the implementation stack behind the prototype. The system is packaged as a local Docker Compose workspace. The user interacts with a native HTML, CSS, and JavaScript frontend. The frontend sends a request to the FastAPI backend, which validates the input, reads the geological material catalog, routes the request to the selected model service, and normalizes the response. The model routes are implemented as Python inference services for PINN, FNO, MeshGraphNet, and Transformer-style prediction. The backend itself does not replace the machine-learning models. Its role is orchestration: it makes the four routes comparable by giving them the same input contract and returning the same response structure.
+
+\KeyPoints
+\begin{itemize}
+  \item Docker Compose runs the local demo stack.
+  \item FastAPI provides validation, routing, and response normalization.
+  \item Python model services expose PINN, FNO, MeshGraphNet, and Transformer routes.
+\end{itemize}
+
+\Transition
+With the implementation stack defined, I will start the model discussion with the physics-informed baseline.
 \end{slidenote}
 
 \begin{slidenote}{PINN: Physics-Informed Baseline}
