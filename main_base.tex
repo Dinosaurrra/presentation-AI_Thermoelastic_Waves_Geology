@@ -614,18 +614,18 @@
     \end{column}
     \begin{column}{0.49\textwidth}
       \centering
-      \resizebox{\linewidth}{!}{%
+      \resizebox{!}{0.49\textheight}{%
       \begin{tikzpicture}[
         font=\scriptsize,
-        node distance=5mm,
+        node distance=4mm and 7mm,
         box/.style={
           draw=AcademicBlue,
           fill=AcademicPanel,
           rounded corners=1pt,
           align=center,
-          inner sep=4pt,
-          minimum width=42mm,
-          minimum height=8mm
+          inner sep=3pt,
+          minimum width=58mm,
+          minimum height=7mm
         },
         service/.style={
           draw=AcademicNavy,
@@ -633,34 +633,24 @@
           rounded corners=1pt,
           align=center,
           inner sep=3pt,
-          minimum width=27mm,
+          minimum width=30mm,
           minimum height=7mm
         },
         arrow/.style={-{Latex[length=2mm]}, thick, draw=AcademicBlue}
       ]
-        \node[box] (ui) {Web UI\\HTML/CSS/JavaScript};
+        \node[box] (docker) {Docker Compose\\local thesis-demo workspace};
+        \node[box, below=of docker] (ui) {Web UI\\HTML/CSS/JavaScript};
         \node[box, below=of ui] (api) {FastAPI backend\\validation + routing};
-        \node[box, below=of api] (catalog) {Material catalog\\JSON rock presets};
-        \node[box, right=16mm of api] (docker) {Docker Compose\\local services};
+        \node[box, below=of api] (catalog) {Material catalog + prediction router\\JSON presets + shared request contract};
+        \node[box, below=of catalog] (models) {Python model services\\
+          PINN \quad FNO \quad MeshGraphNet \quad Transformer};
+        \node[box, below=of models] (out) {Normalized response\\$T$, $u$, $v$, travel time};
 
-        \node[service, below=13mm of catalog, xshift=-42mm] (pinn) {PINN\\Python};
-        \node[service, right=4mm of pinn] (fno) {FNO\\Python};
-        \node[service, right=4mm of fno] (mgn) {MeshGraphNet\\Python};
-        \node[service, right=4mm of mgn] (tr) {Transformer\\Python};
-
-        \node[box, below=11mm of fno, xshift=31mm] (out) {Normalized response\\$T$, $u$, $v$, travel time};
-
+        \draw[arrow] (docker) -- (ui);
         \draw[arrow] (ui) -- (api);
         \draw[arrow] (api) -- (catalog);
-        \draw[arrow] (api.east) -- (docker.west);
-        \draw[arrow] (api.south) -- ++(0,-6mm) -| (pinn.north);
-        \draw[arrow] (api.south) -- ++(0,-6mm) -| (fno.north);
-        \draw[arrow] (api.south) -- ++(0,-6mm) -| (mgn.north);
-        \draw[arrow] (api.south) -- ++(0,-6mm) -| (tr.north);
-        \draw[arrow] (pinn.south) |- (out.west);
-        \draw[arrow] (fno.south) -- (out.north);
-        \draw[arrow] (mgn.south) |- (out.east);
-        \draw[arrow] (tr.south) |- (out.east);
+        \draw[arrow] (catalog) -- (models);
+        \draw[arrow] (models) -- (out);
       \end{tikzpicture}}
       \vspace{2mm}
 
