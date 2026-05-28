@@ -467,60 +467,28 @@
 \end{frame}
 
 \begin{frame}{COMSOL Simulation Results}
-\begin{columns}[T,onlytextwidth]
-    
-    \begin{column}{0.32\textwidth}
-        \centering
-        \includegraphics[
-            width=\textwidth,
-            height=0.42\textheight,
-            keepaspectratio
-        ]{img/comsol_temperature_2d.png}
-        
-        \vspace{2pt}
-        \scriptsize \textbf{Temperature Field}
-        
-        \vspace{2pt}
-        \tiny
-        Local heating creates a high-temperature region near the source, while
-        the surrounding rock remains close to the initial temperature.
-    \end{column}
-    
-    \begin{column}{0.32\textwidth}
-        \centering
-        \includegraphics[
-            width=\textwidth,
-            height=0.42\textheight,
-            keepaspectratio
-        ]{img/comsol_displacement_2d.png}
-        
-        \vspace{2pt}
-        \scriptsize \textbf{Total Displacement}
-        
-        \vspace{2pt}
-        \tiny
-        Thermal expansion causes deformation of the medium, with the largest
-        displacement concentrated around the heated source.
-    \end{column}
-    
-    \begin{column}{0.32\textwidth}
-        \centering
-        \includegraphics[
-            width=\textwidth,
-            height=0.42\textheight,
-            keepaspectratio
-        ]{img/comsol_stress_2d.png}
-        
-        \vspace{2pt}
-        \scriptsize \textbf{von Mises Stress}
-        
-        \vspace{2pt}
-        \tiny
-        The induced thermoelastic response generates stress concentration near
-        the source, confirming the coupled thermal and mechanical behavior.
-    \end{column}
-    
-\end{columns}
+  \centering
+  \includegraphics[
+    width=0.332\textwidth,
+    height=0.70\textheight,
+    trim=0 0 0 32,
+    clip,
+    keepaspectratio
+  ]{img/comsol_temperature_2d.png}%
+  \includegraphics[
+    width=0.332\textwidth,
+    height=0.70\textheight,
+    trim=0 0 0 32,
+    clip,
+    keepaspectratio
+  ]{img/comsol_displacement_2d.png}%
+  \includegraphics[
+    width=0.332\textwidth,
+    height=0.70\textheight,
+    trim=0 0 0 32,
+    clip,
+    keepaspectratio
+  ]{img/comsol_stress_2d.png}
 \end{frame}
 
 \begin{frame}{Data Representation and Preprocessing}
