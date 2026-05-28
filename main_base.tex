@@ -467,28 +467,46 @@
 \end{frame}
 
 \begin{frame}{COMSOL Simulation Results}
-  \centering
-  \includegraphics[
-    width=0.332\textwidth,
-    height=0.70\textheight,
-    trim=0 0 0 32,
-    clip,
-    keepaspectratio
-  ]{img/comsol_temperature_2d.png}%
-  \includegraphics[
-    width=0.332\textwidth,
-    height=0.70\textheight,
-    trim=0 0 0 32,
-    clip,
-    keepaspectratio
-  ]{img/comsol_displacement_2d.png}%
-  \includegraphics[
-    width=0.332\textwidth,
-    height=0.70\textheight,
-    trim=0 0 0 32,
-    clip,
-    keepaspectratio
-  ]{img/comsol_stress_2d.png}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.332\textwidth}
+      \centering
+      \includegraphics[
+        width=\textwidth,
+        height=0.60\textheight,
+        trim=0 0 0 32,
+        clip,
+        keepaspectratio
+      ]{img/comsol_temperature_2d.png}
+
+      \vspace{1mm}
+      {\scriptsize Local heating creates a compact temperature disturbance
+      near the source.}
+    \end{column}
+    \begin{column}{0.332\textwidth}
+      \centering
+      \includegraphics[
+        width=\textwidth,
+        height=0.60\textheight,
+        trim=0 0 0 32,
+        clip,
+        keepaspectratio
+      ]{img/comsol_displacement_2d.png}
+
+      \vspace{1mm}
+      {\scriptsize Thermal expansion produces displacement concentrated
+      around the heated region.}
+    \end{column}
+    \begin{column}{0.332\textwidth}
+      \centering
+      \includegraphics[
+        width=\textwidth,
+        height=0.66\textheight,
+        trim=0 0 0 32,
+        clip,
+        keepaspectratio
+      ]{img/comsol_stress_2d.png}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \begin{frame}{Data Representation and Preprocessing}
