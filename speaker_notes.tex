@@ -586,7 +586,25 @@ The main threats to validity are listed here. First, the training data are limit
 \end{itemize}
 
 \Transition
-With these limitations in mind, I can summarize the conclusions.
+After the limitations, I will briefly show the web application prototype.
+\end{slidenote}
+
+\begin{slidenote}{Web Application Prototype}
+\Purpose
+Show that the thesis includes a usable local MVP for comparing model routes.
+
+\WhatToSay
+This slide shows the implemented web application prototype. The local workspace connects a native web frontend, a FastAPI backend orchestrator, the geological material catalog, and separate model routes for MeshGraphNet, FNO, Transformer, and PINN. The user can choose a geological medium, configure the planar source and probe points, set the observation time, choose a model route, and inspect the normalized prediction response. The screenshots show three parts of the interface: the landing workspace, the source--probe visualization, and a detailed prediction result. The important interpretation remains the same: this is a thesis-demo interface for reproducible comparison, not a field-validated thermoelastic simulator.
+
+\KeyPoints
+\begin{itemize}
+  \item The application connects frontend, backend, material catalog, and model services.
+  \item It supports source--probe setup and model-route comparison.
+  \item Results are displayed as normalized thermal, mechanical, directional, and temporal responses.
+\end{itemize}
+
+\Transition
+With the prototype shown, I can summarize the conclusions.
 \end{slidenote}
 
 \begin{slidenote}{Conclusions}

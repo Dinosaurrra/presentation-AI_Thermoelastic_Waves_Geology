@@ -1459,6 +1459,62 @@ global spectral interactions and local spatial corrections.
   \end{enumerate}
 \end{frame}
 
+\begin{frame}{Web Application Prototype}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.34\textwidth}
+      \begin{block}{Implemented MVP}
+        \footnotesize
+        A local web workspace connects the frontend, backend orchestrator,
+        material catalog, and model services under one prediction contract.
+      \end{block}
+      \vspace{1mm}
+      \footnotesize
+      \begin{itemize}
+        \item Select geological medium and model route:
+              MeshGraphNet, FNO, Transformer, or PINN.
+        \item Configure planar source, probe, and observation time.
+        \item Inspect normalized thermal, mechanical, directional, and
+              temporal response.
+      \end{itemize}
+      \vspace{1mm}
+      \begin{alertblock}{Scientific scope}
+        \scriptsize
+        Thesis-demo interface for reproducible comparison; not a
+        field-validated thermoelastic simulator.
+      \end{alertblock}
+    \end{column}
+    \begin{column}{0.64\textwidth}
+      \includegraphics[
+        width=\linewidth,
+        height=0.19\textheight,
+        keepaspectratio
+      ]{img/web_title.png}
+
+      \vspace{1.2mm}
+
+      \begin{minipage}[t]{0.53\linewidth}
+        \includegraphics[
+          width=\linewidth,
+          height=0.40\textheight,
+          keepaspectratio
+        ]{img/web_visualization.png}
+      \end{minipage}
+      \hfill
+      \begin{minipage}[t]{0.43\linewidth}
+        \includegraphics[
+          width=\linewidth,
+          height=0.40\textheight,
+          keepaspectratio
+        ]{img/web_result.png}
+      \end{minipage}
+
+      \vspace{1mm}
+      {\scriptsize UI screenshots from the local directional prediction
+      workspace: landing view, source--probe geometry, and prediction result.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
 \section{Conclusion}
 
 \begin{frame}{Conclusions}
