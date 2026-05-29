@@ -270,7 +270,7 @@ With the implementation stack defined, I will start the model discussion with th
 Introduce the PINN route and explain why it is the main physical baseline.
 
 \WhatToSay
-PINN stands for Physics-Informed Neural Network. In this framework, it is the explicitly physics-informed route because its training objective can include thermoelastic residuals in addition to supervised data terms. It predicts temperature and displacement fields and serves as the physics-informed baseline for comparison with more data-driven routes. The interpretation must still be balanced: PINN is a neural surrogate whose loss encourages physical consistency. It is not an exact numerical solver and it is still limited by the simplified two-dimensional source--probe setup.
+PINN stands for Physics-Informed Neural Network. A PINN is a neural network that learns from data while also being penalized for violating selected governing physical equations. In this framework, it is the explicitly physics-informed route because its training objective can include thermoelastic residuals in addition to supervised data terms. It predicts temperature and displacement fields and serves as the physics-informed baseline for comparison with more data-driven routes. The interpretation must still be balanced: PINN is a neural surrogate whose loss encourages physical consistency. It is not an exact numerical solver and it is still limited by the simplified two-dimensional source--probe setup.
 
 \KeyPoints
 \begin{itemize}
