@@ -180,7 +180,7 @@ Now I will show the main simulated thermoelastic fields.
 Connect the synthetic thermal source with temperature, displacement, and stress outputs.
 
 \WhatToSay
-The three images show the main result fields from the COMSOL setup. The first image is the temperature field: local heating creates a high-temperature region near the source while the surrounding rock remains closer to the initial temperature. The second image shows total displacement caused by thermal expansion. The third image shows von Mises stress, with stress concentration near the heated region. Together, these fields demonstrate the coupled thermal and mechanical response used as the reference basis for the neural surrogate models.
+The three images show the main result fields from the COMSOL setup. The first image shows the compact temperature disturbance produced by local heating. The second image shows the mechanical displacement response caused by thermal expansion around the heated region. The third image shows the stress response near the source. I would keep the explanation short here, because the slide is now mostly visual: the purpose is to show that the synthetic setup produces coupled thermal and mechanical fields that can be exported for model comparison.
 
 \KeyPoints
 \begin{itemize}
@@ -288,13 +288,13 @@ The next slide shows the PINN input contract and architecture.
 Explain what the PINN receives, what it predicts, and why the architecture is differentiable.
 
 \WhatToSay
-The public neural contract maps coordinates, time, and material parameters to temperature and displacement outputs. The input includes coordinates, time, Young's modulus, Poisson's ratio, density, thermal expansion, conductivity, and heat capacity. The output includes temperature and displacement components. The architecture can be viewed as an MLP-based route, with a more developed version using separate coordinate and material encoders, a fused residual trunk, and separate heads for temperature and displacement. Smooth, differentiable outputs are important because physics residuals require spatial and temporal derivatives through automatic differentiation.
+The public neural contract maps ten input features to four output fields. The inputs are coordinates, time, and material parameters: $x,y,z,t,E,\nu,\rho,\alpha,k,C_p$. The outputs are predicted temperature and three displacement components, $T,u,v,w$. The implemented PINN route is a fully connected \texttt{MLP\_PINN}: first a linear layer maps $10$ features to hidden dimension $192$, then five hidden blocks keep the $192$-dimensional representation with \texttt{tanh} activation, and the final layer maps $192$ features to $4$ outputs. This architecture is intentionally differentiable, because velocity, stress, strain, and residual terms are computed from automatic derivatives.
 
 \KeyPoints
 \begin{itemize}
   \item Inputs are geometry, time, and material properties.
-  \item Outputs are temperature and displacement components.
-  \item Differentiability allows residuals to be evaluated from derivatives.
+  \item The implemented network is $10\rightarrow192$, five hidden $192\rightarrow192$ blocks, and $192\rightarrow4$ output.
+  \item Differentiability allows residuals and velocity consistency to be evaluated from derivatives.
 \end{itemize}
 
 \Transition
@@ -342,7 +342,7 @@ The next slide shows the main FNO processing pipeline.
 Summarize the processing stages of the FNO route.
 
 \WhatToSay
-The FNO pipeline maps an input field to an output field through several stages. First, a lifting layer maps input channels into latent features. Then spectral blocks process the latent field. Finally, a projection layer maps the latent representation back to physical output channels. Inside the spectral block, the model uses Fourier transform, retained modes with learned weights, inverse Fourier transform, and a local convolution branch. In simple terms, the spectral part helps capture broader field patterns, while the local branch preserves nearby spatial corrections.
+The FNO pipeline maps an input field to an output field through several stages. First, a lifting layer maps input channels into latent features. Then spectral blocks process the latent field. Finally, a projection layer maps the latent representation back to physical output channels. Inside the spectral block, the operation is now written explicitly: Fourier transform, retained modes with learned weights, inverse Fourier transform, and a local convolution branch. In simple terms, the Fourier branch helps capture broader field patterns, while the local convolution branch preserves nearby spatial corrections.
 
 \KeyPoints
 \begin{itemize}
@@ -558,7 +558,7 @@ To evaluate accuracy, the next slide compares predictions with an analytical ref
 Present the main quantitative result and its cautious interpretation.
 
 \WhatToSay
-Here the predicted travel times are compared with a simple analytical reference, $t_{\mathrm{gt}}=r/V_p$. In this formula, $t_{\mathrm{gt}}$ is reference travel time, $r$ is source--probe distance, and $V_p$ is compressional wave velocity. This is not a full thermoelastic validation; it is a sanity check under a simple isotropic approximation. In the balanced sweep, PINN has a median error of about $2.0\%$ and remains within the $10\%$ band in all cases. Transformer has a larger median error, while FNO and MeshGraphNet show much larger deviations in the current setup.
+Here the predicted travel times are compared with a simple analytical reference, $t_{\mathrm{gt}}=r/V_p$. In this formula, $t_{\mathrm{gt}}$ is reference travel time, $r$ is source--probe distance, and $V_p$ is compressional wave velocity. This is not a full thermoelastic validation; it is a sanity check under a simple isotropic approximation. In the balanced sweep, PINN has a median error of about $2.0\%$ and remains within the $10\%$ band in all cases. Transformer and FNO have larger median errors, and MeshGraphNet remains outside the most accurate group in this comparison.
 
 \KeyPoints
 \begin{itemize}
@@ -607,18 +607,90 @@ The main threats to validity are listed here. First, the training data are limit
 After the limitations, I will briefly show the web application prototype.
 \end{slidenote}
 
-\begin{slidenote}{Web Application Prototype}
+\begin{slidenote}{Web Application Overview}
 \Purpose
-Show that the thesis includes a usable local MVP for comparing model routes.
+Introduce the web interface as the user-facing part of the prototype.
 
 \WhatToSay
-This slide shows the implemented web application prototype. The local workspace connects a native web frontend, a FastAPI backend orchestrator, the geological material catalog, and separate model routes for MeshGraphNet, FNO, Transformer, and PINN. The user can choose a geological medium, configure the planar source and probe points, set the observation time, choose a model route, and inspect the normalized prediction response. The screenshots show three parts of the interface: the landing workspace, the source--probe visualization, and a detailed prediction result. The important interpretation remains the same: this is a thesis-demo interface for reproducible comparison, not a field-validated thermoelastic simulator.
+This slide introduces the local web application. The purpose of the interface is to make the research prototype usable: a user can configure a planar source--probe scenario, choose a model route, and inspect the normalized prediction response. The important limitation remains visible from the interface itself: this is a thesis-demo workspace for reproducible comparison, not a field-validated thermoelastic simulator.
 
 \KeyPoints
 \begin{itemize}
-  \item The application connects frontend, backend, material catalog, and model services.
-  \item It supports source--probe setup and model-route comparison.
-  \item Results are displayed as normalized thermal, mechanical, directional, and temporal responses.
+  \item The web interface is the user-facing part of the prototype.
+  \item It supports model comparison under one workflow.
+  \item The prototype scope is stated directly in the interface.
+\end{itemize}
+
+\Transition
+Next, I will show the full prediction workspace.
+\end{slidenote}
+
+\begin{slidenote}{Directional Prediction Workspace}
+\Purpose
+Show the full interface layout used after a prediction is returned.
+
+\WhatToSay
+This slide shows the full prediction workspace after running a model request. The interface combines the prediction result panels, metadata, spatial-output state, and diagnostics in one view. The goal is not only to display a number, but to make the response interpretable: thermal response, mechanical displacement, direction, time behaviour, and runtime status are presented together.
+
+\KeyPoints
+\begin{itemize}
+  \item The workspace collects response panels and runtime information in one screen.
+  \item The output is normalized into a common format for all routes.
+  \item This supports comparison rather than manual inspection of raw service payloads.
+\end{itemize}
+
+\Transition
+Now I will zoom into the source--probe geometry visualization.
+\end{slidenote}
+
+\begin{slidenote}{Source--Probe Visualization}
+\Purpose
+Explain how the interface visualizes the directional prediction query.
+
+\WhatToSay
+This slide focuses on the source--probe visualization. The source and probe locations define the directional query. The interface shows the distance between them, the azimuth angle, and the normalized unit direction. This is useful because the prediction task is not an abstract model call: it is tied to a specific source position, probe position, distance, and direction inside the simplified two-dimensional domain.
+
+\KeyPoints
+\begin{itemize}
+  \item The source and probe define the directional query.
+  \item Distance, azimuth, and unit direction are shown visually.
+  \item The visualization connects model output with the geometry of the task.
+\end{itemize}
+
+\Transition
+The next slide shows the response dashboard in more detail.
+\end{slidenote}
+
+\begin{slidenote}{Prediction Response Dashboard}
+\Purpose
+Show the main numerical response panels returned by the selected model.
+
+\WhatToSay
+The prediction dashboard presents the main numerical response values. It includes thermal response, mechanical displacement response, directional response, temporal response, and model metadata. This layout is important because every model route returns the same response structure, even though the internal model architectures are different. In the defence, I would point out that these values are prototype predictions and should be interpreted within the simplified assumptions of the study.
+
+\KeyPoints
+\begin{itemize}
+  \item The dashboard shows thermal, mechanical, directional, and temporal outputs.
+  \item Model metadata makes the selected route and latency visible.
+  \item The same response structure is used across routes.
+\end{itemize}
+
+\Transition
+The final interface slide shows runtime metadata and diagnostics.
+\end{slidenote}
+
+\begin{slidenote}{Runtime Diagnostics and Metadata}
+\Purpose
+Show how the prototype reports service status, metadata, and limitations.
+
+\WhatToSay
+This slide shows the diagnostic part of the interface. It reports the model identity, version, inference time, request identifier, spatial-output state, warnings, and notes. This is important for a research prototype because it makes the runtime context explicit. The interface also states that the result is a prototype prediction and not a field-validated thermoelastic simulation, which keeps the scientific interpretation cautious.
+
+\KeyPoints
+\begin{itemize}
+  \item Diagnostics expose model identity, latency, and request metadata.
+  \item Warnings and notes make runtime assumptions visible.
+  \item The interface reinforces the prototype scope before the conclusion.
 \end{itemize}
 
 \Transition
