@@ -869,7 +869,7 @@
 \draw[->, thick] (ifft) -- (conv);
 
 \draw[->, thick] (spec.south) -- ++(0,-0.3) -| (fft.north);
-\draw[->, thick] (conv.north) |- (spec.south);
+\draw[->, thick] (conv.north) -- ++(0,0.75) -| ([xshift=0.45cm]spec.south);
 
 \end{tikzpicture}
 
